@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ venue }} {{ rno }}R 予想</title>
+  <style>
+    body { font-family:"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;
+           margin:0; background:#f5f7fa; color:#222; }
+    header { background:#0066cc; color:#fff; padding:16px 20px; }
+    header a { color:#cfe2ff; text-decoration:none; font-size:13px; }
+    header h1 { margin:6px 0 0; font-size:19px; }
+    .wrap { max-width:820px; margin:0 auto; padding:18px; }
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px;
+            overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    th, td { padding:9px 8px; text-align:center; font-size:13px; border-bottom:1px solid #eef; }
+    th { background:#eef3fb; color:#456; font-weight:600; }
+    td.name { text-align:left; font-weight:600; }
+    .lane { font-weight:700; color:#fff; border-radius:5px; padding:2px 8px; display:inline-block; }
+    .l1{background:#ffffff;color:#333;border:1px solid #ccc}.l2{background:#000}
+    .l3{background:#e53935}.l4{background:#1e88e5}.l5{background:#fdd835;color:#333}.l6{background:#43a047}
+    .mark { font-size:18px; font-weight:700; }
+    .bar { background:#e8eef7; border-radius:4px; height:16px; position:relative; min-width:60px; }
+    .bar > span { position:absolute; left:0; top:0; bottom:0; background:#0066cc; border-radius:4px; }
+    .pct { font-weight:700; }
+    tr.top td { background:#f3f8ff; }
+    tr.value td { background:#fff8e1; }
+    .ev-good { color:#e8870a; font-weight:700; }
+    .badge { background:#e8870a; color:#fff; font-size:10px; padding:1px 5px; border-radius:4px; }
+    .warn { background:#fff3f3; border:1px solid #f3c2c2; color:#a33;
+            padding:12px 16px; border-radius:8px; }
+    .legend { font-size:12px; color:#777; margin-top:12px; }
+    .spice { background:#fff3e0; border:1px solid #ffb74d; color:#a35200;
+             padding:10px 14px; border-radius:8px; margin-bottom:14px; font-size:14px; line-height:1.6; }
+    .skip { background:#f0f0f0; border:1px solid #ddd; color:#777;
+            padding:8px 14px; border-radius:8px; margin-bottom:14px; font-size:13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">← トップへ</a>
+    <h1>{{ venue }} {{ rno }}R <small style="font-weight:400;font-size:13px;">/ {{ hd }}</small></h1>
+  </header>
+  <div class="wrap">
+    {% if error %}
+      <div class="warn">{{ error }}</div>
+    {% else %}
+      {% if rec and rec.bet %}
+      <div class="spice">⚑ <b>妙味レース・推奨買い目</b><br>
+        モデルがイン(1号艇)を否定 → <b>単勝 {{ rec.tansho }}号 {{ rec.tansho_name }}</b>
+        ／ 2連単 上位3点 <b>{{ rec.exacta3 | join(' ・ ') }}</b><br>
+        <span style="font-size:12px;">検証: 単勝116.5%・2連単上位3点171%（本命≠1号艇, 低分散・複数期間で再現）。少額・分散投票推奨。</span></div>
+      {% elif rec %}
+      <div class="skip">― 見送り推奨。{{ rec.reason }}</div>
+      {% endif %}
+      <table>
+        <thead>
+          <tr>
+            <th>印</th><th>艇</th><th>選手</th><th>級</th>
+            <th>予想勝率</th><th>単勝<br>オッズ</th><th>期待値<br>EV</th><th>展示T</th><th>全国勝率</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in rows %}
+          <tr class="{{ 'value' if e.value else ('top' if e.rank==1 else '') }}">
+            <td class="mark">{{ e.mark }}</td>
+            <td><span class="lane l{{ e.lane }}">{{ e.lane }}</span></td>
+            <td class="name">{{ e.name or '―' }}</td>
+            <td>{{ e.racer_class }}</td>
+            <td>
+              <div class="bar"><span style="width:{{ e.win_pct }}%"></span></div>
+              <span class="pct">{{ e.win_pct }}%</span>
+            </td>
+            <td>{{ '%.1f'|format(e.odds) if e.odds is not none else '―' }}</td>
+            <td>
+              {% if e.ev is not none %}
+                <span class="{{ 'ev-good' if e.value else '' }}">{{ '%.2f'|format(e.ev) }}</span>
+                {% if e.value %} <span class="badge">割安</span>{% endif %}
+              {% else %}―{% endif %}
+            </td>
+            <td>{{ '%.2f'|format(e.tenji_time) if e.tenji_time is not none else '―' }}</td>
+            <td>{{ '%.2f'|format(e.nat_win) if e.nat_win is not none else '―' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="legend">◎本命 ○対抗 ▲単穴 △連下　｜　予想勝率はレース内で正規化した相対値（合計100%）。
+        <b>期待値EV = 校正済み勝率 × 単勝オッズ</b>。<span class="badge">割安</span>(EV&gt;1.0)はオッズに対しモデルが過小評価とみる艇。
+        オッズは取得時点の値（締切直前で変動）。モデルの統計的推定であり的中・利益を保証するものではありません。</p>
+    {% endif %}
+  </div>
+</body>
+</html>

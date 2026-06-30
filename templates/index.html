@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>競艇予想</title>
+  <style>
+    :root { --accent:#0066cc; --bg:#f5f7fa; }
+    * { box-sizing:border-box; }
+    body { font-family:"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;
+           margin:0; background:var(--bg); color:#222; }
+    header { background:var(--accent); color:#fff; padding:18px 20px; }
+    header h1 { margin:0; font-size:20px; }
+    .wrap { max-width:760px; margin:0 auto; padding:20px; }
+    .card { background:#fff; border-radius:10px; padding:18px 20px;
+            box-shadow:0 1px 4px rgba(0,0,0,.08); margin-bottom:18px; }
+    h2 { font-size:15px; color:#555; margin:0 0 12px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+    .venue { display:block; text-align:center; padding:10px 6px; border-radius:8px;
+             background:#eef3fb; color:var(--accent); text-decoration:none; font-weight:600;
+             border:1px solid #dbe6f5; }
+    .venue:hover { background:var(--accent); color:#fff; }
+    .venue.local { background:#fff5e6; border-color:#ffd28a; color:#b3650a; }
+    .venue.local:hover { background:#e8870a; color:#fff; }
+    form { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    label { font-size:13px; color:#555; }
+    select, input { padding:7px 9px; border:1px solid #ccc; border-radius:6px; font-size:14px; }
+    button { background:var(--accent); color:#fff; border:0; padding:8px 18px;
+             border-radius:6px; font-size:14px; cursor:pointer; }
+    .warn { background:#fff3f3; border:1px solid #f3c2c2; color:#a33;
+            padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:18px; }
+    .note { font-size:12px; color:#888; }
+  </style>
+</head>
+<body>
+  <header><h1>🚤 競艇予想</h1></header>
+  <div class="wrap">
+
+    {% if not model_ready %}
+    <div class="warn">⚠ モデル未学習です。<code>python -m src.collect</code> で収集後、
+      <code>python -m src.train</code> を実行してください。</div>
+    {% endif %}
+
+    <a href="/today" style="display:block;text-align:center;background:#e8870a;color:#fff;
+       padding:14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:16px;
+       margin-bottom:18px;box-shadow:0 1px 4px rgba(0,0,0,.1);">
+      ⚑ 本日の妙味レースを見る</a>
+
+    <div class="card">
+      <h2>レースを指定して予想</h2>
+      <form action="/race" method="get">
+        <label>日付
+          <input type="text" name="hd" value="{{ today }}" size="8" pattern="\d{8}">
+        </label>
+        <label>場
+          <select name="jcd">
+            {% for code, vname in venues.items() %}
+            <option value="{{ code }}" {% if code in local %}selected{% endif %}>{{ vname }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>R
+          <select name="rno">
+            {% for r in range(1,13) %}<option value="{{ r }}">{{ r }}R</option>{% endfor %}
+          </select>
+        </label>
+        <button type="submit">予想する</button>
+      </form>
+      <p class="note">日付は YYYYMMDD（例 {{ today }}）。出走表が発表済みのレースのみ予想できます。</p>
+    </div>
+
+    <div class="card">
+      <h2>愛知近郊（よく使う場）</h2>
+      <div class="grid">
+        {% for code in local %}
+        <a class="venue local" href="/race?jcd={{ code }}&rno=1&hd={{ today }}">{{ venues[code] }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>全24場</h2>
+      <div class="grid">
+        {% for code, vname in venues.items() %}
+        <a class="venue" href="/race?jcd={{ code }}&rno=1&hd={{ today }}">{{ vname }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
