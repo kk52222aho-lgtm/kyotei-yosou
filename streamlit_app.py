@@ -11,7 +11,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from src import predict, scan
+from src import predict, scan, slip
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -47,6 +47,17 @@ def page_today():
     if not cache["picks"]:
         st.success("本日の妙味レースはありません（全レースでモデル本命がイン＝見送り推奨）。")
         return
+
+    # 📋 買い目スリップ（テレボート手入力用・コピーボタン内蔵）
+    with st.expander("📋 本日の買い目スリップ（コピーして手入力）", expanded=True):
+        unit = st.number_input("1点あたりの賭け額（円）", min_value=100, max_value=10000,
+                               value=100, step=100,
+                               help="少額・分散が前提。プールを潰さない範囲で。")
+        st.code(slip.format_slip(cache, int(unit)), language="text")
+        st.caption("⚠️ 購入は自分でテレボートに入力（自動購入はしない＝規約・金銭事故リスク回避）。"
+                   "1日の勝敗で判断せず、数十〜百本の平均で。投資は自己責任。")
+
+    st.divider()
     for p in cache["picks"]:
         odds = f"{p['odds']:.1f}倍" if p.get("odds") else "—"
         with st.container(border=True):
