@@ -11,7 +11,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade
+from src import predict, papertrade, scraper
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -59,15 +59,35 @@ def page_today():
     c[2].metric("精算", f"{ps['races']} 件")
     c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
 
-    st.caption("各レース：単勝=本命（締切オッズ1.5倍未満は見送り）／2連単=上位3点。各100円・少額分散。"
-               "購入は自分でテレボートに入力。自己責任。")
+    st.caption("各レース：単勝=本命／2連単=上位3点、各100円・少額分散。購入は自分でテレボート入力・自己責任。")
+
+    # 買う直前に押すと、現在の単勝オッズで1.5倍未満（明確な大本命）を弾く
+    unsettled = [r for r in rows if not r.get("settled")]
+    if unsettled and st.button("🔄 今の単勝オッズを取得して1.5倍判定"):
+        live = {}
+        with st.spinner("現在の単勝オッズを取得中…"):
+            for r in unsettled:
+                od = scraper.fetch_odds(r["date"], r["jcd"], r["rno"])
+                live[f"{r['jcd']}-{r['rno']}"] = od.get(r["honmei"]) if od else None
+        st.session_state["live_odds"] = live
+    live_odds = st.session_state.get("live_odds", {})
+
     st.divider()
     for r in rows:
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
             c1.markdown(f"### {r['venue']} {r['rno']}R")
-            body = (f"**単勝 {r['honmei']}号 {r.get('name') or ''}** ／ "
-                    f"2連単 上位3点 {' ・ '.join(r['exacta3'])}")
+            # 単勝オッズ＋低オッズフラグ（現在オッズ優先、無ければ朝オッズ）
+            lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
+            o = lo if lo is not None else r.get("scan_odds")
+            src_lbl = "現在" if lo is not None else "朝"
+            if o and o < papertrade.ODDS_FLOOR:
+                tansho = f"**単勝 {r['honmei']}号**（{src_lbl}{o:.1f}倍 ⚠低オッズ→見送り推奨）"
+            elif o:
+                tansho = f"**単勝 {r['honmei']}号**（{src_lbl}{o:.1f}倍）"
+            else:
+                tansho = f"**単勝 {r['honmei']}号**（オッズ未形成→上のボタンで取得）"
+            body = f"{tansho} {r.get('name') or ''} ／ 2連単 上位3点 {' ・ '.join(r['exacta3'])}"
             if r.get("settled"):
                 t = (f"🎯的中 {r.get('final_odds')}倍" if r.get("tansho_win")
                      else f"×ハズレ(勝ち{r.get('winner')}号)")
