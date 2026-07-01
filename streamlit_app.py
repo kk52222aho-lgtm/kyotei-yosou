@@ -118,21 +118,36 @@ def page_record():
         cum.append(acc)
     st.line_chart(pd.DataFrame({"累積損益(合計・円)": cum}))
 
+    st.markdown("#### 明細（1点100円・単勝1点＋2連単3点）")
     tbl = []
     for r in reversed(settled):
-        race_pl = ((r.get("tansho_return", 0) - 100)
-                   + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
+        t_pl = r.get("tansho_return", 0) - 100
+        e_stake = r.get("exacta_points", 0) * 100
+        e_pl = r.get("exacta_return", 0) - e_stake
+        od = f"{r.get('final_odds'):.1f}倍" if r.get("final_odds") else "―"
         tbl.append({
-            "日付": r["date"], "場": r["venue"], "R": r["rno"],
-            "本命": f"{r['honmei']}号",
-            "単勝": "🎯" if r.get("tansho_win") else "×",
-            "2連単": "🎯" if r.get("exacta_win") else "×",
-            "実結果(2連単)": r.get("exacta_result"),
-            "レース収支": race_pl,
+            "日付": r["date"],
+            "レース": f"{r['venue']}{r['rno']}R",
+            "単勝": f"{r['honmei']}号({od})",
+            "単勝結果": (f"🎯 +{r.get('tansho_return', 0) - 100}円"
+                        if r.get("tansho_win") else "× -100円"),
+            "2連単 買い目": " ".join(r.get("exacta3", [])),
+            "2連単 結果": (f"🎯 {r.get('exacta_result')} 払戻{r.get('exacta_return')}円"
+                          if r.get("exacta_win")
+                          else f"× 結果{r.get('exacta_result') or '?'} -{e_stake}円"),
+            "単勝損益": t_pl,
+            "2連単損益": e_pl,
+            "レース収支": t_pl + e_pl,
         })
-    st.dataframe(pd.DataFrame(tbl), hide_index=True, use_container_width=True)
+    st.dataframe(
+        pd.DataFrame(tbl), hide_index=True, use_container_width=True,
+        column_config={
+            "単勝損益": st.column_config.NumberColumn(format="%+d"),
+            "2連単損益": st.column_config.NumberColumn(format="%+d"),
+            "レース収支": st.column_config.NumberColumn(format="%+d"),
+        })
     st.caption("※単勝1点＋2連単3点/レース・各100円の実トラック（前向き記録）。過去の前進検証は単勝116%/2連単176%だが"
-               "1日〜少数では大きくブレる（今日のように負ける日も普通）。数十〜百本の平均で判断。")
+               "1日〜少数では大きくブレる（負ける日も普通）。数十〜百本の平均で判断。")
 
 
 def render_prediction(rows):
