@@ -302,6 +302,40 @@ def trifecta_combos() -> list[tuple[int, int, int]]:
 _TRIFECTA_ORDER = trifecta_combos()
 
 
+def exacta_combos() -> list[tuple[int, int]]:
+    """2連単オッズ表(odds2tf)の td.oddsPoint 出現順に対応する (1着,2着) の列挙。
+
+    DOM は行優先(5行×6列)。列 col(0-5) の1着=col+1、行 r は残り5艇の r 番目。
+    """
+    combos: list[tuple[int, int]] = [None] * 30  # type: ignore
+    for col in range(6):
+        first = col + 1
+        others = [x for x in range(1, 7) if x != first]
+        for r, second in enumerate(others):
+            combos[r * 6 + col] = (first, second)
+    return combos
+
+
+_EXACTA_ORDER = exacta_combos()
+
+
+def fetch_exacta_odds(date: str, jcd: str, rno: int) -> dict[str, float] | None:
+    """2連単オッズページ(odds2tf)から {'i-j': オッズ} を返す（最大30点）。"""
+    soup = _get(_race_url("odds2tf", date, jcd, rno))
+    if soup is None:
+        return None
+    cells = soup.select("td.oddsPoint")
+    if len(cells) < 30:
+        return None
+    out: dict[str, float] = {}
+    for idx in range(30):
+        combo = _EXACTA_ORDER[idx]
+        vals = _floats(cells[idx].get_text(strip=True))
+        if combo and vals and vals[0] > 0:
+            out[f"{combo[0]}-{combo[1]}"] = vals[0]
+    return out or None
+
+
 def fetch_trifecta_odds(date: str, jcd: str, rno: int) -> dict[str, float] | None:
     """3連単オッズページ(odds3t)から {'i-j-k': オッズ} を返す（最大120点）。"""
     soup = _get(_race_url("odds3t", date, jcd, rno))
