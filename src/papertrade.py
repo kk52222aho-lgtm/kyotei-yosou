@@ -49,46 +49,34 @@ def _key(r):
 
 
 def cmd_log(date: str):
-    """締切前: 妙味レースの買い目＋現オッズを記録（重複はスキップ）。"""
-    bundle = predict.load_model()
+    """本日の妙味レースの買い目を記録（重複はスキップ）。
+
+    scan のキャッシュ(today_picks.json)から記録する＝あなたが画面で見て賭けた
+    買い目と完全一致。再スキャンしないので速く、ズレも出ない。
+    （毎朝の運用では run_daily が先に scan→キャッシュ更新してから log する）
+    """
+    from .scan import load_cache
+    cache = load_cache()
+    if not cache or cache.get("date") != date:
+        print(f"{date} のキャッシュが無い。先に python -m src.scan --date {date} を実行。")
+        return
     rows = _load()
     seen = {_key(r) for r in rows}
-    venues = scraper.fetch_held_venues(date)
-    print(f"{date} 開催{len(venues)}場をスキャン（締切前オッズを記録）")
     added = 0
-    import time
-    for jcd in venues:
-        empty = 0
-        for rno in range(1, 13):
-            entries = scraper.fetch_racelist(date, jcd, rno)
-            time.sleep(0.4)
-            if not entries:
-                empty += 1
-                if empty >= 2:
-                    break
-                continue
-            empty = 0
-            if (date, jcd, rno) in seen:
-                continue
-            for e in entries:
-                e["jcd"] = jcd
-            pred = predict.predict_entries(entries, bundle)
-            rec = predict.recommend(pred)
-            if not rec.get("bet"):
-                continue
-            o = scraper.fetch_odds(date, jcd, rno)
-            scan_odds = o.get(rec["tansho"]) if o else None
-            rows.append({
-                "date": date, "jcd": jcd, "rno": rno,
-                "venue": venue_name(jcd), "honmei": rec["tansho"],
-                "name": rec.get("tansho_name"), "scan_odds": scan_odds,
-                "exacta3": rec["exacta3"],
-                "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "settled": False,
-            })
-            added += 1
-            print(f"  記録 {venue_name(jcd)}{rno}R 単勝{rec['tansho']}号 "
-                  f"({scan_odds}倍時点)")
+    for p in cache["picks"]:
+        key = (p["date"] if "date" in p else date, p["jcd"], p["rno"])
+        if key in seen:
+            continue
+        rows.append({
+            "date": date, "jcd": p["jcd"], "rno": p["rno"],
+            "venue": p["venue"], "honmei": p["honmei"],
+            "name": p.get("name"), "scan_odds": p.get("odds"),
+            "exacta3": p["exacta3"],
+            "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "settled": False,
+        })
+        added += 1
+        print(f"  記録 {p['venue']}{p['rno']}R 単勝{p['honmei']}号")
     _save(rows)
     print(f"\n{added}件を記録（台帳: {LEDGER}）")
 
@@ -100,8 +88,9 @@ def cmd_settle(today: str):
     for r in rows:
         if r.get("settled"):
             continue
-        if r["date"] >= today:   # 当日以降は未確定とみなす
+        if r["date"] > today:    # 未来日は当然スキップ
             continue
+        # 当日でも結果が出ていれば精算（未確定レースは fetch_result が None）
         result = scraper.fetch_result(r["date"], r["jcd"], r["rno"])
         if not result:
             continue
