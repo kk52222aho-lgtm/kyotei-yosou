@@ -11,7 +11,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, slip
+from src import predict, papertrade
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -59,12 +59,8 @@ def page_today():
     c[2].metric("精算", f"{ps['races']} 件")
     c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
 
-    with st.expander("📋 買い目スリップ（コピーして手入力）", expanded=True):
-        unit = st.number_input("1点あたりの賭け額（円）", min_value=100, max_value=10000,
-                               value=100, step=100)
-        st.code(slip.format_slip({"date": date, "picks": rows}, int(unit)), language="text")
-        st.caption("⚠️ 購入は自分でテレボートに入力（自動購入なし＝規約・金銭事故回避）。少額分散・自己責任。")
-
+    st.caption("各レース：単勝=本命（締切オッズ1.5倍未満は見送り）／2連単=上位3点。各100円・少額分散。"
+               "購入は自分でテレボートに入力。自己責任。")
     st.divider()
     for r in rows:
         with st.container(border=True):
