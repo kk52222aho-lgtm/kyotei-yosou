@@ -117,6 +117,10 @@ def cmd_settle(today: str):
     print(f"{n}件を精算")
 
 
+# 単勝オッズ下限（クリーン年検証: 低オッズ単勝は控除率負け。1.5倍未満は見送りが有利）
+ODDS_FLOOR = 1.5
+
+
 def portfolio_stats(rows: list[dict]) -> dict:
     """精算済み記録から 単勝/2連単/合計 の集計を返す（1点100円）。"""
     settled = [r for r in rows if r.get("settled")]
@@ -124,12 +128,19 @@ def portfolio_stats(rows: list[dict]) -> dict:
     t_stake = n * 100
     t_ret = sum(r.get("tansho_return", 0) for r in settled)
     t_hit = sum(1 for r in settled if r.get("tansho_win"))
+    # 単勝オッズ1.5+のみ（低オッズ見送りルール適用時）
+    hi = [r for r in settled if (r.get("final_odds") or 0) >= ODDS_FLOOR]
+    hi_stake = len(hi) * 100
+    hi_ret = sum(r.get("tansho_return", 0) for r in hi)
+    hi_hit = sum(1 for r in hi if r.get("tansho_win"))
     e_stake = sum(r.get("exacta_points", 0) for r in settled) * 100
     e_ret = sum(r.get("exacta_return", 0) for r in settled)
     e_hit = sum(1 for r in settled if r.get("exacta_win"))
     return {
         "races": n,
         "tansho": {"stake": t_stake, "ret": t_ret, "hit": t_hit, "pl": t_ret - t_stake},
+        "tansho_hi": {"stake": hi_stake, "ret": hi_ret, "hit": hi_hit,
+                      "pl": hi_ret - hi_stake, "races": len(hi)},
         "exacta": {"stake": e_stake, "ret": e_ret, "hit": e_hit, "pl": e_ret - e_stake},
         "total": {"stake": t_stake + e_stake, "ret": t_ret + e_ret,
                   "pl": (t_ret + e_ret) - (t_stake + e_stake)},
@@ -151,9 +162,11 @@ def cmd_report():
 
     print(f"=== 実トラック（{n}レース・1点100円）===")
     line("単勝", s["tansho"], s["tansho"]["hit"])
+    line(f"単勝1.5+", s["tansho_hi"], s["tansho_hi"]["hit"])
     line("2連単3点", s["exacta"], s["exacta"]["hit"])
     line("合計", s["total"])
-    print(f"\n  ※単勝＋2連単の実際の合計。前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
+    print(f"\n  ※「単勝1.5+」= 締切オッズ1.5倍未満を見送った場合（クリーン年検証で回収率↑）。")
+    print(f"  ※前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
 
 
 def main():

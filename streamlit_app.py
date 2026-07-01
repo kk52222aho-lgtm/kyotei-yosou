@@ -104,6 +104,12 @@ def page_record():
     c[3].metric("合計 回収率", f"{ps['total']['ret']/ps['total']['stake']:.1%}",
                 f"{ps['total']['pl']:+,}円")
 
+    hi = ps.get("tansho_hi", {})
+    if hi.get("stake"):
+        st.caption(f"💡 単勝オッズ1.5倍未満を見送った場合の単勝: "
+                   f"{hi['races']}レース・回収率 {hi['ret']/hi['stake']:.1%}・収支 {hi['pl']:+,}円"
+                   f"（低オッズは控除率負け＝クリーン年検証で回収率↑。締切オッズで判断）")
+
     # 合計(単勝+2連単)の累積損益
     acc, cum = 0, []
     for r in settled:
