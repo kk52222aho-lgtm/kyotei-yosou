@@ -52,14 +52,12 @@ def page_today():
         st.warning("本日の記録がまだありません（毎朝9時に自動記録されます）。")
         return
 
-    settled = [r for r in rows if r.get("settled")]
-    hits = sum(1 for r in settled if r.get("tansho_win"))
-    pl = sum(r.get("tansho_return", 0) for r in settled) - len(settled) * 100
+    ps = papertrade.portfolio_stats(rows)
     c = st.columns(4)
     c[0].metric("対象日", date)
     c[1].metric("妙味レース", f"{len(rows)} 件")
-    c[2].metric("精算 / 的中", f"{len(settled)} / {hits}")
-    c[3].metric("単勝収支(確定分)", f"{pl:+,} 円")
+    c[2].metric("精算", f"{ps['races']} 件")
+    c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
 
     with st.expander("📋 買い目スリップ（コピーして手入力）", expanded=True):
         unit = st.number_input("1点あたりの賭け額（円）", min_value=100, max_value=10000,
@@ -75,10 +73,13 @@ def page_today():
             body = (f"**単勝 {r['honmei']}号 {r.get('name') or ''}** ／ "
                     f"2連単 上位3点 {' ・ '.join(r['exacta3'])}")
             if r.get("settled"):
-                if r.get("tansho_win"):
-                    body += f"  \n🎯 **的中** {r.get('final_odds')}倍（+{r.get('tansho_return', 0) - 100}円）"
-                else:
-                    body += f"  \n× ハズレ（勝ち艇 {r.get('winner')}号）"
+                t = (f"🎯的中 {r.get('final_odds')}倍" if r.get("tansho_win")
+                     else f"×ハズレ(勝ち{r.get('winner')}号)")
+                e = (f"🎯的中 {r.get('exacta_return')}円" if r.get("exacta_win")
+                     else f"×ハズレ(結果 {r.get('exacta_result') or '?'})")
+                race_pl = ((r.get("tansho_return", 0) - 100)
+                           + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
+                body += f"  \n単勝: {t}  ｜  2連単: {e}  ｜  **収支 {race_pl:+,}円**"
             else:
                 body += "  \n⏳ 結果待ち"
             c2.markdown(body)
@@ -93,32 +94,39 @@ def page_record():
         st.info("精算済みの記録がまだありません（毎朝9時に自動精算されます）。")
         return
 
-    bets = len(settled)
-    hits = sum(1 for r in settled if r.get("tansho_win"))
-    ret = sum(r.get("tansho_return", 0) for r in settled)
-    stake = bets * 100
+    ps = papertrade.portfolio_stats(settled)
     c = st.columns(4)
-    c[0].metric("確定ベット", bets)
-    c[1].metric("的中率", f"{hits / bets:.1%}")
-    c[2].metric("回収率(単勝)", f"{ret / stake:.1%}")
-    c[3].metric("収支", f"{ret - stake:+,} 円")
+    c[0].metric("確定レース", ps["races"])
+    c[1].metric("単勝 回収率", f"{ps['tansho']['ret']/ps['tansho']['stake']:.1%}",
+                f"{ps['tansho']['pl']:+,}円")
+    c[2].metric("2連単 回収率", f"{ps['exacta']['ret']/ps['exacta']['stake']:.1%}" if ps['exacta']['stake'] else "―",
+                f"{ps['exacta']['pl']:+,}円")
+    c[3].metric("合計 回収率", f"{ps['total']['ret']/ps['total']['stake']:.1%}",
+                f"{ps['total']['pl']:+,}円")
 
+    # 合計(単勝+2連単)の累積損益
     acc, cum = 0, []
     for r in settled:
-        acc += r.get("tansho_return", 0) - 100
+        acc += ((r.get("tansho_return", 0) - 100)
+                + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
         cum.append(acc)
-    st.line_chart(pd.DataFrame({"累積損益(円)": cum}))
+    st.line_chart(pd.DataFrame({"累積損益(合計・円)": cum}))
 
-    tbl = [{
-        "日付": r["date"], "場": r["venue"], "R": r["rno"],
-        "予想(本命)": f"{r['honmei']}号",
-        "結果": "🎯的中" if r.get("tansho_win") else "×ハズレ",
-        "オッズ": r.get("final_odds"),
-        "損益": r.get("tansho_return", 0) - 100,
-    } for r in reversed(settled)]
+    tbl = []
+    for r in reversed(settled):
+        race_pl = ((r.get("tansho_return", 0) - 100)
+                   + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
+        tbl.append({
+            "日付": r["date"], "場": r["venue"], "R": r["rno"],
+            "本命": f"{r['honmei']}号",
+            "単勝": "🎯" if r.get("tansho_win") else "×",
+            "2連単": "🎯" if r.get("exacta_win") else "×",
+            "実結果(2連単)": r.get("exacta_result"),
+            "レース収支": race_pl,
+        })
     st.dataframe(pd.DataFrame(tbl), hide_index=True, use_container_width=True)
-    st.caption("※単勝フラット100円/レースの実トラック（前向き記録）。過去の前進検証では単勝116%。"
-               "少数のうちは大きくブレる＝数十〜百本の平均で判断。")
+    st.caption("※単勝1点＋2連単3点/レース・各100円の実トラック（前向き記録）。過去の前進検証は単勝116%/2連単176%だが"
+               "1日〜少数では大きくブレる（今日のように負ける日も普通）。数十〜百本の平均で判断。")
 
 
 def render_prediction(rows):

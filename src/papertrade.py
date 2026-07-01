@@ -103,10 +103,37 @@ def cmd_settle(today: str):
         r["final_odds"] = final_odds
         r["tansho_win"] = won
         r["tansho_return"] = int(round((final_odds or 0) * 100)) if won else 0
+        # --- 2連単（上位3点）も精算 ---
+        ex = scraper.fetch_exacta_payout(r["date"], r["jcd"], r["rno"])
+        picks = r.get("exacta3", [])
+        ex_hit = bool(ex and ex[0] in picks)
+        r["exacta_result"] = ex[0] if ex else None
+        r["exacta_points"] = len(picks)
+        r["exacta_win"] = ex_hit
+        r["exacta_return"] = ex[1] if ex_hit else 0     # 100円あたり払戻
         r["settled"] = True
         n += 1
     _save(rows)
     print(f"{n}件を精算")
+
+
+def portfolio_stats(rows: list[dict]) -> dict:
+    """精算済み記録から 単勝/2連単/合計 の集計を返す（1点100円）。"""
+    settled = [r for r in rows if r.get("settled")]
+    n = len(settled)
+    t_stake = n * 100
+    t_ret = sum(r.get("tansho_return", 0) for r in settled)
+    t_hit = sum(1 for r in settled if r.get("tansho_win"))
+    e_stake = sum(r.get("exacta_points", 0) for r in settled) * 100
+    e_ret = sum(r.get("exacta_return", 0) for r in settled)
+    e_hit = sum(1 for r in settled if r.get("exacta_win"))
+    return {
+        "races": n,
+        "tansho": {"stake": t_stake, "ret": t_ret, "hit": t_hit, "pl": t_ret - t_stake},
+        "exacta": {"stake": e_stake, "ret": e_ret, "hit": e_hit, "pl": e_ret - e_stake},
+        "total": {"stake": t_stake + e_stake, "ret": t_ret + e_ret,
+                  "pl": (t_ret + e_ret) - (t_stake + e_stake)},
+    }
 
 
 def cmd_report():
@@ -114,15 +141,19 @@ def cmd_report():
     if not rows:
         print("精算済みの記録がまだありません（log→（結果後）settle）。")
         return
-    bets = len(rows)
-    hits = sum(1 for r in rows if r.get("tansho_win"))
-    ret = sum(r.get("tansho_return", 0) for r in rows)
-    stake = bets * 100
-    print(f"=== ペーパートレード実トラック（単勝フラット100円）===")
-    print(f"  賭けたレース: {bets}")
-    print(f"  的中: {hits}（的中率 {hits/bets:.1%}）")
-    print(f"  回収率: {ret/stake:.1%}   収支: {ret-stake:+,}円")
-    print(f"\n  ※前向き記録（log を締切前に走らせたぶん）だけが本物の実トラック。")
+    s = portfolio_stats(rows)
+    n = s["races"]
+
+    def line(name, d, hit=None):
+        roi = d["ret"] / d["stake"] if d["stake"] else 0
+        h = f" 的中{hit}" if hit is not None else ""
+        print(f"  {name:<8} 賭金{d['stake']:>6,}円 回収{roi*100:>5.1f}% 収支{d['pl']:>+7,}円{h}")
+
+    print(f"=== 実トラック（{n}レース・1点100円）===")
+    line("単勝", s["tansho"], s["tansho"]["hit"])
+    line("2連単3点", s["exacta"], s["exacta"]["hit"])
+    line("合計", s["total"])
+    print(f"\n  ※単勝＋2連単の実際の合計。前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
 
 
 def main():

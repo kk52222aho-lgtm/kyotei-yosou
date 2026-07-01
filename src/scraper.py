@@ -223,6 +223,20 @@ def fetch_beforeinfo(date: str, jcd: str, rno: int) -> tuple[dict[int, dict], di
     return per_lane, race_cond
 
 
+def fetch_exacta_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None:
+    """結果ページから2連単の (的中組番, 払戻円) を返す。例 ('3-1', 500)。未確定は None。"""
+    soup = _get(_race_url("raceresult", date, jcd, rno))
+    if soup is None:
+        return None
+    text = soup.get_text(" ", strip=True)
+    m = re.search(r"2連単\s*(\d)\s*-\s*(\d)\s*¥\s*([\d,]+)", text)
+    if not m:
+        return None
+    combo = f"{m.group(1)}-{m.group(2)}"
+    yen = int(m.group(3).replace(",", ""))
+    return combo, yen
+
+
 def fetch_odds(date: str, jcd: str, rno: int) -> dict[int, float] | None:
     """単勝オッズページ(oddstf)から {艇番: 単勝オッズ} を返す。
 
