@@ -125,13 +125,17 @@ def _render_today(date, rows):
                 lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
                 o = lo if lo is not None else r.get("scan_odds")
                 src = "現在" if lo is not None else "朝"
+                nm = r.get("name") or ""
                 if o and o < papertrade.ODDS_FLOOR:
-                    tansho = f"**単勝 {r['honmei']}号**（{src}{o:.1f}倍 ⚠低オッズ→見送り推奨）"
-                elif o:
-                    tansho = f"**単勝 {r['honmei']}号**（{src}{o:.1f}倍）"
+                    # 単勝が大本命＝レース全体がチャラ → 単勝も2連単も見送り
+                    c2.markdown(
+                        f"**単勝 {r['honmei']}号** {nm}（{src}{o:.1f}倍）  \n"
+                        f"⚠ **レース丸ごと見送り推奨**（単勝が大本命＝全体チャラで単勝も2連単も低調）  \n"
+                        f"⏳ 結果待ち")
                 else:
-                    tansho = f"**単勝 {r['honmei']}号**（オッズ未形成→上のボタンで取得）"
-                c2.markdown(f"{tansho} {r.get('name') or ''} ／ 2連単 上位3点 {combos}  \n⏳ 結果待ち")
+                    odlbl = f"（{src}{o:.1f}倍）" if o else "（オッズ未形成→上のボタンで取得）"
+                    c2.markdown(f"**単勝 {r['honmei']}号**{odlbl} {nm} ／ "
+                                f"2連単 上位3点 {combos}  \n⏳ 結果待ち")
 
 
 def page_record():
@@ -153,11 +157,11 @@ def page_record():
     c[3].metric("合計 回収率", f"{ps['total']['ret']/ps['total']['stake']:.1%}",
                 f"{ps['total']['pl']:+,}円")
 
-    hi = ps.get("tansho_hi", {})
-    if hi.get("stake"):
-        st.caption(f"💡 単勝オッズ1.5倍未満を見送った場合の単勝: "
-                   f"{hi['races']}レース・回収率 {hi['ret']/hi['stake']:.1%}・収支 {hi['pl']:+,}円"
-                   f"（低オッズは控除率負け＝クリーン年検証で回収率↑。締切オッズで判断）")
+    rc = ps.get("reco", {})
+    if rc.get("stake"):
+        st.success(f"💡 **推奨戦略（単勝1.5倍未満のレースを丸ごと見送り）**：単勝+2連単 合計 "
+                   f"回収率 **{rc['ret']/rc['stake']:.1%}**・収支 **{rc['pl']:+,}円**"
+                   f"（見送り {rc['skipped']}レース）。クリーン年検証：単勝<1.5は単勝も2連単も死に金(69%)なので除外。")
 
     # 合計(単勝+2連単)の累積損益
     acc, cum = 0, []

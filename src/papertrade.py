@@ -136,6 +136,10 @@ def portfolio_stats(rows: list[dict]) -> dict:
     e_stake = sum(r.get("exacta_points", 0) for r in settled) * 100
     e_ret = sum(r.get("exacta_return", 0) for r in settled)
     e_hit = sum(1 for r in settled if r.get("exacta_win"))
+    # 推奨: 単勝<1.5(チャラレース)を丸ごと見送った場合の 単勝+2連単（検証で最良）
+    reco = [r for r in settled if (r.get("final_odds") or 0) >= ODDS_FLOOR]
+    rc_stake = len(reco) * 100 + sum(r.get("exacta_points", 0) for r in reco) * 100
+    rc_ret = sum(r.get("tansho_return", 0) + r.get("exacta_return", 0) for r in reco)
     return {
         "races": n,
         "tansho": {"stake": t_stake, "ret": t_ret, "hit": t_hit, "pl": t_ret - t_stake},
@@ -144,6 +148,8 @@ def portfolio_stats(rows: list[dict]) -> dict:
         "exacta": {"stake": e_stake, "ret": e_ret, "hit": e_hit, "pl": e_ret - e_stake},
         "total": {"stake": t_stake + e_stake, "ret": t_ret + e_ret,
                   "pl": (t_ret + e_ret) - (t_stake + e_stake)},
+        "reco": {"races": len(reco), "skipped": n - len(reco),
+                 "stake": rc_stake, "ret": rc_ret, "pl": rc_ret - rc_stake},
     }
 
 
@@ -162,10 +168,12 @@ def cmd_report():
 
     print(f"=== 実トラック（{n}レース・1点100円）===")
     line("単勝", s["tansho"], s["tansho"]["hit"])
-    line(f"単勝1.5+", s["tansho_hi"], s["tansho_hi"]["hit"])
     line("2連単3点", s["exacta"], s["exacta"]["hit"])
     line("合計", s["total"])
-    print(f"\n  ※「単勝1.5+」= 締切オッズ1.5倍未満を見送った場合（クリーン年検証で回収率↑）。")
+    rc = s["reco"]
+    line("推奨(単+2連)", rc)
+    print(f"\n  ※「推奨」= 単勝1.5倍未満のレースを丸ごと見送った単勝+2連単（検証で最良）。"
+          f"見送り {rc['skipped']}レース。")
     print(f"  ※前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
 
 
