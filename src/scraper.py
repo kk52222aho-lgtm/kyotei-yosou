@@ -223,6 +223,47 @@ def fetch_beforeinfo(date: str, jcd: str, rno: int) -> tuple[dict[int, dict], di
     return per_lane, race_cond
 
 
+def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
+    """結果ページ1回で 勝ち艇・単勝払戻・2連単払戻 をまとめて返す（ライブ結果表示用）。
+
+    返り値: {"winner": int, "tansho_yen": int, "exacta_combo": str, "exacta_yen": int}
+    レース未確定（結果未掲載）は None。
+    """
+    soup = _get(_race_url("raceresult", date, jcd, rno))
+    if soup is None:
+        return None
+
+    # 着順テーブルから1着艇
+    winner = None
+    for t in soup.find_all("table"):
+        head = t.get_text(" ", strip=True)[:30]
+        if "着" in head and "ボートレーサー" in head:
+            for tr in t.find_all("tr"):
+                cells = tr.find_all("td")
+                if len(cells) < 2:
+                    continue
+                rank = cells[0].get_text(strip=True).translate(_Z2H)
+                lane = cells[1].get_text(strip=True).translate(_Z2H)
+                if rank == "1" and lane.isdigit():
+                    winner = int(lane)
+                    break
+            break
+    if winner is None:
+        return None  # まだ確定してない
+
+    text = soup.get_text(" ", strip=True)
+    out = {"winner": winner, "tansho_yen": None,
+           "exacta_combo": None, "exacta_yen": None}
+    m = re.search(r"単勝\s*(\d)\s*¥\s*([\d,]+)", text)
+    if m:
+        out["tansho_yen"] = int(m.group(2).replace(",", ""))
+    m = re.search(r"2連単\s*(\d)\s*-\s*(\d)\s*¥\s*([\d,]+)", text)
+    if m:
+        out["exacta_combo"] = f"{m.group(1)}-{m.group(2)}"
+        out["exacta_yen"] = int(m.group(3).replace(",", ""))
+    return out
+
+
 def fetch_exacta_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None:
     """結果ページから2連単の (的中組番, 払戻円) を返す。例 ('3-1', 500)。未確定は None。"""
     soup = _get(_race_url("raceresult", date, jcd, rno))

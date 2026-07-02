@@ -45,21 +45,39 @@ def _latest_day_rows():
     return latest, [r for r in ledger if r["date"] == latest]
 
 
+@st.cache_data(ttl=120, show_spinner=False)
+def _live_result(date, jcd, rno):
+    """結果ページ1回で 勝ち艇/単勝/2連単払戻。未確定は None（120秒キャッシュ）。"""
+    return scraper.fetch_result_full(date, jcd, rno)
+
+
+def _effective(r):
+    """settled行はそのまま。未settledはライブ結果を取りに行き擬似settled化。"""
+    if r.get("settled"):
+        return {**r, "_live": False}
+    res = _live_result(r["date"], r["jcd"], r["rno"])
+    if not res:
+        return {**r, "_live": False}  # まだ結果が出ていない
+    e = dict(r)
+    e["settled"] = True
+    e["_live"] = True
+    e["winner"] = res["winner"]
+    e["tansho_win"] = res["winner"] == r["honmei"]
+    e["tansho_return"] = res["tansho_yen"] if (e["tansho_win"] and res["tansho_yen"]) else 0
+    e["final_odds"] = round(res["tansho_yen"] / 100, 1) if (e["tansho_win"] and res["tansho_yen"]) else None
+    e["exacta_result"] = res["exacta_combo"]
+    e["exacta_points"] = len(r.get("exacta3", []))
+    e["exacta_win"] = res["exacta_combo"] in r.get("exacta3", [])
+    e["exacta_return"] = res["exacta_yen"] if (e["exacta_win"] and res["exacta_yen"]) else 0
+    return e
+
+
 def page_today():
     st.header("⚑ 本日の妙味レース")
     date, rows = _latest_day_rows()
     if not rows:
         st.warning("本日の記録がまだありません（毎朝9時に自動記録されます）。")
         return
-
-    ps = papertrade.portfolio_stats(rows)
-    c = st.columns(4)
-    c[0].metric("対象日", date)
-    c[1].metric("妙味レース", f"{len(rows)} 件")
-    c[2].metric("精算", f"{ps['races']} 件")
-    c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
-
-    st.caption("各レース：単勝=本命／2連単=上位3点、各100円・少額分散。購入は自分でテレボート入力・自己責任。")
 
     # 買う直前に押すと、現在の単勝オッズで1.5倍未満（明確な大本命）を弾く
     unsettled = [r for r in rows if not r.get("settled")]
@@ -70,35 +88,50 @@ def page_today():
                 od = scraper.fetch_odds(r["date"], r["jcd"], r["rno"])
                 live[f"{r['jcd']}-{r['rno']}"] = od.get(r["honmei"]) if od else None
         st.session_state["live_odds"] = live
-    live_odds = st.session_state.get("live_odds", {})
 
+    _render_today(date, rows)
+
+
+@st.fragment(run_every=180)
+def _render_today(date, rows):
+    eff = [_effective(r) for r in rows]           # ライブ結果込み（3分ごと自動更新）
+    ps = papertrade.portfolio_stats(eff)
+    c = st.columns(4)
+    c[0].metric("対象日", date)
+    c[1].metric("妙味レース", f"{len(eff)} 件")
+    c[2].metric("結果確定", f"{ps['races']} 件")
+    c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
+    st.caption("各レース：単勝=本命／2連単=上位3点・各100円。結果はレース後およそ5分で自動反映（3分毎更新）。"
+               "購入は自分でテレボート入力・自己責任。")
+
+    live_odds = st.session_state.get("live_odds", {})
     st.divider()
-    for r in rows:
+    for r in eff:
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
             c1.markdown(f"### {r['venue']} {r['rno']}R")
-            # 単勝オッズ＋低オッズフラグ（現在オッズ優先、無ければ朝オッズ）
-            lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
-            o = lo if lo is not None else r.get("scan_odds")
-            src_lbl = "現在" if lo is not None else "朝"
-            if o and o < papertrade.ODDS_FLOOR:
-                tansho = f"**単勝 {r['honmei']}号**（{src_lbl}{o:.1f}倍 ⚠低オッズ→見送り推奨）"
-            elif o:
-                tansho = f"**単勝 {r['honmei']}号**（{src_lbl}{o:.1f}倍）"
-            else:
-                tansho = f"**単勝 {r['honmei']}号**（オッズ未形成→上のボタンで取得）"
-            body = f"{tansho} {r.get('name') or ''} ／ 2連単 上位3点 {' ・ '.join(r['exacta3'])}"
+            combos = " ・ ".join(r["exacta3"])
             if r.get("settled"):
+                tag = "🔴速報 " if r.get("_live") else ""
                 t = (f"🎯的中 {r.get('final_odds')}倍" if r.get("tansho_win")
                      else f"×ハズレ(勝ち{r.get('winner')}号)")
                 e = (f"🎯的中 {r.get('exacta_return')}円" if r.get("exacta_win")
                      else f"×ハズレ(結果 {r.get('exacta_result') or '?'})")
-                race_pl = ((r.get("tansho_return", 0) - 100)
-                           + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
-                body += f"  \n単勝: {t}  ｜  2連単: {e}  ｜  **収支 {race_pl:+,}円**"
+                pl = ((r.get("tansho_return", 0) - 100)
+                      + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
+                c2.markdown(f"**単勝 {r['honmei']}号** ／ 2連単 {combos}  \n"
+                            f"{tag}単勝: {t} ｜ 2連単: {e} ｜ **収支 {pl:+,}円**")
             else:
-                body += "  \n⏳ 結果待ち"
-            c2.markdown(body)
+                lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
+                o = lo if lo is not None else r.get("scan_odds")
+                src = "現在" if lo is not None else "朝"
+                if o and o < papertrade.ODDS_FLOOR:
+                    tansho = f"**単勝 {r['honmei']}号**（{src}{o:.1f}倍 ⚠低オッズ→見送り推奨）"
+                elif o:
+                    tansho = f"**単勝 {r['honmei']}号**（{src}{o:.1f}倍）"
+                else:
+                    tansho = f"**単勝 {r['honmei']}号**（オッズ未形成→上のボタンで取得）"
+                c2.markdown(f"{tansho} {r.get('name') or ''} ／ 2連単 上位3点 {combos}  \n⏳ 結果待ち")
 
 
 def page_record():
