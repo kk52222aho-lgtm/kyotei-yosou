@@ -11,7 +11,7 @@ import datetime as dt
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scraper
+from src import predict, papertrade, scan, scraper
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -74,10 +74,27 @@ def _effective(r):
 
 def page_today():
     st.header("⚑ 本日の妙味レース")
+    today = dt.date.today().strftime("%Y%m%d")
+    cache = scan.load_cache()
+    scanned_today = bool(cache and cache.get("date") == today)
+    md = f"{today[4:6]}/{today[6:]}"
+
+    # 本日のステータス（妙味ナシなら「無」を明示）
+    if scanned_today and len(cache["picks"]) == 0:
+        st.success(f"📅 **{md} 本日は妙味レース無し（見送り）**　"
+                   "全レースでモデル本命がイン(1号艇)＝張らない日。")
+    elif scanned_today:
+        st.info(f"📅 **{md} 本日の妙味レース {len(cache['picks'])}件**")
+    else:
+        st.warning(f"本日({md})はまだスキャンされていません（毎朝9時に自動）。")
+
     date, rows = _latest_day_rows()
     if not rows:
-        st.warning("本日の記録がまだありません（毎朝9時に自動記録されます）。")
+        st.caption("まだ記録がありません。")
         return
+    if date != today:
+        st.divider()
+        st.caption(f"↓ 直近の記録・結果（{date[4:6]}/{date[6:]}）")
 
     # 買う直前に押すと、現在の単勝オッズで1.5倍未満（明確な大本命）を弾く
     unsettled = [r for r in rows if not r.get("settled")]
@@ -156,12 +173,16 @@ def page_record():
                 f"{ps['exacta']['pl']:+,}円")
     c[3].metric("合計 回収率", f"{ps['total']['ret']/ps['total']['stake']:.1%}",
                 f"{ps['total']['pl']:+,}円")
+    st.caption("↑ **track A＝無フィルタ土台のライブ検証**（全妙味レースを記録＝机上OOF 単勝116%/2連単188.7%の直接対照）。"
+               "何を実際に張ったかに関わらず、台帳は全レースを記録する。")
 
     rc = ps.get("reco", {})
     if rc.get("stake"):
-        st.success(f"💡 **推奨戦略（単勝1.5倍未満のレースを丸ごと見送り）**：単勝+2連単 合計 "
-                   f"回収率 **{rc['ret']/rc['stake']:.1%}**・収支 **{rc['pl']:+,}円**"
-                   f"（見送り {rc['skipped']}レース）。クリーン年検証：単勝<1.5は単勝も2連単も死に金(69%)なので除外。")
+        st.info(f"💡 **参考：フィルタ版（単勝1.5倍未満を丸ごと見送り）**：単勝+2連単 合計 "
+                f"回収率 **{rc['ret']/rc['stake']:.1%}**・収支 **{rc['pl']:+,}円**"
+                f"（見送り {rc['skipped']}レース）。クリーン年検証：単勝<1.5は死に金(69%)。"
+                f"※これはtrack Aから導いたフィルタ版の目安。実弾（裁量・金額込みで実際に張った分）はさらに別trackで、"
+                f"**どちらも「土台188.7の検証」とは呼ばない**（母数も対象も違う）。")
 
     # 合計(単勝+2連単)の累積損益
     acc, cum = 0, []
@@ -199,8 +220,10 @@ def page_record():
             "2連単損益": st.column_config.NumberColumn(format="%+d"),
             "レース収支": st.column_config.NumberColumn(format="%+d"),
         })
-    st.caption("※単勝1点＋2連単3点/レース・各100円の実トラック（前向き記録）。過去の前進検証は単勝116%/2連単176%だが"
-               "1日〜少数では大きくブレる（負ける日も普通）。数十〜百本の平均で判断。")
+    st.caption("※単勝1点＋2連単3点/レース・各100円の実トラック（track A＝無フィルタ土台の前向き記録）。"
+               "2連単188.7%はファットテール込みで分散が大きく、エッジは高配当帯に薄く濃い。"
+               "**有意化は年単位**（妙味は1日0〜2本・高配当帯的中は年に数十本）＝数十本で机上vsライブを判断せん。"
+               "中間集計での一喜一憂が最大の敵。見るなら四半期に一度、累積ROIとサンプル数で。")
 
 
 def render_prediction(rows):
