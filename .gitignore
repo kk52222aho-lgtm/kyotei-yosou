@@ -16,3 +16,5 @@ data/*.lzh
 #   data/model.joblib        … 学習済みモデル（個別予想に必要）
 #   data/today_picks.json    … 本日の妙味レース（毎朝push）
 #   data/papertrade.jsonl    … 実トラック台帳
+data/odds_cache.json
+data/exacta_odds_cache.json
