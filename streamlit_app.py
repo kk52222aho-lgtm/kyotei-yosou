@@ -130,6 +130,9 @@ def _render_today(date, rows):
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
             c1.markdown(f"### {r['venue']} {r['rno']}R")
+            if r.get("deadline"):
+                c1.markdown(f"⏰ 締切 **{r['deadline']}**"
+                            + ("" if r.get("settled") else "　までに投票"))
             combos = " ・ ".join(r["exacta3"])
             if r.get("settled"):
                 tag = "🔴速報 " if r.get("_live") else ""

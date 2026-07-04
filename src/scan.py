@@ -52,6 +52,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
 
     picks = []
     for jcd in venues:
+        deadlines = scraper.fetch_deadlines(date, jcd)  # {rno: "HH:MM"} 場ごと1発
         empty = 0
         for rno in range(1, 13):
             entries = scraper.fetch_racelist(date, jcd, rno)
@@ -76,11 +77,12 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "jcd": jcd, "venue": venue_name(jcd), "rno": rno,
                 "honmei": rec["tansho"], "name": rec.get("tansho_name"),
                 "win_pct": rows[0]["win_pct"], "exacta3": rec["exacta3"],
-                "odds": odds,
+                "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"
-            print(f"  ⚑ {venue_name(jcd)} {rno}R  単勝{rec['tansho']}号 {rec.get('tansho_name','')} "
-                  f"(予想{rows[0]['win_pct']}% / {od})  2連単{'・'.join(rec['exacta3'])}")
+            dl = deadlines.get(rno)
+            print(f"  ⚑ {venue_name(jcd)} {rno}R {('締切'+dl) if dl else ''}  単勝{rec['tansho']}号 "
+                  f"{rec.get('tansho_name','')} (予想{rows[0]['win_pct']}% / {od})  2連単{'・'.join(rec['exacta3'])}")
     return picks
 
 

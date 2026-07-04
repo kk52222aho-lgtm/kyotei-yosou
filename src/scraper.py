@@ -320,6 +320,24 @@ def fetch_held_venues(date: str) -> list[str]:
     return sorted(jcds)
 
 
+def fetch_deadlines(date: str, jcd: str) -> dict[int, str]:
+    """場のraceindexページから各レースの締切予定時刻 {rno: "HH:MM"} を1発で返す。
+
+    各行が「NR HH:MM 投票 …」の形なので、行単位で番号と時刻を対応付ける
+    （ページ全体のHH:MM総なめより頑健）。取得失敗時は空dict。
+    """
+    soup = _get(f"{BASE}/raceindex?jcd={jcd}&hd={date}")
+    if soup is None:
+        return {}
+    out: dict[int, str] = {}
+    for tr in soup.find_all("tr"):
+        txt = re.sub(r"\s+", " ", tr.get_text(" ", strip=True))
+        m = re.match(r"(\d{1,2})R\s+([0-2]?\d:[0-5]\d)", txt)
+        if m:
+            out[int(m.group(1))] = m.group(2)
+    return out
+
+
 def trifecta_combos() -> list[tuple[int, int, int]]:
     """3連単オッズ表(odds3t)の td.oddsPoint 出現順に対応する (1着,2着,3着) の列挙。
 
