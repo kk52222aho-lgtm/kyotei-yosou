@@ -99,6 +99,8 @@ def parse_b(data: bytes) -> dict:
                 "loc_2rate": n[3] if len(n) > 3 else None,
                 "motor_2rate": n[5] if len(n) > 5 else None,
                 "boat_2rate": n[7] if len(n) > 7 else None,
+                "motor_no": int(n[4]) if len(n) > 4 else None,   # 生モーター番号(場内で節ごと再割当)
+                "boat_no": int(n[6]) if len(n) > 6 else None,    # 生ボート番号
             }
             out.setdefault((jcd, rno), []).append(rec)
     return out

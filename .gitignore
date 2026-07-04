@@ -18,3 +18,4 @@ data/*.lzh
 #   data/papertrade.jsonl    … 実トラック台帳
 data/odds_cache.json
 data/exacta_odds_cache.json
+data/motor_boat.csv
