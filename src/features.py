@@ -16,21 +16,20 @@ CLASS_MAP = {"A1": 4, "A2": 3, "B1": 2, "B2": 1, "": 0}
 CATEGORICAL = ["venue_code"]
 
 # モデルに入れる特徴量カラム
+# ※2026-07 掃除: ROI-permutation(free/固定universe)＋精度permの三重確認で shuffle=完全no-op
+#   (モデルが一度も分岐に使わん)だった10軸を除去 → f_count, l_count, avg_st, nat_3rate,
+#   loc_3rate, motor_3rate, boat_3rate, tilt, weight_today, tenji_st。ROI無変化を検証済み。
 FEATURES = [
     "venue_code",      # 場コード(jcd) ※場ごとのイン有利度を学習
-    "lane",            # 艇番(コース) ※競艇では最重要
+    "lane",            # 艇番(コース) ※競艇では最重要。特に2連単の組順序の本体
     "class_num",
     "age", "weight",
-    "f_count", "l_count", "avg_st",
-    "nat_win", "nat_2rate", "nat_3rate",
-    "loc_win", "loc_2rate", "loc_3rate",
-    "motor_2rate", "motor_3rate",
-    "boat_2rate", "boat_3rate",
+    "nat_win", "nat_2rate",   # 全国勝率/2連率 ※単勝per-bet品質の本体
+    "loc_win", "loc_2rate",   # 当地勝率/2連率
+    "motor_2rate",
+    "boat_2rate",
     # --- 直前情報 ---
     "tenji_time",    # 展示タイム（小さいほど速い）
-    "tilt",          # チルト角
-    "weight_today",  # 当日体重
-    "tenji_st",      # ST展示（フライングは負値）
     "wind_speed",    # 風速 m
     "wave_height",   # 波高 cm
 ]
