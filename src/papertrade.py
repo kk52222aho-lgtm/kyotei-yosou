@@ -72,6 +72,9 @@ def cmd_log(date: str):
             "venue": p["venue"], "honmei": p["honmei"],
             "name": p.get("name"), "scan_odds": p.get("odds"),
             "exacta3": p["exacta3"],
+            "exacta3_p": p.get("exacta3_p"),   # EV算出用
+            "deadline": p.get("deadline"),
+            "exacta_ev": None,                 # 締切間際にcapture_evで埋める
             "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
             "settled": False,
         })
@@ -79,6 +82,26 @@ def cmd_log(date: str):
         print(f"  記録 {p['venue']}{p['rno']}R 単勝{p['honmei']}号")
     _save(rows)
     print(f"\n{added}件を記録（台帳: {LEDGER}）")
+
+
+def cmd_capture_ev(today: str):
+    """未精算の本日ピックの2連単締切オッズを取得しEVを記録（overwrite=最新に収束）。
+
+    締切間際に定期実行する想定。EV>2.0が検証済みの買い帯。settle前に締切値が入る。
+    """
+    from . import scraper, predict
+    rows = _load()
+    n = 0
+    for r in rows:
+        if r.get("settled") or r.get("date") != today or not r.get("exacta3_p"):
+            continue
+        lv = scraper.fetch_exacta_odds(r["date"], r["jcd"], r["rno"])
+        ev = predict.exacta_ev(r.get("exacta3"), r.get("exacta3_p"), lv)
+        if ev is not None:
+            r["exacta_ev"] = round(ev, 3)
+            n += 1
+    _save(rows)
+    print(f"{n}件のEVを更新（EV>{predict.EXACTA_EV_THRESHOLD}が買い帯）")
 
 
 def cmd_settle(today: str):
@@ -140,6 +163,13 @@ def portfolio_stats(rows: list[dict]) -> dict:
     reco = [r for r in settled if (r.get("final_odds") or 0) >= ODDS_FLOOR]
     rc_stake = len(reco) * 100 + sum(r.get("exacta_points", 0) for r in reco) * 100
     rc_ret = sum(r.get("tansho_return", 0) + r.get("exacta_return", 0) for r in reco)
+    # 2連単EV>2.0フィルタ（検証: 締切EV>2.0帯が堅く300-500%・fat-tail生存）
+    from .predict import EXACTA_EV_THRESHOLD
+    evf = [r for r in settled if (r.get("exacta_ev") or 0) >= EXACTA_EV_THRESHOLD]
+    evf_stake = sum(r.get("exacta_points", 0) for r in evf) * 100
+    evf_ret = sum(r.get("exacta_return", 0) for r in evf)
+    evf_hit = sum(1 for r in evf if r.get("exacta_win"))
+    captured = [r for r in settled if r.get("exacta_ev") is not None]
     return {
         "races": n,
         "tansho": {"stake": t_stake, "ret": t_ret, "hit": t_hit, "pl": t_ret - t_stake},
@@ -150,6 +180,9 @@ def portfolio_stats(rows: list[dict]) -> dict:
                   "pl": (t_ret + e_ret) - (t_stake + e_stake)},
         "reco": {"races": len(reco), "skipped": n - len(reco),
                  "stake": rc_stake, "ret": rc_ret, "pl": rc_ret - rc_stake},
+        "exacta_ev": {"races": len(evf), "captured": len(captured),
+                      "stake": evf_stake, "ret": evf_ret, "hit": evf_hit,
+                      "pl": evf_ret - evf_stake},
     }
 
 
@@ -172,8 +205,13 @@ def cmd_report():
     line("合計", s["total"])
     rc = s["reco"]
     line("推奨(単+2連)", rc)
+    ev = s["exacta_ev"]
+    if ev["captured"]:
+        line(f"2連単EV>2.0", ev, ev["hit"])
+        print(f"    （EV捕捉 {ev['captured']}レース中 EV>2.0で買い {ev['races']}レース）")
     print(f"\n  ※「推奨」= 単勝1.5倍未満のレースを丸ごと見送った単勝+2連単（検証で最良）。"
           f"見送り {rc['skipped']}レース。")
+    print(f"  ※「2連単EV>2.0」= 締切EVフィルタの前向きtrack（机上で堅く300-500%・要ライブ確認）。")
     print(f"  ※前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
 
 
@@ -183,6 +221,7 @@ def main():
     lg = sub.add_parser("log"); lg.add_argument("--date", default=dt.date.today().strftime("%Y%m%d"))
     sub.add_parser("settle")
     sub.add_parser("report")
+    sub.add_parser("capture_ev")   # 締切間際に定期実行=2連単EVを台帳に記録
     args = ap.parse_args()
     today = dt.date.today().strftime("%Y%m%d")
     if args.cmd == "log":
@@ -191,6 +230,8 @@ def main():
         cmd_settle(today)
     elif args.cmd == "report":
         cmd_report()
+    elif args.cmd == "capture_ev":
+        cmd_capture_ev(today)
 
 
 if __name__ == "__main__":
