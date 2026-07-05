@@ -4,6 +4,9 @@ REM Order: settle+push FIRST (result fetching = reliable/quick), THEN scan+log (
 REM so that even if the scan is interrupted, results are already fetched and pushed.
 set PY=C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\python3.12.exe
 set PYTHONIOENCODING=utf-8
+set PYTHONUNBUFFERED=1
+REM ^ unbuffered: flush output immediately so a hang shows where it stuck (settle output was
+REM   lost to block-buffering on the 2026-07-05 flaky-network hang; results saved, picks didn't).
 cd /d C:\dev\kyotei-yosou
 
 echo ==== %date% %time% ==== >> data\papertrade_run.log
