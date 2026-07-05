@@ -101,13 +101,23 @@ def page_today():
 
     # 買う直前に押すと、現在の単勝オッズで1.5倍未満（明確な大本命）を弾く
     unsettled = [r for r in rows if not r.get("settled")]
-    if unsettled and st.button("🔄 今の単勝オッズを取得して1.5倍判定"):
+    b1, b2 = st.columns(2)
+    if unsettled and b1.button("🔄 今の単勝オッズを取得して1.5倍判定"):
         live = {}
         with st.spinner("現在の単勝オッズを取得中…"):
             for r in unsettled:
                 od = scraper.fetch_odds(r["date"], r["jcd"], r["rno"])
                 live[f"{r['jcd']}-{r['rno']}"] = od.get(r["honmei"]) if od else None
         st.session_state["live_odds"] = live
+    # 締切間際に押す: 2連単の締切オッズでEV判定（検証: EV>2.0だけ堅く300-500%）
+    if unsettled and b2.button("🎯 今の2連単オッズでEV判定（EV>2.0が買い）"):
+        evs = {}
+        with st.spinner("現在の2連単オッズを取得中…（締切間際に押すのが正確）"):
+            for r in unsettled:
+                lv = scraper.fetch_exacta_odds(r["date"], r["jcd"], r["rno"])
+                evs[f"{r['jcd']}-{r['rno']}"] = predict.exacta_ev(
+                    r.get("exacta3"), r.get("exacta3_p"), lv)
+        st.session_state["exacta_ev"] = evs
 
     _render_today(date, rows)
 
@@ -157,8 +167,14 @@ def _render_today(date, rows):
                         f"⏳ 結果待ち")
                 else:
                     odlbl = f"（{src}{o:.1f}倍）" if o else "（オッズ未形成→上のボタンで取得）"
+                    ev = st.session_state.get("exacta_ev", {}).get(f"{r['jcd']}-{r['rno']}")
+                    if ev is not None:
+                        evtag = (f"🟢 **2連単 買い（EV {ev:.2f}>2.0）**" if ev >= predict.EXACTA_EV_THRESHOLD
+                                 else f"⚪ 2連単 見送り（EV {ev:.2f}<2.0）")
+                    else:
+                        evtag = "（2連単EV: 締切間際に上のEVボタン）"
                     c2.markdown(f"**単勝 {r['honmei']}号**{odlbl} {nm} ／ "
-                                f"2連単 上位3点 {combos}  \n⏳ 結果待ち")
+                                f"2連単 上位3点 {combos}  \n{evtag}　⏳ 結果待ち")
 
 
 def page_record():

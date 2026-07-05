@@ -77,6 +77,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "jcd": jcd, "venue": venue_name(jcd), "rno": rno,
                 "honmei": rec["tansho"], "name": rec.get("tansho_name"),
                 "win_pct": rows[0]["win_pct"], "exacta3": rec["exacta3"],
+                "exacta3_p": rec.get("exacta3_p"),   # EV算出用(締切間際にオッズだけ取ればEV出せる)
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"

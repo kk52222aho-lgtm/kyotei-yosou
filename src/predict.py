@@ -103,8 +103,26 @@ def recommend(rows: list[dict]) -> dict:
         "tansho": honmei["lane"],
         "tansho_name": honmei.get("name"),
         "exacta3": [c for c, _ in ex[:3]],
+        "exacta3_p": [round(pr, 5) for _, pr in ex[:3]],  # EV算出用: 各組のHarville確率
         "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%。",
     }
+
+
+# 2連単EVフィルタ閾値（test_ev_probe: EV>2.0帯がfat-tail生存で堅く300-500%・CI下限>100%）
+EXACTA_EV_THRESHOLD = 2.0
+
+
+def exacta_ev(exacta3, exacta3_p, live_odds):
+    """2連単EV = Σ(p_c × 締切odds_c)/3。live_odds={'i-j':odズ}。全組そろわねば None。
+
+    test_ev_probe と同一定義。EV>EXACTA_EV_THRESHOLD が「買い」。
+    """
+    if not exacta3 or not exacta3_p or not live_odds:
+        return None
+    ods = [live_odds.get(c) for c in exacta3]
+    if any(o is None or o <= 0 for o in ods):
+        return None
+    return sum(p * o for p, o in zip(exacta3_p, ods)) / len(exacta3)
 
 
 def harville_trifecta(win_prob: dict[int, float]) -> dict[str, float]:
