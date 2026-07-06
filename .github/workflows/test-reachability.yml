@@ -1,0 +1,32 @@
+name: test-reachability
+# 米国GitHub ActionsランナーからboatRace.jpに到達できるか検証（移設の前提）。
+# 手動トリガー: gh workflow run test-reachability.yml
+on:
+  workflow_dispatch:
+
+jobs:
+  reach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests beautifulsoup4 lxml
+      - name: boatrace.jp reachability
+        run: |
+          python - <<'PY'
+          import datetime as dt, time
+          from src import scraper
+          jst = (dt.datetime.utcnow() + dt.timedelta(hours=9)).strftime('%Y%m%d')
+          print('runner UTC:', dt.datetime.utcnow(), '/ JST date:', jst)
+          t = time.time()
+          vs = scraper.fetch_held_venues(jst)
+          print(f'fetch_held_venues: {time.time()-t:.1f}s / venues={len(vs)}: {vs[:8]}')
+          assert vs, 'FAIL: no venues returned (boatrace.jp unreachable or blocked from US runner)'
+          t = time.time()
+          rl = scraper.fetch_racelist(jst, vs[0], 1)
+          print(f'fetch_racelist {vs[0]}-1R: {time.time()-t:.1f}s / {"OK("+str(len(rl))+"entries)" if rl else "None"}')
+          assert rl, 'FAIL: racelist empty'
+          print('REACHABLE: 米国ランナーからboatrace.jp到達OK')
+          PY
