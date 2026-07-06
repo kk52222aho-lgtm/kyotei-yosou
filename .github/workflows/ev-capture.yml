@@ -1,0 +1,35 @@
+name: ev-capture
+# レース開催中(JST 10:00-21:xx)に20分毎、未精算ピックの2連単締切オッズ→EV算出→台帳overwrite→push。
+# 締切間際の値に収束(overwrite方式)。EV>2.0が検証済みの買い帯。GH cronは多少遅延するが許容。
+on:
+  schedule:
+    - cron: '*/20 1-12 * * *'   # UTC 01:00-12:xx = JST 10:00-21:xx 20分毎
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repo-write             # daily-scanと直列化
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Tokyo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas "numpy<2" scikit-learn==1.6.1 joblib requests beautifulsoup4 lxml
+      - run: python -m src.papertrade capture_ev
+      - name: commit + push
+        run: |
+          git config user.name "kyotei-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/papertrade.jsonl
+          git commit -m "cloud ev capture $(date +%H:%M)" || { echo "no changes"; exit 0; }
+          git pull --rebase --autostash || true
+          git push
