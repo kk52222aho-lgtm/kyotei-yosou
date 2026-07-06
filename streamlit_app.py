@@ -187,50 +187,59 @@ def page_record():
         return
 
     ps = papertrade.portfolio_stats(settled)
+    # --- 主表示: 単勝1.5倍未満のレースを丸ごと見送った成績 ---
+    FLOOR = papertrade.ODDS_FLOOR
+    kept = [r for r in settled if (r.get("final_odds") or 0) >= FLOOR]
+    skipped = len(settled) - len(kept)
+    f_tan_st = len(kept) * 100
+    f_tan_ret = sum(r.get("tansho_return", 0) for r in kept)
+    f_ex_st = sum(r.get("exacta_points", 0) for r in kept) * 100
+    f_ex_ret = sum(r.get("exacta_return", 0) for r in kept)
+    f_tot_st, f_tot_ret = f_tan_st + f_ex_st, f_tan_ret + f_ex_ret
+
+    def roi(ret, st_): return f"{ret/st_:.1%}" if st_ else "―"
+    st.caption(f"**単勝1.5倍未満のレースは丸ごと見送った成績**（買った {len(kept)} / 見送り {skipped} レース）")
     c = st.columns(4)
-    c[0].metric("確定レース", ps["races"])
-    c[1].metric("単勝 回収率", f"{ps['tansho']['ret']/ps['tansho']['stake']:.1%}",
-                f"{ps['tansho']['pl']:+,}円")
-    c[2].metric("2連単 回収率", f"{ps['exacta']['ret']/ps['exacta']['stake']:.1%}" if ps['exacta']['stake'] else "―",
-                f"{ps['exacta']['pl']:+,}円")
-    c[3].metric("合計 回収率", f"{ps['total']['ret']/ps['total']['stake']:.1%}",
-                f"{ps['total']['pl']:+,}円")
-    st.caption("↑ **track A＝無フィルタ土台のライブ検証**（全妙味レースを記録＝机上OOF 単勝116%/2連単188.7%の直接対照）。"
-               "何を実際に張ったかに関わらず、台帳は全レースを記録する。")
+    c[0].metric("買ったレース", len(kept))
+    c[1].metric("単勝 回収率", roi(f_tan_ret, f_tan_st), f"{f_tan_ret - f_tan_st:+,}円")
+    c[2].metric("2連単 回収率", roi(f_ex_ret, f_ex_st), f"{f_ex_ret - f_ex_st:+,}円")
+    c[3].metric("合計 回収率", roi(f_tot_ret, f_tot_st), f"{f_tot_ret - f_tot_st:+,}円")
 
-    rc = ps.get("reco", {})
-    if rc.get("stake"):
-        st.info(f"💡 **参考：フィルタ版（単勝1.5倍未満を丸ごと見送り）**：単勝+2連単 合計 "
-                f"回収率 **{rc['ret']/rc['stake']:.1%}**・収支 **{rc['pl']:+,}円**"
-                f"（見送り {rc['skipped']}レース）。クリーン年検証：単勝<1.5は死に金(69%)。"
-                f"※これはtrack Aから導いたフィルタ版の目安。実弾（裁量・金額込みで実際に張った分）はさらに別trackで、"
-                f"**どちらも「土台188.7の検証」とは呼ばない**（母数も対象も違う）。")
+    # 参考: 無フィルタ土台(track A=机上188.7の直接対照)
+    with st.expander("参考：無フィルタ土台（全妙味レース＝机上OOFの直接対照）"):
+        st.caption(f"全 {ps['races']} レース記録。単勝 {roi(ps['tansho']['ret'], ps['tansho']['stake'])}"
+                   f" / 2連単 {roi(ps['exacta']['ret'], ps['exacta']['stake'])}"
+                   f" / 合計 {roi(ps['total']['ret'], ps['total']['stake'])}。"
+                   "台帳は何を張ったかに関わらず全レース記録＝机上116/188.7の対照。上の主表示は単勝<1.5を見送った実運用版。")
 
-    # 合計(単勝+2連単)の累積損益
+    # 合計(単勝+2連単)の累積損益（フィルタ版=買ったレースのみ）
     acc, cum = 0, []
-    for r in settled:
+    for r in kept:
         acc += ((r.get("tansho_return", 0) - 100)
                 + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
         cum.append(acc)
-    st.line_chart(pd.DataFrame({"累積損益(合計・円)": cum}))
+    if cum:
+        st.line_chart(pd.DataFrame({"累積損益(単勝<1.5見送り・円)": cum}))
 
     st.markdown("#### 明細（1点100円・単勝1点＋2連単3点）")
     tbl = []
     for r in reversed(settled):
-        t_pl = r.get("tansho_return", 0) - 100
+        bet_race = (r.get("final_odds") or 0) >= FLOOR   # 単勝1.5未満は見送り＝損益0
         e_stake = r.get("exacta_points", 0) * 100
-        e_pl = r.get("exacta_return", 0) - e_stake
+        t_pl = (r.get("tansho_return", 0) - 100) if bet_race else 0
+        e_pl = (r.get("exacta_return", 0) - e_stake) if bet_race else 0
         od = f"{r.get('final_odds'):.1f}倍" if r.get("final_odds") else "―"
         tbl.append({
             "日付": r["date"],
             "レース": f"{r['venue']}{r['rno']}R",
+            "対象": "買" if bet_race else "見送り",
             "単勝": f"{r['honmei']}号({od})",
             "単勝結果": (f"🎯 +{r.get('tansho_return', 0) - 100}円"
-                        if r.get("tansho_win") else "× -100円"),
+                        if r.get("tansho_win") else "× -100円") if bet_race else "―(見送り)",
             "2連単 買い目": " ".join(r.get("exacta3", [])),
             "2連単 結果": (f"🎯 {r.get('exacta_result')} 払戻{r.get('exacta_return')}円"
                           if r.get("exacta_win")
-                          else f"× 結果{r.get('exacta_result') or '?'} -{e_stake}円"),
+                          else f"× 結果{r.get('exacta_result') or '?'} -{e_stake}円") if bet_race else "―(見送り)",
             "単勝損益": t_pl,
             "2連単損益": e_pl,
             "レース収支": t_pl + e_pl,
