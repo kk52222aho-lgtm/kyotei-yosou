@@ -412,13 +412,99 @@ def page_about():
     )
 
 
+AGENT_UNIT = 1000            # エージェントの1点あたり張額（円）
+AGENT_EV_TH = 2.0
+
+
+def _agent_pl(r, sc):
+    """エージェントの1レースP&L（円）。単勝<1.5は見送り(None)。2連単はEV>2.0のみ。"""
+    if (r.get("final_odds") or 0) < papertrade.ODDS_FLOOR:
+        return None
+    pl = (r.get("tansho_return", 0) - 100) * sc
+    bet2 = (r.get("exacta_ev") or 0) >= AGENT_EV_TH
+    if bet2:
+        pl += (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100) * sc
+    return pl
+
+
 def page_pro():
-    st.header("🎯 プロの目線 ― データに無い暗黙知")
+    st.header("🎯 プロ・エージェント（毎日の予想と結果）")
+    st.caption(f"逐次エージェント＝三関門（本命≠1号艇 → 単勝≥1.5 → 2連単EV>2.0）で選び、"
+               f"1点 {AGENT_UNIT:,}円で張る。毎日ここに予想と結果が積まれる。"
+               f"※机上の月平均は+25万前後だが**ライブ未証明**。負け月も隠さず出す。")
+    sc = AGENT_UNIT / 100
+    ledger = papertrade._load()
+    today = dt.date.today().strftime("%Y%m%d")
+
+    # --- 今日の予想 ---
+    st.markdown("#### 📅 今日の予想")
+    todays = [r for r in ledger if r.get("date") == today and not r.get("settled")]
+    if not todays:
+        c = scan.load_cache()
+        if c and c.get("date") == today and len(c.get("picks", [])) == 0:
+            st.success("本日は妙味レース無し＝**全レース見送り**（プロは買わない日）。")
+        else:
+            st.info("本日の対象レースはまだありません（毎朝9時に自動更新）。")
+    else:
+        for r in todays:
+            ev = r.get("exacta_ev")
+            ev_txt = (f"2連単EV **{ev:.2f}** → {'🟢買い' if ev >= AGENT_EV_TH else '⚪見送り'}"
+                      if ev is not None else "2連単EV：締切間際に判定")
+            st.markdown(f"- **{r['venue']}{r['rno']}R**（締切 {r.get('deadline','—')}）"
+                        f"　単勝 本命{r['honmei']}号（締切で1.5判定）｜ {ev_txt}")
+
+    # --- 確定した結果（日別） ---
+    settled = sorted([r for r in ledger if r.get("settled")],
+                     key=lambda r: (r["date"], r["jcd"], r["rno"]))
+    st.markdown("#### 📊 確定した結果（エージェントの実績）")
+    if not settled:
+        st.caption("まだ確定結果がありません。毎日積まれます。")
+    else:
+        by_day, run = {}, 0
+        for r in settled:
+            pl = _agent_pl(r, sc)
+            if pl is None:
+                continue
+            d = by_day.setdefault(r["date"], {"pl": 0.0, "n": 0})
+            d["pl"] += pl; d["n"] += 1
+        rows = []
+        for dt_ in sorted(by_day):
+            run += by_day[dt_]["pl"]
+            rows.append({"日付": f"{dt_[4:6]}/{dt_[6:]}", "賭けたレース": by_day[dt_]["n"],
+                         "その日の収支": int(by_day[dt_]["pl"]), "累計": int(run)})
+        if rows:
+            tot_n = sum(d["n"] for d in by_day.values())
+            tot_pl = int(run)
+            cc = st.columns(3)
+            cc[0].metric("賭けたレース累計", tot_n)
+            cc[1].metric("累計収支", f"{tot_pl:+,}円")
+            cc[2].metric("1点あたり", f"{AGENT_UNIT:,}円")
+            st.dataframe(pd.DataFrame(reversed(rows)), hide_index=True, use_container_width=True,
+                         column_config={"その日の収支": st.column_config.NumberColumn(format="%+d"),
+                                        "累計": st.column_config.NumberColumn(format="%+d")})
+            # 月別
+            by_mo = {}
+            for dt_ in by_day:
+                by_mo.setdefault(dt_[:6], 0.0)
+                by_mo[dt_[:6]] += by_day[dt_]["pl"]
+            st.markdown("###### 月別")
+            st.dataframe(pd.DataFrame([{"月": f"{m[:4]}/{m[4:]}", "収支": int(v)}
+                                       for m, v in sorted(by_mo.items())]),
+                         hide_index=True, use_container_width=True,
+                         column_config={"収支": st.column_config.NumberColumn(format="%+d")})
+        else:
+            st.caption("エージェントが賭けた確定レースはまだありません（単勝<1.5は見送り／2連単はEV>2.0のみ）。")
+
+    st.info("※これは前向きの実記録＝ライブ検証。机上（過去+25万/月）が本当に出るかを積んで確かめる装置。"
+            "数十本〜年単位で見る（プレレジ：EV枠はN<300本は判断しない）。")
+
+    # --- 暗黙知ノート（頭の中） ---
+    st.markdown("---")
+    st.markdown("#### 🧠 エージェントの頭の中（データに無い暗黙知）")
     path = os.path.join(os.path.dirname(__file__), "data", "pro_wisdom.md")
     if os.path.exists(path):
-        st.markdown(open(path, encoding="utf-8").read())
-    else:
-        st.info("準備中。")
+        with st.expander("開く：気配と地合いの読み方"):
+            st.markdown(open(path, encoding="utf-8").read())
 
 
 st.title("🚤 競艇予想")
