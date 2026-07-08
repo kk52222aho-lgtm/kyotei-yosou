@@ -448,10 +448,13 @@ def page_pro():
     else:
         for r in todays:
             ev = r.get("exacta_ev")
-            ev_txt = (f"2連単EV **{ev:.2f}** → {'🟢買い' if ev >= AGENT_EV_TH else '⚪見送り'}"
-                      if ev is not None else "2連単EV：締切間際に判定")
-            st.markdown(f"- **{r['venue']}{r['rno']}R**（締切 {r.get('deadline','—')}）"
-                        f"　単勝 本命{r['honmei']}号（締切で1.5判定）｜ {ev_txt}")
+            ev_txt = (f"EV **{ev:.2f}** → {'🟢買い' if ev >= AGENT_EV_TH else '⚪見送り'}"
+                      if ev is not None else "EV：締切間際に判定")
+            combos = " ・ ".join(r.get("exacta3", []))
+            st.markdown(
+                f"**{r['venue']}{r['rno']}R**（締切 {r.get('deadline','—')}）  \n"
+                f"　🎫 **単勝：{r['honmei']}号**（各1,000円・締切で1.5倍以上か判定）  \n"
+                f"　🎫 **2連単：{combos}**（各1,000円・{ev_txt}）")
 
     # --- 確定した結果（日別） ---
     settled = sorted([r for r in ledger if r.get("settled")],
@@ -492,6 +495,27 @@ def page_pro():
                                        for m, v in sorted(by_mo.items())]),
                          hide_index=True, use_container_width=True,
                          column_config={"収支": st.column_config.NumberColumn(format="%+d")})
+            # 賭けたレースごとの明細（買い目＋結果）
+            det = []
+            for r in settled:
+                if _agent_pl(r, sc) is None:
+                    continue
+                bet2 = (r.get("exacta_ev") or 0) >= AGENT_EV_TH
+                od = f"{r.get('final_odds'):.1f}倍" if r.get("final_odds") else "―"
+                det.append({
+                    "日付": f"{r['date'][4:6]}/{r['date'][6:]}",
+                    "レース": f"{r['venue']}{r['rno']}R",
+                    "単勝 買い目": f"{r['honmei']}号({od})",
+                    "単勝 結果": "🎯的中" if r.get("tansho_win") else "×ハズレ",
+                    "2連単 買い目": " ".join(r.get("exacta3", [])) if bet2 else "見送り(EV<2.0)",
+                    "2連単 結果": (f"🎯{r.get('exacta_result')} 払戻{r.get('exacta_return')}円"
+                                  if bet2 and r.get("exacta_win")
+                                  else ("×" + str(r.get("exacta_result") or "") if bet2 else "―")),
+                    "レース収支": int(_agent_pl(r, sc)),
+                })
+            st.markdown("###### 明細（賭けたレースごとの買い目と結果）")
+            st.dataframe(pd.DataFrame(list(reversed(det))), hide_index=True, use_container_width=True,
+                         column_config={"レース収支": st.column_config.NumberColumn(format="%+d")})
         else:
             st.caption("エージェントが賭けた確定レースはまだありません（単勝<1.5は見送り／2連単はEV>2.0のみ）。")
 
