@@ -1,8 +1,12 @@
 name: daily-scan
-# 毎朝9時JSTに settle(結果反映)→scan(今日の妙味)→log(台帳)→push。PC不要でサイト自動更新。
+# 早朝JSTに settle(結果反映)→scan(今日の妙味)→log(台帳)→push。PC不要でサイト自動更新。
+# cronは常にUTC(workflow内のTZ:Asia/Tokyoはcron解釈に効かない)。
+# 旧 '0 0 * * *'(=00:00 UTC/09:00 JST)は世界のcronが殺到する最混雑スロットで
+# GitHubのschedule遅延が常時+2h(07-07〜09で実測11時更新)→9時前に更新されず。
+# 閑散時刻(22 UTC)＋非正時(:47)へ移し、予定を7:47 JSTに前倒しして残延バッファも確保。
 on:
   schedule:
-    - cron: '0 0 * * *'    # 00:00 UTC = 09:00 JST
+    - cron: '47 22 * * *'   # 22:47 UTC = 07:47 JST（混雑回避で遅延を最小化）
   workflow_dispatch:        # 手動実行も可
 
 permissions:
