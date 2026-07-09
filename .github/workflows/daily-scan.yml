@@ -29,6 +29,10 @@ jobs:
           python -m src.papertrade settle || echo "settle skipped"
           python -m src.scan
           python -m src.papertrade log
+      # 空データ検知: HTTP通ったがデータ0件(IPブロック/パース破損)や鮮度切れを非ゼロ終了で失敗通知に乗せる。
+      # commit前に置く → 壊れた空スキャンをサイトに公開せず、ここで止めてGH失敗メールを飛ばす。
+      - name: healthcheck (empty-data / freshness assertion)
+        run: python -m src.healthcheck
       - name: commit + push
         run: |
           git config user.name "kyotei-bot"
@@ -37,3 +41,14 @@ jobs:
           git commit -m "cloud daily $(date +%F)" || { echo "no changes"; exit 0; }
           git pull --rebase --autostash || true
           git push
+      # 死活監視: 全ステップ成功時のみ healthchecks.io にping。cronスキップ/リポジトリ無効化/
+      # IPブロックでのハード失敗ではpingが来ず、healthchecks側が期待間隔超過でメール警告。
+      # secret HEALTHCHECK_DAILY(=https://hc-ping.com/<uuid>) 未設定なら黙ってskip(壊さない)。
+      - name: ping healthchecks.io (liveness)
+        if: success()
+        run: |
+          if [ -n "${{ secrets.HEALTHCHECK_DAILY }}" ]; then
+            curl -fsS -m 10 --retry 3 "${{ secrets.HEALTHCHECK_DAILY }}" && echo "pinged" || echo "ping failed (non-fatal)"
+          else
+            echo "HEALTHCHECK_DAILY secret 未設定 — ping省略。死活メールを有効化するには設定を。"
+          fi

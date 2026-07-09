@@ -25,11 +25,13 @@ from .venues import name as venue_name
 CACHE_PATH = os.path.join(storage.DATA_DIR, "today_picks.json")
 
 
-def save_cache(date: str, picks: list[dict]) -> None:
+def save_cache(date: str, picks: list[dict], meta: dict | None = None) -> None:
     os.makedirs(storage.DATA_DIR, exist_ok=True)
     payload = {"date": date,
                "generated_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
                "picks": picks}
+    if meta:
+        payload.update(meta)   # venues_checked / races_scanned（死活・空データ検知用）
     with open(CACHE_PATH, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=1)
 
@@ -51,6 +53,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
     print("スキャン中…（本命≠1号艇のレースを抽出）\n")
 
     picks = []
+    races_scanned = 0
     for jcd in venues:
         deadlines = scraper.fetch_deadlines(date, jcd)  # {rno: "HH:MM"} 場ごと1発
         empty = 0
@@ -63,6 +66,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                     break
                 continue
             empty = 0
+            races_scanned += 1
             for e in entries:
                 e["jcd"] = jcd
             rows = predict.predict_entries(entries, bundle)
@@ -84,7 +88,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
             dl = deadlines.get(rno)
             print(f"  ⚑ {venue_name(jcd)} {rno}R {('締切'+dl) if dl else ''}  単勝{rec['tansho']}号 "
                   f"{rec.get('tansho_name','')} (予想{rows[0]['win_pct']}% / {od})  2連単{'・'.join(rec['exacta3'])}")
-    return picks
+    return picks, {"venues_checked": len(venues), "races_scanned": races_scanned}
 
 
 def main():
@@ -92,9 +96,10 @@ def main():
     ap.add_argument("--date", default=dt.date.today().strftime("%Y%m%d"))
     ap.add_argument("--no-odds", action="store_true")
     args = ap.parse_args()
-    picks = scan(args.date, with_odds=not args.no_odds)
-    save_cache(args.date, picks)
-    print(f"\n=== 本日の妙味レース {len(picks)}件 ===  (キャッシュ保存: {CACHE_PATH})")
+    picks, meta = scan(args.date, with_odds=not args.no_odds)
+    save_cache(args.date, picks, meta)
+    print(f"\n=== 本日の妙味レース {len(picks)}件 ===  "
+          f"(開催{meta['venues_checked']}場/{meta['races_scanned']}R走査, キャッシュ保存: {CACHE_PATH})")
     if not picks:
         print("該当なし（全レースでモデル本命がイン＝見送り）。")
 
