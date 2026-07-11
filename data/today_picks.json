@@ -1,28 +1,7 @@
 {
- "date": "20260710",
- "generated_at": "2026-07-10 09:21",
- "picks": [
-  {
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 10,
-   "honmei": 3,
-   "name": "木田 峰由季",
-   "win_pct": 25.8,
-   "exacta3": [
-    "3-1",
-    "3-4",
-    "1-3"
-   ],
-   "exacta3_p": [
-    0.08093,
-    0.0803,
-    0.07834
-   ],
-   "odds": null,
-   "deadline": "13:09"
-  }
- ],
- "venues_checked": 13,
- "races_scanned": 156
+ "date": "20260711",
+ "generated_at": "2026-07-11 09:13",
+ "picks": [],
+ "venues_checked": 15,
+ "races_scanned": 180
 }
