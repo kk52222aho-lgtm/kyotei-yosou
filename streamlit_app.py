@@ -694,13 +694,20 @@ def page_dynamic():
         st.info("本日の妙味レースなし、またはスキャン待ち。")
         return
     names = {"tansho": "単勝", "exacta": "2連単", "trio": "3連複", "trifecta": "3連単"}
+    # 持続センサー→賭式ゲート（DECAYEDは自動OFF＝ライブ劣化を買い目に反映）
+    gate = sensor.bet_gate()
+    off = [g["track"] for g in gate.values() if not g["ok"]]
+    if off:
+        st.error("🔴 持続センサーが崩れ判定 → 自動OFF中の賭式：" + " / ".join(off))
+    else:
+        st.caption("🟢 持続センサー：全賭式ON（DECAYEDなし＝崩れ確定まで張る）")
     if st.button("🎯 現在の締切オッズで動的判定"):
         bundle = get_model()
         for p in bets:
             with st.container(border=True):
                 st.markdown(f"### {p['venue']} {p['rno']}R　締切{p.get('deadline','')}")
                 with st.spinner("全賭式の締切オッズ取得中…"):
-                    r = predict.dynamic_for_race(today, p["jcd"], p["rno"], bundle, th)
+                    r = predict.dynamic_for_race(today, p["jcd"], p["rno"], bundle, th, gate)
                 if not r:
                     st.caption("予測不可（出走表/オッズ未形成）")
                     continue

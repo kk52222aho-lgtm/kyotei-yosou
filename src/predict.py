@@ -246,11 +246,12 @@ def predict_trifecta(date: str, jcd: str, rno: int, bundle=None, top: int = 10):
 DYNAMIC_EV_TH = 2.0
 
 
-def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH) -> dict:
+def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH, gate: dict | None = None) -> dict:
     """モデル確率×締切オッズで各賭式の全目のEVを出し、EV>th の割安だけ選抜（動的点数）。
 
     odds = {"tansho":{lane:odズ}, "exacta":{'i-j':odズ}, "trio":{'a-b-c':odズ}, "trifecta":{'i-j-k':odズ}}。
     割安that多いレース→点数増（＝万舟つく→広く）、少ない→絞る＝『EVで点数を自己調整』の心臓。
+    gate=sensor.bet_gate()：ok=Falseの賭式(＝持続センサーがDECAYED)は自動でOFF＝ライブ劣化を反映。
     """
     wp = {e["lane"]: e["win_prob"] for e in rows}
     s = sum(wp.values()) or 1
@@ -275,12 +276,19 @@ def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH) -> dict
         "trio": ev_list(trio_probs(wp), odds.get("trio")),
         "trifecta": ev_list(harville_trifecta(wp), odds.get("trifecta")),
     }
-    buy = {k: [x for x in v if x["ev"] > th] for k, v in allb.items()}
+    buy, off = {}, []
+    for k, v in allb.items():
+        if gate and not gate.get(k, {}).get("ok", True):
+            buy[k] = []                      # 持続センサーがDECAYED→この賭式OFF
+            off.append(k)
+        else:
+            buy[k] = [x for x in v if x["ev"] > th]
     pts = sum(len(v) for v in buy.values())
-    return {"buy": buy, "all": allb, "th": th, "points": pts, "cost": pts * 100}
+    return {"buy": buy, "all": allb, "th": th, "points": pts, "cost": pts * 100, "off": off}
 
 
-def dynamic_for_race(date: str, jcd: str, rno: int, bundle=None, th: float = DYNAMIC_EV_TH):
+def dynamic_for_race(date: str, jcd: str, rno: int, bundle=None,
+                     th: float = DYNAMIC_EV_TH, gate: dict | None = None):
     """指定レースをライブ予測＋全賭式の締切オッズ取得→動的買い目。(rows, dynamic) を返す。"""
     rows = predict_race(date, jcd, rno, bundle)
     if not rows:
@@ -291,7 +299,7 @@ def dynamic_for_race(date: str, jcd: str, rno: int, bundle=None, th: float = DYN
         "trio": scraper.fetch_trio_odds(date, jcd, rno) or {},
         "trifecta": scraper.fetch_trifecta_odds(date, jcd, rno) or {},
     }
-    return rows, dynamic_buy(rows, odds, th)
+    return rows, dynamic_buy(rows, odds, th, gate)
 
 
 def predict_race(date: str, jcd: str, rno: int, bundle=None) -> list[dict] | None:

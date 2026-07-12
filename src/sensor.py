@@ -31,7 +31,11 @@ from . import storage
 from .papertrade import ODDS_FLOOR
 
 LEDGER = os.path.join(storage.DATA_DIR, "papertrade.jsonl")
-MIN_N = {"単勝(≥1.5)": 60, "2連単3点": 60, "3連複4点": 120}
+MIN_N = {"単勝(≥1.5)": 60, "2連単3点": 60, "3連複4点": 120, "3連単3点": 120}
+
+# センサートラック→動的買い目の賭式キー
+TRACK_TO_KEY = {"単勝(≥1.5)": "tansho", "2連単3点": "exacta",
+                "3連複4点": "trio", "3連単3点": "trifecta"}
 TRAIL_DAYS = 45
 BOOT = 2000
 
@@ -56,11 +60,16 @@ def _bets(settled, track):
             if not pts:
                 continue
             out.append((r["date"], pts * 100, r.get("exacta_return", 0)))
-        else:  # 3連複4点
+        elif track == "3連複4点":
             pts = r.get("trio_points", 0)
             if not pts:
                 continue
             out.append((r["date"], pts * 100, r.get("trio_return", 0)))
+        else:  # 3連単3点
+            pts = r.get("trifecta_points", 0)
+            if not pts:
+                continue
+            out.append((r["date"], pts * 100, r.get("trifecta_return", 0)))
     return out
 
 
@@ -107,6 +116,23 @@ def status() -> dict:
         trail = _stat(trailb, seed=1)
         v, why = _verdict(track, life)
         out["tracks"][track] = {"life": life, "trail": trail, "verdict": v, "why": why}
+    return out
+
+
+def bet_gate() -> dict:
+    """動的買い目用ゲート: 各賭式(tansho/exacta/trio/trifecta)を張ってよいか。
+
+    DECAYED(前向きで confidently 100%割れ)の賭式だけ ok=False で自動OFF。
+    INSUFFICIENT/HOLDING/WATCH は ok=True（"疑わしきは罰せず"＝崩れ確定まで張る）。
+    ＝ライブ実エッジの劣化が、次の買い目に自動反映される（ループを閉じる）。
+    """
+    tracks = status().get("tracks", {})
+    out = {}
+    for tname, key in TRACK_TO_KEY.items():
+        t = tracks.get(tname)
+        v = t["verdict"] if t else "INSUFFICIENT"
+        out[key] = {"ok": v != "DECAYED", "verdict": v,
+                    "track": tname, "why": (t["why"] if t else "記録なし")}
     return out
 
 
