@@ -82,6 +82,34 @@ def _effective(r):
     return e
 
 
+_VMARK = {"HOLDING": "🟢", "WATCH": "🟡", "DECAYED": "🔴", "INSUFFICIENT": "⚪"}
+_SHORT = {"単勝(≥1.5)": "単勝", "2連単3点": "2連単", "3連複4点": "3連複"}
+
+
+def render_sensor(expanded=True):
+    """持続センサー: 机上エッジが未来も通用してるかを前向き記録で監視（本日/成績 共通）。"""
+    tracks = sensor.status().get("tracks", {})
+    if tracks:
+        summ = " ／ ".join(f"{_VMARK.get(t['verdict'], '⚪')}{_SHORT.get(tr, tr)}"
+                           for tr, t in tracks.items())
+        st.caption(f"🛰 **持続センサー**（机上エッジが未来も通用してるか）：{summ}"
+                   "　🟢黒字 🟡失速入口 🔴崩れ ⚪判定保留(N不足)")
+    with st.expander("🛰 持続センサー 詳細", expanded=expanded):
+        st.caption("低分散の 単勝/2連単that持続カナリア。前向き記録で confidently 100%割れ(🔴)＝歪み消滅"
+                   "＝3連複も道連れ。3連複はfat-tailで参考。判定は最小N到達後だけ（早合点を機械的に抑止）。")
+        if not tracks:
+            st.markdown("まだ精算記録が無い（log→settle が回り出してから）。")
+            return
+        for track, t in tracks.items():
+            life = t["life"]
+            if life is None:
+                st.markdown(f"{_VMARK['INSUFFICIENT']} **{track}**：記録なし（INSUFFICIENT）")
+                continue
+            ci = f"CI[{life['lo']*100:.0f}〜{life['hi']*100:.0f}]%"
+            st.markdown(f"{_VMARK.get(t['verdict'], '⚪')} **{track}**：N={life['n']} ／ "
+                        f"回収 {life['roi']*100:.0f}% {ci} ／ **{t['verdict']}** — {t['why']}")
+
+
 def page_today():
     st.header("⚑ 本日の妙味レース")
     today = dt.date.today().strftime("%Y%m%d")
@@ -97,6 +125,8 @@ def page_today():
         st.info(f"📅 **{md} 本日の妙味レース {len(cache['picks'])}件**")
     else:
         st.warning(f"本日({md})はまだスキャンされていません（毎朝9時に自動）。")
+
+    render_sensor(expanded=False)   # 賭ける前に"未来も通用してるか"を一目で
 
     date, rows = _latest_day_rows()
     if not rows:
@@ -224,20 +254,7 @@ def page_record():
     c[2].metric("2連単 回収率", roi(f_ex_ret, f_ex_st), f"{f_ex_ret - f_ex_st:+,}円")
     c[3].metric("合計 回収率", roi(f_tot_ret, f_tot_st), f"{f_tot_ret - f_tot_st:+,}円")
 
-    # --- 持続センサー: 机上のエッジが"未来も通用してるか"を前向き記録で監視 ---
-    _VMARK = {"HOLDING": "🟢", "WATCH": "🟡", "DECAYED": "🔴", "INSUFFICIENT": "⚪"}
-    ss = sensor.status()
-    with st.expander("🛰 持続センサー（机上エッジが未来も通用してるか）", expanded=True):
-        st.caption("低分散の 単勝/2連単that持続カナリア。前向き記録で confidently 100%割れ(🔴)＝歪み消滅"
-                   "＝3連複も道連れ。3連複はfat-tailで参考。判定は最小N到達後だけ（早合点を機械的に抑止）。")
-        for track, t in ss.get("tracks", {}).items():
-            life = t["life"]
-            if life is None:
-                st.markdown(f"{_VMARK['INSUFFICIENT']} **{track}**：記録なし（INSUFFICIENT）")
-                continue
-            ci = f"CI[{life['lo']*100:.0f}〜{life['hi']*100:.0f}]%"
-            st.markdown(f"{_VMARK.get(t['verdict'],'⚪')} **{track}**：N={life['n']} ／ "
-                        f"回収 {life['roi']*100:.0f}% {ci} ／ **{t['verdict']}** — {t['why']}")
+    render_sensor(expanded=True)   # 持続センサー（本日ページと共通）
 
     # 参考: 無フィルタ土台(track A=机上188.7の直接対照)
     with st.expander("参考：無フィルタ土台（全妙味レース＝机上OOFの直接対照）"):
