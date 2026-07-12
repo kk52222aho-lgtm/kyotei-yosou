@@ -73,6 +73,8 @@ def cmd_log(date: str):
             "name": p.get("name"), "scan_odds": p.get("odds"),
             "exacta3": p["exacta3"],
             "exacta3_p": p.get("exacta3_p"),   # EV算出用
+            "trio4": p.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
+            "trio4_p": p.get("trio4_p"),
             "deadline": p.get("deadline"),
             "exacta_ev": None,                 # 締切間際にcapture_evで埋める
             "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -134,6 +136,14 @@ def cmd_settle(today: str):
         r["exacta_points"] = len(picks)
         r["exacta_win"] = ex_hit
         r["exacta_return"] = ex[1] if ex_hit else 0     # 100円あたり払戻
+        # --- 3連複（上位4点）も精算（着順不問セット。確定払戻） ---
+        tr = scraper.fetch_trio_payout(r["date"], r["jcd"], r["rno"])
+        tpicks = r.get("trio4", []) or []
+        tr_hit = bool(tr and tr[0] in tpicks)
+        r["trio_result"] = tr[0] if tr else None
+        r["trio_points"] = len(tpicks)
+        r["trio_win"] = tr_hit
+        r["trio_return"] = tr[1] if tr_hit else 0       # 100円あたり払戻
         r["settled"] = True
         n += 1
     _save(rows)
@@ -159,6 +169,11 @@ def portfolio_stats(rows: list[dict]) -> dict:
     e_stake = sum(r.get("exacta_points", 0) for r in settled) * 100
     e_ret = sum(r.get("exacta_return", 0) for r in settled)
     e_hit = sum(1 for r in settled if r.get("exacta_win"))
+    # 3連複（上位4点）: 荒れ読みの頑健な器。確定払戻ベースの前向きtrack
+    tr_settled = [r for r in settled if r.get("trio_points")]
+    tr_stake = sum(r.get("trio_points", 0) for r in settled) * 100
+    tr_ret = sum(r.get("trio_return", 0) for r in settled)
+    tr_hit = sum(1 for r in settled if r.get("trio_win"))
     # 推奨: 単勝<1.5(チャラレース)を丸ごと見送った場合の 単勝+2連単（検証で最良）
     reco = [r for r in settled if (r.get("final_odds") or 0) >= ODDS_FLOOR]
     rc_stake = len(reco) * 100 + sum(r.get("exacta_points", 0) for r in reco) * 100
@@ -176,6 +191,8 @@ def portfolio_stats(rows: list[dict]) -> dict:
         "tansho_hi": {"stake": hi_stake, "ret": hi_ret, "hit": hi_hit,
                       "pl": hi_ret - hi_stake, "races": len(hi)},
         "exacta": {"stake": e_stake, "ret": e_ret, "hit": e_hit, "pl": e_ret - e_stake},
+        "trio": {"stake": tr_stake, "ret": tr_ret, "hit": tr_hit,
+                 "pl": tr_ret - tr_stake, "races": len(tr_settled)},
         "total": {"stake": t_stake + e_stake, "ret": t_ret + e_ret,
                   "pl": (t_ret + e_ret) - (t_stake + e_stake)},
         "reco": {"races": len(reco), "skipped": n - len(reco),
@@ -202,6 +219,8 @@ def cmd_report():
     print(f"=== 実トラック（{n}レース・1点100円）===")
     line("単勝", s["tansho"], s["tansho"]["hit"])
     line("2連単3点", s["exacta"], s["exacta"]["hit"])
+    if s["trio"]["races"]:
+        line("3連複4点", s["trio"], s["trio"]["hit"])
     line("合計", s["total"])
     rc = s["reco"]
     line("推奨(単+2連)", rc)

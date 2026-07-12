@@ -253,7 +253,8 @@ def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
 
     text = soup.get_text(" ", strip=True)
     out = {"winner": winner, "tansho_yen": None,
-           "exacta_combo": None, "exacta_yen": None}
+           "exacta_combo": None, "exacta_yen": None,
+           "trio_combo": None, "trio_yen": None}
     m = re.search(r"単勝\s*(\d)\s*¥\s*([\d,]+)", text)
     if m:
         out["tansho_yen"] = int(m.group(2).replace(",", ""))
@@ -261,6 +262,10 @@ def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
     if m:
         out["exacta_combo"] = f"{m.group(1)}-{m.group(2)}"
         out["exacta_yen"] = int(m.group(3).replace(",", ""))
+    m = re.search(r"3連複\s*(\d)\s*=\s*(\d)\s*=\s*(\d)\s*[¥￥]\s*([\d,]+)", text)
+    if m:
+        out["trio_combo"] = "-".join(sorted(m.group(1, 2, 3), key=int))
+        out["trio_yen"] = int(m.group(4).replace(",", ""))
     return out
 
 
@@ -275,6 +280,24 @@ def fetch_exacta_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None
         return None
     combo = f"{m.group(1)}-{m.group(2)}"
     yen = int(m.group(3).replace(",", ""))
+    return combo, yen
+
+
+def fetch_trio_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None:
+    """結果ページから3連複の (的中組番, 払戻円) を返す。例 ('1-3-5', 1130)。未確定は None。
+
+    3連複の結果表記は '='区切り(例「3連複 1 = 3 = 5 ¥1130」)。¥はU+00A5/U+FFE5両対応。
+    組番は昇順に統一('a-b-c')＝predict.trio4/today_picksのキー形式と一致。
+    """
+    soup = _get(_race_url("raceresult", date, jcd, rno))
+    if soup is None:
+        return None
+    text = soup.get_text(" ", strip=True)
+    m = re.search(r"3連複\s*(\d)\s*=\s*(\d)\s*=\s*(\d)\s*[¥￥]\s*([\d,]+)", text)
+    if not m:
+        return None
+    combo = "-".join(sorted(m.group(1, 2, 3), key=int))
+    yen = int(m.group(4).replace(",", ""))
     return combo, yen
 
 

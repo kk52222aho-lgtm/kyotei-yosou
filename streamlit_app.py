@@ -73,6 +73,12 @@ def _effective(r):
     e["exacta_points"] = len(r.get("exacta3", []))
     e["exacta_win"] = res["exacta_combo"] in r.get("exacta3", [])
     e["exacta_return"] = res["exacta_yen"] if (e["exacta_win"] and res["exacta_yen"]) else 0
+    # 3連複（上位4点・着順不問セット）もライブ結果で擬似settle
+    tpicks = r.get("trio4", []) or []
+    e["trio_result"] = res.get("trio_combo")
+    e["trio_points"] = len(tpicks)
+    e["trio_win"] = bool(res.get("trio_combo") and res["trio_combo"] in tpicks)
+    e["trio_return"] = res["trio_yen"] if (e["trio_win"] and res.get("trio_yen")) else 0
     return e
 
 
@@ -145,6 +151,7 @@ def _render_today(date, rows):
                 c1.markdown(f"⏰ 締切 **{r['deadline']}**"
                             + ("" if r.get("settled") else "　までに投票"))
             combos = " ・ ".join(r["exacta3"])
+            trio = " ・ ".join(r.get("trio4") or [])
             if r.get("settled"):
                 tag = "🔴速報 " if r.get("_live") else ""
                 t = (f"🎯的中 {r.get('final_odds')}倍" if r.get("tansho_win")
@@ -155,6 +162,13 @@ def _render_today(date, rows):
                       + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
                 c2.markdown(f"**単勝 {r['honmei']}号** ／ 2連単 {combos}  \n"
                             f"{tag}単勝: {t} ｜ 2連単: {e} ｜ **収支 {pl:+,}円**")
+                if r.get("trio_points"):
+                    tr = (f"🎯的中 {r.get('trio_return')}円" if r.get("trio_win")
+                          else f"×ハズレ(結果 {r.get('trio_result') or '?'})")
+                    tr_pl = r.get("trio_return", 0) - r.get("trio_points", 0) * 100
+                    c2.markdown(f"🎲 3連複4点 {trio} ｜ {tr} ｜ 収支 {tr_pl:+,}円 "
+                                f"<span style='color:gray'>(別枠・荒れ読みの器)</span>",
+                                unsafe_allow_html=True)
             else:
                 lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
                 o = lo if lo is not None else r.get("scan_odds")
@@ -176,6 +190,10 @@ def _render_today(date, rows):
                         evtag = "（2連単EV: 締切間際に上のEVボタン）"
                     c2.markdown(f"**単勝 {r['honmei']}号**{odlbl} {nm} ／ "
                                 f"2連単 上位3点 {combos}  \n{evtag}　⏳ 結果待ち")
+                    if trio:
+                        c2.markdown(f"🎲 3連複4点 {trio}　"
+                                    f"<span style='color:gray'>(荒れ読みの頑健な器・別枠)</span>",
+                                    unsafe_allow_html=True)
 
 
 def page_record():
