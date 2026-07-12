@@ -79,6 +79,12 @@ def _effective(r):
     e["trio_points"] = len(tpicks)
     e["trio_win"] = bool(res.get("trio_combo") and res["trio_combo"] in tpicks)
     e["trio_return"] = res["trio_yen"] if (e["trio_win"] and res.get("trio_yen")) else 0
+    # 3連単（上位3点・着順あり）もライブ結果で擬似settle
+    fpicks = r.get("trifecta3", []) or []
+    e["trifecta_result"] = res.get("trifecta_combo")
+    e["trifecta_points"] = len(fpicks)
+    e["trifecta_win"] = bool(res.get("trifecta_combo") and res["trifecta_combo"] in fpicks)
+    e["trifecta_return"] = res["trifecta_yen"] if (e["trifecta_win"] and res.get("trifecta_yen")) else 0
     return e
 
 
@@ -185,6 +191,7 @@ def _render_today(date, rows):
                             + ("" if r.get("settled") else "　までに投票"))
             combos = " ・ ".join(r["exacta3"])
             trio = " ・ ".join(r.get("trio4") or [])
+            tfecta = " ・ ".join(r.get("trifecta3") or [])
             if r.get("settled"):
                 tag = "🔴速報 " if r.get("_live") else ""
                 t = (f"🎯的中 {r.get('final_odds')}倍" if r.get("tansho_win")
@@ -201,6 +208,13 @@ def _render_today(date, rows):
                     tr_pl = r.get("trio_return", 0) - r.get("trio_points", 0) * 100
                     c2.markdown(f"🎲 3連複4点 {trio} ｜ {tr} ｜ 収支 {tr_pl:+,}円 "
                                 f"<span style='color:gray'>(別枠・荒れ読みの器)</span>",
+                                unsafe_allow_html=True)
+                if r.get("trifecta_points"):
+                    tf = (f"🎯的中 {r.get('trifecta_return')}円" if r.get("trifecta_win")
+                          else f"×ハズレ(結果 {r.get('trifecta_result') or '?'})")
+                    tf_pl = r.get("trifecta_return", 0) - r.get("trifecta_points", 0) * 100
+                    c2.markdown(f"🎰 3連単3点 {tfecta} ｜ {tf} ｜ 収支 {tf_pl:+,}円 "
+                                f"<span style='color:gray'>(別枠・大きい方/脆い)</span>",
                                 unsafe_allow_html=True)
             else:
                 lo = live_odds.get(f"{r['jcd']}-{r['rno']}")
@@ -226,6 +240,10 @@ def _render_today(date, rows):
                     if trio:
                         c2.markdown(f"🎲 3連複4点 {trio}　"
                                     f"<span style='color:gray'>(荒れ読みの頑健な器・別枠)</span>",
+                                    unsafe_allow_html=True)
+                    if tfecta:
+                        c2.markdown(f"🎰 3連単3点 {tfecta}　"
+                                    f"<span style='color:gray'>(大きい方・fat-tailで脆い・別枠)</span>",
                                     unsafe_allow_html=True)
 
 

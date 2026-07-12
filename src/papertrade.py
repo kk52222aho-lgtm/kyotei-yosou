@@ -75,6 +75,8 @@ def cmd_log(date: str):
             "exacta3_p": p.get("exacta3_p"),   # EV算出用
             "trio4": p.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
             "trio4_p": p.get("trio4_p"),
+            "trifecta3": p.get("trifecta3"),   # 3連単3点(着順あり・大きい方)
+            "trifecta3_p": p.get("trifecta3_p"),
             "deadline": p.get("deadline"),
             "exacta_ev": None,                 # 締切間際にcapture_evで埋める
             "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -144,6 +146,14 @@ def cmd_settle(today: str):
         r["trio_points"] = len(tpicks)
         r["trio_win"] = tr_hit
         r["trio_return"] = tr[1] if tr_hit else 0       # 100円あたり払戻
+        # --- 3連単（上位3点・着順あり）も精算（大きい方・別枠track） ---
+        tf = scraper.fetch_trifecta_payout(r["date"], r["jcd"], r["rno"])
+        fpicks = r.get("trifecta3", []) or []
+        tf_hit = bool(tf and tf[0] in fpicks)
+        r["trifecta_result"] = tf[0] if tf else None
+        r["trifecta_points"] = len(fpicks)
+        r["trifecta_win"] = tf_hit
+        r["trifecta_return"] = tf[1] if tf_hit else 0
         r["settled"] = True
         n += 1
     _save(rows)
@@ -174,6 +184,11 @@ def portfolio_stats(rows: list[dict]) -> dict:
     tr_stake = sum(r.get("trio_points", 0) for r in settled) * 100
     tr_ret = sum(r.get("trio_return", 0) for r in settled)
     tr_hit = sum(1 for r in settled if r.get("trio_win"))
+    # 3連単（上位3点・着順あり）: 大きい方・fat-tail。別枠track
+    tf_settled = [r for r in settled if r.get("trifecta_points")]
+    tf_stake = sum(r.get("trifecta_points", 0) for r in settled) * 100
+    tf_ret = sum(r.get("trifecta_return", 0) for r in settled)
+    tf_hit = sum(1 for r in settled if r.get("trifecta_win"))
     # 推奨: 単勝<1.5(チャラレース)を丸ごと見送った場合の 単勝+2連単（検証で最良）
     reco = [r for r in settled if (r.get("final_odds") or 0) >= ODDS_FLOOR]
     rc_stake = len(reco) * 100 + sum(r.get("exacta_points", 0) for r in reco) * 100
@@ -193,6 +208,8 @@ def portfolio_stats(rows: list[dict]) -> dict:
         "exacta": {"stake": e_stake, "ret": e_ret, "hit": e_hit, "pl": e_ret - e_stake},
         "trio": {"stake": tr_stake, "ret": tr_ret, "hit": tr_hit,
                  "pl": tr_ret - tr_stake, "races": len(tr_settled)},
+        "trifecta": {"stake": tf_stake, "ret": tf_ret, "hit": tf_hit,
+                     "pl": tf_ret - tf_stake, "races": len(tf_settled)},
         "total": {"stake": t_stake + e_stake, "ret": t_ret + e_ret,
                   "pl": (t_ret + e_ret) - (t_stake + e_stake)},
         "reco": {"races": len(reco), "skipped": n - len(reco),
@@ -221,6 +238,8 @@ def cmd_report():
     line("2連単3点", s["exacta"], s["exacta"]["hit"])
     if s["trio"]["races"]:
         line("3連複4点", s["trio"], s["trio"]["hit"])
+    if s["trifecta"]["races"]:
+        line("3連単3点", s["trifecta"], s["trifecta"]["hit"])
     line("合計", s["total"])
     rc = s["reco"]
     line("推奨(単+2連)", rc)

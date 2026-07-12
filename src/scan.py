@@ -85,6 +85,8 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "exacta3_p": rec.get("exacta3_p"),   # EV算出用(締切間際にオッズだけ取ればEV出せる)
                 "trio4": rec.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
                 "trio4_p": rec.get("trio4_p"),
+                "trifecta3": rec.get("trifecta3"),   # 3連単3点(着順あり・大きい方)
+                "trifecta3_p": rec.get("trifecta3_p"),
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"

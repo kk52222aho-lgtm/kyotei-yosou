@@ -105,6 +105,10 @@ def recommend(rows: list[dict]) -> dict:
     #  test_trio: 荒れ読みで4点258%/上位30本抜き222%とfat-tail頑健。ROI源はレース選択）
     trio = sorted(trio_probs({e["lane"]: e["win_prob"] for e in rows}).items(),
                   key=lambda x: -x[1])
+    # 3連単 上位3点（着順あり・大きい方＝万舟狙い。test_trio: 荒れ読み3点533%だがfat-tail脆い・
+    #  着順スキル0で高ROIは配当構造由来。別枠track・アクセル踏み込み用）
+    tf = sorted(harville_trifecta({e["lane"]: e["win_prob"] for e in rows}).items(),
+                key=lambda x: -x[1])
 
     # 高確信妙味フラグ: 本命の正規化勝率(p0)≥50%。test_trio_only で妙味×p0≥.50 が
     #  最ジューシー帯（N325・fat-tailで水準は不明）→ 強調表示だけ。ROI水準は主張しない。
@@ -121,7 +125,9 @@ def recommend(rows: list[dict]) -> dict:
         "exacta3_p": [round(pr, 5) for _, pr in ex[:3]],  # EV算出用: 各組のHarville確率
         "trio4": [c for c, _ in trio[:4]],
         "trio4_p": [round(pr, 5) for _, pr in trio[:4]],   # 3連複セット確率(表示/EV/追跡用)
-        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%・3連複4点は荒れ読みで頑健。",
+        "trifecta3": [c for c, _ in tf[:3]],               # 3連単上位3点(着順あり・大きい方)
+        "trifecta3_p": [round(pr, 5) for _, pr in tf[:3]],
+        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%・3連複4点は荒れ読みで頑健・3連単は大きい方(脆い)。",
     }
 
 

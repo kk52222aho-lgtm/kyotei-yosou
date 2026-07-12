@@ -254,7 +254,8 @@ def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
     text = soup.get_text(" ", strip=True)
     out = {"winner": winner, "tansho_yen": None,
            "exacta_combo": None, "exacta_yen": None,
-           "trio_combo": None, "trio_yen": None}
+           "trio_combo": None, "trio_yen": None,
+           "trifecta_combo": None, "trifecta_yen": None}
     m = re.search(r"単勝\s*(\d)\s*¥\s*([\d,]+)", text)
     if m:
         out["tansho_yen"] = int(m.group(2).replace(",", ""))
@@ -262,6 +263,10 @@ def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
     if m:
         out["exacta_combo"] = f"{m.group(1)}-{m.group(2)}"
         out["exacta_yen"] = int(m.group(3).replace(",", ""))
+    m = re.search(r"3連単\s*(\d)\s*-\s*(\d)\s*-\s*(\d)\s*[¥￥]\s*([\d,]+)", text)
+    if m:
+        out["trifecta_combo"] = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"  # 着順あり
+        out["trifecta_yen"] = int(m.group(4).replace(",", ""))
     m = re.search(r"3連複\s*(\d)\s*=\s*(\d)\s*=\s*(\d)\s*[¥￥]\s*([\d,]+)", text)
     if m:
         out["trio_combo"] = "-".join(sorted(m.group(1, 2, 3), key=int))
@@ -280,6 +285,24 @@ def fetch_exacta_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None
         return None
     combo = f"{m.group(1)}-{m.group(2)}"
     yen = int(m.group(3).replace(",", ""))
+    return combo, yen
+
+
+def fetch_trifecta_payout(date: str, jcd: str, rno: int) -> tuple[str, int] | None:
+    """結果ページから3連単の (的中組番, 払戻円) を返す。例 ('1-3-2', 1170)。未確定は None。
+
+    3連単は結果表記が '-'区切りで【着順あり】(1-3-2 ≠ 1-2-3)。並べ替えない。
+    predict.trifecta3/today_picks のキー形式(harville 'i-j-k')と一致。
+    """
+    soup = _get(_race_url("raceresult", date, jcd, rno))
+    if soup is None:
+        return None
+    text = soup.get_text(" ", strip=True)
+    m = re.search(r"3連単\s*(\d)\s*-\s*(\d)\s*-\s*(\d)\s*[¥￥]\s*([\d,]+)", text)
+    if not m:
+        return None
+    combo = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
+    yen = int(m.group(4).replace(",", ""))
     return combo, yen
 
 
