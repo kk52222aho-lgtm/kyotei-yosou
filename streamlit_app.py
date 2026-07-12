@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper, sensor
+from src import predict, papertrade, scan, scraper, sensor, wild
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -602,14 +602,43 @@ def page_pro():
             st.markdown(open(path, encoding="utf-8").read())
 
 
+def page_wild():
+    st.header("🌊 本日のインが崩れやすいレース（参考）")
+    st.caption("本命≠1号で、インが崩れやすい条件that濃い順。**万舟が来る/儲かる保証ではない**"
+               "（検証: 万舟率は条件によらず約24%で一定）。捉えてるのは『インの脆さ』だけ＝見て楽しむ/参考用。")
+    w = wild.load()
+    today = dt.date.today().strftime("%Y%m%d")
+    if not w or not w.get("races"):
+        st.info("まだ荒れ度データがありません（毎朝の自動スキャンで生成されます）。")
+        return
+    if w.get("date") != today:
+        st.caption(f"（直近スキャン: {w['date'][4:6]}/{w['date'][6:]} 分）")
+    for i, r in enumerate(w["races"], 1):
+        with st.container(border=True):
+            c1, c2 = st.columns([1, 3])
+            c1.markdown(f"### {i}. {r['venue']} {r['rno']}R")
+            if r.get("deadline"):
+                c1.caption(f"⏰ 締切 {r['deadline']}")
+            c1.metric("荒れ度", f"{r['score']:.0f}")
+            reasons = " ／ ".join(r.get("reasons") or []) or "（際立った条件なし）"
+            c2.markdown(f"**荒れ要因**：{reasons}  \n"
+                        f"モデル本命 **{r['honmei']}号**（勝率 {r.get('win_pct', 0):.0f}%）"
+                        f"　←インが飛べば波乱")
+    st.caption("※スコアは 1-モデルのイン勝率 / 1号の級 / 混戦度 / アウトの実力 の合成。"
+               "インの脆さは捉えるが、それが小穴で終わるか万舟に化けるかは事前に読めない(=買い推奨ではない)。")
+
+
 st.title("🚤 競艇予想")
 status_banner()
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
+                        ["本日の妙味レース", "🌊荒れそうレース", "成績（予想vs実際）",
+                         "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
+elif page == "🌊荒れそうレース":
+    page_wild()
 elif page == "成績（予想vs実際）":
     page_record()
 elif page == "プロの見方":
