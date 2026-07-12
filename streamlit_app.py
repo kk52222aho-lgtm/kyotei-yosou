@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper
+from src import predict, papertrade, scan, scraper, sensor
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -223,6 +223,21 @@ def page_record():
     c[1].metric("単勝 回収率", roi(f_tan_ret, f_tan_st), f"{f_tan_ret - f_tan_st:+,}円")
     c[2].metric("2連単 回収率", roi(f_ex_ret, f_ex_st), f"{f_ex_ret - f_ex_st:+,}円")
     c[3].metric("合計 回収率", roi(f_tot_ret, f_tot_st), f"{f_tot_ret - f_tot_st:+,}円")
+
+    # --- 持続センサー: 机上のエッジが"未来も通用してるか"を前向き記録で監視 ---
+    _VMARK = {"HOLDING": "🟢", "WATCH": "🟡", "DECAYED": "🔴", "INSUFFICIENT": "⚪"}
+    ss = sensor.status()
+    with st.expander("🛰 持続センサー（机上エッジが未来も通用してるか）", expanded=True):
+        st.caption("低分散の 単勝/2連単that持続カナリア。前向き記録で confidently 100%割れ(🔴)＝歪み消滅"
+                   "＝3連複も道連れ。3連複はfat-tailで参考。判定は最小N到達後だけ（早合点を機械的に抑止）。")
+        for track, t in ss.get("tracks", {}).items():
+            life = t["life"]
+            if life is None:
+                st.markdown(f"{_VMARK['INSUFFICIENT']} **{track}**：記録なし（INSUFFICIENT）")
+                continue
+            ci = f"CI[{life['lo']*100:.0f}〜{life['hi']*100:.0f}]%"
+            st.markdown(f"{_VMARK.get(t['verdict'],'⚪')} **{track}**：N={life['n']} ／ "
+                        f"回収 {life['roi']*100:.0f}% {ci} ／ **{t['verdict']}** — {t['why']}")
 
     # 参考: 無フィルタ土台(track A=机上188.7の直接対照)
     with st.expander("参考：無フィルタ土台（全妙味レース＝机上OOFの直接対照）"):

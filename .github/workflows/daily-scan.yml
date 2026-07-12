@@ -37,6 +37,9 @@ jobs:
       # commit前に置く → 壊れた空スキャンをサイトに公開せず、ここで止めてGH失敗メールを飛ばす。
       - name: healthcheck (empty-data / freshness assertion)
         run: python -m src.healthcheck
+      # 持続センサー: 机上エッジが未来も通用してるかを前向き台帳で監視（情報表示・非致命）。
+      - name: persistence sensor
+        run: python -m src.sensor || echo "sensor skipped"
       - name: commit + push
         run: |
           git config user.name "kyotei-bot"
