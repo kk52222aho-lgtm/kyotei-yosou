@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper, sensor, wild, commentary
+from src import predict, papertrade, scan, scraper, sensor, wild, commentary, styles
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -681,17 +681,63 @@ def page_agent():
     _agent_feed(log)
 
 
+def page_styles():
+    st.header("💴 買い方くらべ（アクセル段階別トータル）")
+    st.caption("点数を増やすほど『的中率↑・万舟捕捉↑』だが『回収率↓』（控除を余計に払う）＝"
+               "効率(回収率)と総額(P&L)でベストが違う。確定払戻ベース・ライブ未証明・儲け保証なし。")
+    h = styles.HISTORICAL
+    st.subheader("3年トータル（本体）")
+    st.caption(h["universe"])
+    st.dataframe(pd.DataFrame([{
+        "買い方": r["name"], "点/R": r["pts"], "回収率": f"{r['roi']}%",
+        "総収支": f"{r['pl']:+,}円", "的中率": f"{r['hit']}%",
+        "万舟": r["manshu"], "最大払戻": f"{r['max']:,}円",
+    } for r in h["rows"]]), hide_index=True, use_container_width=True)
+    st.info("🔑 " + h["note"])
+
+    st.subheader("本日の勝負レースを各スタイルで見ると")
+    st.caption("※本日ぶんは数レース＝ノイズ。判断は上の3年トータルで。")
+    today = dt.date.today().strftime("%Y%m%d")
+    cache = scan.load_cache()
+    bets = (cache or {}).get("picks", []) if cache and cache.get("date") == today else []
+    if not bets:
+        st.caption("本日の勝負レースなし、または未確定。")
+        return
+    agg = {name: {"stake": 0, "ret": 0, "any": False} for name, *_ in styles.STYLES}
+    for p in bets:
+        res = _live_result(today, p["jcd"], p["rno"])
+        if not res:
+            continue
+        for s in styles.compute(p, res):
+            if s["computable"]:
+                agg[s["name"]]["stake"] += s["stake"]
+                agg[s["name"]]["ret"] += s["ret"]
+                agg[s["name"]]["any"] = True
+    rows = []
+    for name, *_ in styles.STYLES:
+        a = agg[name]
+        if a["any"]:
+            rows.append({"買い方": name, "本日賭金": f"{a['stake']:,}円",
+                         "本日払戻": f"{a['ret']:,}円", "本日収支": f"{a['ret']-a['stake']:+,}円"})
+        else:
+            rows.append({"買い方": name, "本日賭金": "—", "本日払戻": "—",
+                         "本日収支": "全ランク記録待ち（次のscanから）"})
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+
+
 st.title("🚤 競艇予想")
 status_banner()
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "🎙️エージェント実況", "🌊荒れそうレース",
-                         "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
+                        ["本日の妙味レース", "🎙️エージェント実況", "💴買い方くらべ",
+                         "🌊荒れそうレース", "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
 elif page == "🎙️エージェント実況":
     page_agent()
+elif page == "💴買い方くらべ":
+    page_styles()
 elif page == "🌊荒れそうレース":
     page_wild()
 elif page == "成績（予想vs実際）":

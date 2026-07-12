@@ -106,6 +106,8 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "trio4_p": rec.get("trio4_p"),
                 "trifecta3": rec.get("trifecta3"),   # 3連単3点(着順あり・大きい方)
                 "trifecta3_p": rec.get("trifecta3_p"),
+                "trio_rank": rec.get("trio_rank"),        # 3連複全ランク(買い方くらべ用)
+                "trifecta_rank": rec.get("trifecta_rank"),  # 3連単全ランク(買い方くらべ用)
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"

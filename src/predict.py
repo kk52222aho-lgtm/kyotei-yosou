@@ -127,6 +127,8 @@ def recommend(rows: list[dict]) -> dict:
         "trio4_p": [round(pr, 5) for _, pr in trio[:4]],   # 3連複セット確率(表示/EV/追跡用)
         "trifecta3": [c for c, _ in tf[:3]],               # 3連単上位3点(着順あり・大きい方)
         "trifecta3_p": [round(pr, 5) for _, pr in tf[:3]],
+        "trio_rank": [c for c, _ in trio],                 # 3連複全ランク(買い方くらべ用)
+        "trifecta_rank": [c for c, _ in tf],               # 3連単全ランク(買い方くらべ用)
         "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%・3連複4点は荒れ読みで頑健・3連単は大きい方(脆い)。",
     }
 
