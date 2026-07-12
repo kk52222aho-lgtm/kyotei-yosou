@@ -242,6 +242,58 @@ def predict_trifecta(date: str, jcd: str, rno: int, bundle=None, top: int = 10):
     return rows, trifecta_ev(rows, odds)[:top]
 
 
+# 動的買い目の割安ライン。2連単EV>2.0は検証済み。3連系は実験（3連単ライブ収集で調整予定）。
+DYNAMIC_EV_TH = 2.0
+
+
+def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH) -> dict:
+    """モデル確率×締切オッズで各賭式の全目のEVを出し、EV>th の割安だけ選抜（動的点数）。
+
+    odds = {"tansho":{lane:odズ}, "exacta":{'i-j':odズ}, "trio":{'a-b-c':odズ}, "trifecta":{'i-j-k':odズ}}。
+    割安that多いレース→点数増（＝万舟つく→広く）、少ない→絞る＝『EVで点数を自己調整』の心臓。
+    """
+    wp = {e["lane"]: e["win_prob"] for e in rows}
+    s = sum(wp.values()) or 1
+    p = {k: v / s for k, v in wp.items()}
+
+    def ev_list(prob_map, od):
+        out = [{"combo": c, "p": round(pr, 4), "odds": od[c], "ev": round(pr * od[c], 2)}
+               for c, pr in prob_map.items() if od and od.get(c)]
+        return sorted(out, key=lambda x: -x["ev"])
+
+    tan_p = {str(l): p[l] for l in p}
+    exa_p = {}
+    for i in p:
+        di = 1 - p[i]
+        if di > 0:
+            for j in p:
+                if j != i:
+                    exa_p[f"{i}-{j}"] = p[i] * p[j] / di
+    allb = {
+        "tansho": ev_list(tan_p, odds.get("tansho") and {str(k): v for k, v in odds["tansho"].items()}),
+        "exacta": ev_list(exa_p, odds.get("exacta")),
+        "trio": ev_list(trio_probs(wp), odds.get("trio")),
+        "trifecta": ev_list(harville_trifecta(wp), odds.get("trifecta")),
+    }
+    buy = {k: [x for x in v if x["ev"] > th] for k, v in allb.items()}
+    pts = sum(len(v) for v in buy.values())
+    return {"buy": buy, "all": allb, "th": th, "points": pts, "cost": pts * 100}
+
+
+def dynamic_for_race(date: str, jcd: str, rno: int, bundle=None, th: float = DYNAMIC_EV_TH):
+    """指定レースをライブ予測＋全賭式の締切オッズ取得→動的買い目。(rows, dynamic) を返す。"""
+    rows = predict_race(date, jcd, rno, bundle)
+    if not rows:
+        return None
+    odds = {
+        "tansho": {e["lane"]: e["odds"] for e in rows if e.get("odds")},
+        "exacta": scraper.fetch_exacta_odds(date, jcd, rno) or {},
+        "trio": scraper.fetch_trio_odds(date, jcd, rno) or {},
+        "trifecta": scraper.fetch_trifecta_odds(date, jcd, rno) or {},
+    }
+    return rows, dynamic_buy(rows, odds, th)
+
+
 def predict_race(date: str, jcd: str, rno: int, bundle=None) -> list[dict] | None:
     entries = scraper.fetch_racelist(date, jcd, rno)
     if not entries:

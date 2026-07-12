@@ -681,6 +681,45 @@ def page_agent():
     _agent_feed(log)
 
 
+def page_dynamic():
+    st.header("🎯 動的買い目（EV割安拾い＝毎レース点数が変わる）")
+    st.caption("モデル確率×締切オッズでEVを出し、EV>閾値の『割安な目』だけ買う。割安が多い→点数増、"
+               "少ない→絞る＝『20倍つきそうなら20点』の正体（見た目の荒れでなくEV）。2連単EV>2.0は検証済／"
+               "3連系は実験（3連単ライブ収集で調整中）。締切間際に押すのが正確。儲け保証なし。")
+    th = st.slider("EV割安ライン（これ超えを買う）", 1.5, 4.0, 2.0, 0.1)
+    today = dt.date.today().strftime("%Y%m%d")
+    cache = scan.load_cache()
+    bets = (cache or {}).get("picks", []) if cache and cache.get("date") == today else []
+    if not bets:
+        st.info("本日の妙味レースなし、またはスキャン待ち。")
+        return
+    names = {"tansho": "単勝", "exacta": "2連単", "trio": "3連複", "trifecta": "3連単"}
+    if st.button("🎯 現在の締切オッズで動的判定"):
+        bundle = get_model()
+        for p in bets:
+            with st.container(border=True):
+                st.markdown(f"### {p['venue']} {p['rno']}R　締切{p.get('deadline','')}")
+                with st.spinner("全賭式の締切オッズ取得中…"):
+                    r = predict.dynamic_for_race(today, p["jcd"], p["rno"], bundle, th)
+                if not r:
+                    st.caption("予測不可（出走表/オッズ未形成）")
+                    continue
+                rows, d = r
+                if d["points"] == 0:
+                    st.markdown(f"**割安ゼロ → 見送り**（EV>{th}の目なし＝市場が正しく値付け）")
+                    continue
+                st.markdown(f"**割安 {d['points']}個 → {d['points']}点（{d['cost']:,}円）**")
+                for k in ["tansho", "exacta", "trio", "trifecta"]:
+                    sel = d["buy"][k]
+                    if not sel:
+                        continue
+                    top = " ／ ".join(f"{x['combo']}(EV{x['ev']}/{x['odds']:.0f}倍)" for x in sel[:6])
+                    more = f" …他{len(sel)-6}個" if len(sel) > 6 else ""
+                    st.markdown(f"- **{names[k]} {len(sel)}点**：{top}{more}")
+    else:
+        st.caption("↑ボタンで、今の締切オッズから各レースの割安な目を全賭式で洗い出す（点数はレースごとに変動）。")
+
+
 def page_styles():
     st.header("💴 買い方くらべ（アクセル段階別トータル）")
     st.caption("点数を増やすほど『的中率↑・万舟捕捉↑』だが『回収率↓』（控除を余計に払う）＝"
@@ -728,12 +767,14 @@ def page_styles():
 st.title("🚤 競艇予想")
 status_banner()
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "🎙️エージェント実況", "💴買い方くらべ",
+                        ["本日の妙味レース", "🎯動的買い目", "🎙️エージェント実況", "💴買い方くらべ",
                          "🌊荒れそうレース", "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
+elif page == "🎯動的買い目":
+    page_dynamic()
 elif page == "🎙️エージェント実況":
     page_agent()
 elif page == "💴買い方くらべ":
