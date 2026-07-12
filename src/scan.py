@@ -19,7 +19,7 @@ import json
 import os
 import time
 
-from . import predict, scraper, storage, wild
+from . import predict, scraper, storage, wild, commentary
 from .venues import name as venue_name
 
 CACHE_PATH = os.path.join(storage.DATA_DIR, "today_picks.json")
@@ -54,6 +54,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
 
     picks = []
     wild_all = []      # 全レースの荒れ度(参考ページ用)
+    agent_all = []     # 全レースのエージェント判断(実況ページ用)
     races_scanned = 0
     for jcd in venues:
         deadlines = scraper.fetch_deadlines(date, jcd)  # {rno: "HH:MM"} 場ごと1発
@@ -81,6 +82,14 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                                  "deadline": deadlines.get(rno)})
             except Exception:
                 pass
+            # エージェント実況ログ: 全レースの本命/勝負判定/買い目(勝負のみ)
+            agent_all.append({
+                "jcd": jcd, "venue": venue_name(jcd), "rno": rno,
+                "honmei": rows[0]["lane"], "win_pct": rows[0]["win_pct"],
+                "bet": bool(rec.get("bet")), "deadline": deadlines.get(rno),
+                "exacta3": rec.get("exacta3"), "trio4": rec.get("trio4"),
+                "trifecta3": rec.get("trifecta3"),
+            })
             if not rec.get("bet"):
                 continue
             odds = None
@@ -104,6 +113,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
             print(f"  ⚑ {venue_name(jcd)} {rno}R {('締切'+dl) if dl else ''}  単勝{rec['tansho']}号 "
                   f"{rec.get('tansho_name','')} (予想{rows[0]['win_pct']}% / {od})  2連単{'・'.join(rec['exacta3'])}")
     wild.save(date, wild_all)   # 荒れ度上位を today_wild.json へ（参考ページ用）
+    commentary.save_log(date, agent_all)   # 全レース判断を today_agent.json へ（実況ページ用）
     return picks, {"venues_checked": len(venues), "races_scanned": races_scanned}
 
 

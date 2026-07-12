@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper, sensor, wild
+from src import predict, papertrade, scan, scraper, sensor, wild, commentary
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -629,15 +629,69 @@ def page_wild():
                "インの脆さは捉えるが、それが小穴で終わるか万舟に化けるかは事前に読めない(=買い推奨ではない)。")
 
 
+@st.fragment(run_every=180)
+def _agent_feed(log):
+    races, date = log["races"], log["date"]
+    bets = [r for r in races if r.get("bet")]
+    mikoku = [r for r in races if not r.get("bet")]
+    pl = done = hitraces = 0
+    feed = []
+    for r in bets:
+        res = _live_result(date, r["jcd"], r["rno"])
+        feed.append((r, res))
+        if res:
+            done += 1
+            ret = (res.get("tansho_yen") or 0) if res.get("winner") == r["honmei"] else 0
+            ret += (res.get("exacta_yen") or 0) if res.get("exacta_combo") in (r.get("exacta3") or []) else 0
+            ret += (res.get("trio_yen") or 0) if res.get("trio_combo") in (r.get("trio4") or []) else 0
+            ret += (res.get("trifecta_yen") or 0) if res.get("trifecta_combo") in (r.get("trifecta3") or []) else 0
+            pl += ret - 11 * 100          # 単1+2連3+3複4+3単3=11点
+            if ret > 0:
+                hitraces += 1
+    c = st.columns(4)
+    c[0].metric("検討レース", len(races))
+    c[1].metric("勝負", len(bets))
+    c[2].metric("結果確定", f"{done}/{len(bets)}")
+    c[3].metric("本日収支(11点)", f"{pl:+,}円")
+    st.caption(f"的中 {hitraces} レース。1レース=単勝1＋2連単3＋3連複4＋3連単3＝11点(1,100円)。"
+               "結果はレース後およそ5分で自動反映（3分毎更新）。")
+    st.divider()
+    for r, res in feed:
+        with st.container(border=True):
+            st.markdown(f"**{r.get('deadline','')}　{r['venue']}{r['rno']}R**　"
+                        + commentary.comment(r, res))
+    if mikoku:
+        with st.expander(f"⚪ 見送り {len(mikoku)}レース（インが濃厚＝妙味なしと判断した回）"):
+            for r in mikoku:
+                st.caption(f"{r.get('deadline','')} {r['venue']}{r['rno']}R ｜ "
+                           f"本命{r['honmei']}号({r.get('win_pct',0):.0f}%) 見送り")
+
+
+def page_agent():
+    st.header("🎙️ エージェント実況（全レース予想→勝負/見送り→結果）")
+    st.caption("エージェントが本日の全レースを直前まで読み、妙味だけ勝負。結果that出たら一言。自動更新(3分毎)。"
+               "※コメントはルール生成(LLM不使用)・儲け保証なし。実弾は自己責任。")
+    log = commentary.load_log()
+    today = dt.date.today().strftime("%Y%m%d")
+    if not log or not log.get("races"):
+        st.info("まだ本日のエージェントログがありません（毎朝の自動スキャンで生成されます）。")
+        return
+    if log.get("date") != today:
+        st.caption(f"（直近スキャン: {log['date'][4:6]}/{log['date'][6:]} 分）")
+    _agent_feed(log)
+
+
 st.title("🚤 競艇予想")
 status_banner()
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "🌊荒れそうレース", "成績（予想vs実際）",
-                         "プロの見方", "レース個別予想", "解説"])
+                        ["本日の妙味レース", "🎙️エージェント実況", "🌊荒れそうレース",
+                         "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
+elif page == "🎙️エージェント実況":
+    page_agent()
 elif page == "🌊荒れそうレース":
     page_wild()
 elif page == "成績（予想vs実際）":
