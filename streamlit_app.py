@@ -604,8 +604,9 @@ def page_pro():
 
 def page_wild():
     st.header("🌊 本日のインが崩れやすいレース（参考）")
-    st.caption("本命≠1号で、インが崩れやすい条件that濃い順。**万舟が来る/儲かる保証ではない**"
-               "（検証: 万舟率は条件によらず約24%で一定）。捉えてるのは『インの脆さ』だけ＝見て楽しむ/参考用。")
+    st.caption("モデルのイン勝率that低い＝1号が信頼薄い順（本命that1号でも勝率が薄ければ入る）。"
+               "**万舟が来る/儲かる保証ではない**（検証: 万舟率は条件によらず約24%で一定）。"
+               "捉えてるのは『インの脆さ』だけ＝見て楽しむ/参考用。")
     w = wild.load()
     today = dt.date.today().strftime("%Y%m%d")
     if not w or not w.get("races"):
@@ -621,9 +622,9 @@ def page_wild():
                 c1.caption(f"⏰ 締切 {r['deadline']}")
             c1.metric("荒れ度", f"{r['score']:.0f}")
             reasons = " ／ ".join(r.get("reasons") or []) or "（際立った条件なし）"
-            c2.markdown(f"**荒れ要因**：{reasons}  \n"
-                        f"モデル本命 **{r['honmei']}号**（勝率 {r.get('win_pct', 0):.0f}%）"
-                        f"　←インが飛べば波乱")
+            c2.markdown(f"**荒れ要因**：{reasons}")
+            c2.caption(f"モデル本命 {r['honmei']}号（勝率 {r.get('win_pct', 0):.0f}%）"
+                       + ("　＝インを疑ってる" if r.get("honmei") != 1 else "　＝インだが薄い"))
     st.caption("※スコアは 1-モデルのイン勝率 / 1号の級 / 混戦度 / アウトの実力 の合成。"
                "インの脆さは捉えるが、それが小穴で終わるか万舟に化けるかは事前に読めない(=買い推奨ではない)。")
 
