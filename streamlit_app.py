@@ -176,7 +176,10 @@ def _render_today(date, rows):
     for r in eff:
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
-            c1.markdown(f"### {r['venue']} {r['rno']}R")
+            badge = " 🔥" if r.get("high_conf") else ""
+            c1.markdown(f"### {r['venue']} {r['rno']}R{badge}")
+            if r.get("high_conf"):
+                c1.caption("🔥 高確信妙味（本命度が高い群）")
             if r.get("deadline"):
                 c1.markdown(f"⏰ 締切 **{r['deadline']}**"
                             + ("" if r.get("settled") else "　までに投票"))

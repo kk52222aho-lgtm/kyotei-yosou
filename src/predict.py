@@ -17,6 +17,9 @@ MODEL_PATH = os.path.join(storage.DATA_DIR, "model.joblib")
 
 MARKS = ["◎", "○", "▲", "△", "×", " "]
 
+# 高確信妙味の閾値: 本命の正規化勝率(win_pct)がこれ以上なら🔥フラグ（強調表示のみ）
+HIGH_CONF_PCT = 50.0
+
 
 def load_model():
     if not os.path.exists(MODEL_PATH):
@@ -103,10 +106,17 @@ def recommend(rows: list[dict]) -> dict:
     trio = sorted(trio_probs({e["lane"]: e["win_prob"] for e in rows}).items(),
                   key=lambda x: -x[1])
 
+    # 高確信妙味フラグ: 本命の正規化勝率(p0)≥50%。test_trio_only で妙味×p0≥.50 が
+    #  最ジューシー帯（N325・fat-tailで水準は不明）→ 強調表示だけ。ROI水準は主張しない。
+    conf = honmei.get("win_pct")
+    high_conf = bool(conf is not None and conf >= HIGH_CONF_PCT)
+
     return {
         "bet": True,
         "tansho": honmei["lane"],
         "tansho_name": honmei.get("name"),
+        "conf": conf,                                       # 本命の正規化勝率(表示用)
+        "high_conf": high_conf,                             # 🔥高確信妙味フラグ
         "exacta3": [c for c, _ in ex[:3]],
         "exacta3_p": [round(pr, 5) for _, pr in ex[:3]],  # EV算出用: 各組のHarville確率
         "trio4": [c for c, _ in trio[:4]],

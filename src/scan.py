@@ -80,6 +80,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
             picks.append({
                 "jcd": jcd, "venue": venue_name(jcd), "rno": rno,
                 "honmei": rec["tansho"], "name": rec.get("tansho_name"),
+                "high_conf": rec.get("high_conf"),   # 🔥高確信妙味フラグ(p0≥50%)
                 "win_pct": rows[0]["win_pct"], "exacta3": rec["exacta3"],
                 "exacta3_p": rec.get("exacta3_p"),   # EV算出用(締切間際にオッズだけ取ればEV出せる)
                 "trio4": rec.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
