@@ -98,13 +98,20 @@ def recommend(rows: list[dict]) -> dict:
                 ex.append((f"{i}-{j}", p[i] * p[j] / di))
     ex.sort(key=lambda x: -x[1])
 
+    # 3連複 上位4点（着順不問セット。順序スキル0を回避しセット選択だけ使う頑健な器。
+    #  test_trio: 荒れ読みで4点258%/上位30本抜き222%とfat-tail頑健。ROI源はレース選択）
+    trio = sorted(trio_probs({e["lane"]: e["win_prob"] for e in rows}).items(),
+                  key=lambda x: -x[1])
+
     return {
         "bet": True,
         "tansho": honmei["lane"],
         "tansho_name": honmei.get("name"),
         "exacta3": [c for c, _ in ex[:3]],
         "exacta3_p": [round(pr, 5) for _, pr in ex[:3]],  # EV算出用: 各組のHarville確率
-        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%。",
+        "trio4": [c for c, _ in trio[:4]],
+        "trio4_p": [round(pr, 5) for _, pr in trio[:4]],   # 3連複セット確率(表示/EV/追跡用)
+        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%・3連複4点は荒れ読みで頑健。",
     }
 
 
@@ -153,6 +160,39 @@ def harville_trifecta(win_prob: dict[int, float]) -> dict[str, float]:
                     continue
                 out[f"{i}-{j}-{k}"] = p[i] * (p[j] / di) * (p[k] / dij)
     return out
+
+
+def trio_probs(win_prob: dict[int, float]) -> dict[str, float]:
+    """各艇の1着確率→3連複(着順不問)セット確率。
+
+    harville_trifecta の6順列(i-j-k)を無順序セットへ合算。キーは 'a-b-c' (a<b<c)。
+    test_trio.trio_probs と同一定義（荒れ読みで頑健な器と実証した集約）。
+    """
+    from collections import defaultdict
+    agg: dict[str, float] = defaultdict(float)
+    for combo, p in harville_trifecta(win_prob).items():
+        key = "-".join(sorted(combo.split("-"), key=int))
+        agg[key] += p
+    return dict(agg)
+
+
+def trio_ev(rows: list[dict], odds: dict[str, float]) -> list[dict]:
+    """3連複の各セットについて EV = 確率 × オッズ を計算し、EV降順で返す。
+
+    rows は predict_entries の出力（win_prob を含む）。odds は fetch_trio_odds。
+    ※3連複エッジの本体は"荒れレースの選択"（本命≠1号艇）で、EVは表示/追跡用。
+      2連単のような検証済みEV閾値はまだ無い（確定払戻ベースの器・ライブ未証明）。
+    """
+    probs = trio_probs({e["lane"]: e["win_prob"] for e in rows})
+    res = []
+    for combo, p in probs.items():
+        o = odds.get(combo)
+        if o is None:
+            continue
+        res.append({"combo": combo, "prob": round(p, 4),
+                    "odds": o, "ev": round(p * o, 2)})
+    res.sort(key=lambda x: -x["ev"])
+    return res
 
 
 def trifecta_ev(rows: list[dict], odds: dict[str, float]) -> list[dict]:

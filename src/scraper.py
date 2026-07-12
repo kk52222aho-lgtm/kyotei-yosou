@@ -412,6 +412,40 @@ def fetch_trifecta_odds(date: str, jcd: str, rno: int) -> dict[str, float] | Non
     return out or None
 
 
+def trio_combos() -> list[tuple[int, int, int]]:
+    """3連複オッズ表(odds3f)の td.oddsPoint 出現順に対応する (a,b,c) a<b<c の列挙(20点)。
+
+    現物HTML(odds3f)で検証済みの並び: DOM行=中(s)・大(t)の昇順、各行の列=小(f)を 1..s-1。
+    生成順が実オッズ [4.7,4.5,30.3,...] と1:1一致することを確認済み。全て a<b<c で出る。
+    """
+    combos: list[tuple[int, int, int]] = []
+    for s in range(2, 7):            # 中央の艇
+        for t in range(s + 1, 7):    # 最大の艇
+            for f in range(1, s):    # 最小の艇（列: 1..s-1）
+                combos.append((f, s, t))
+    return combos
+
+
+_TRIO_ORDER = trio_combos()
+
+
+def fetch_trio_odds(date: str, jcd: str, rno: int) -> dict[str, float] | None:
+    """3連複オッズページ(odds3f)から {'a-b-c'(a<b<c): オッズ} を返す（20点）。"""
+    soup = _get(_race_url("odds3f", date, jcd, rno))
+    if soup is None:
+        return None
+    cells = soup.select("td.oddsPoint")
+    if len(cells) < 20:
+        return None
+    out: dict[str, float] = {}
+    for idx, td in enumerate(cells[:20]):
+        combo = _TRIO_ORDER[idx]
+        vals = _floats(td.get_text(strip=True))
+        if combo and vals and vals[0] > 0:
+            out[f"{combo[0]}-{combo[1]}-{combo[2]}"] = vals[0]
+    return out or None
+
+
 def fetch_result(date: str, jcd: str, rno: int) -> dict[int, int] | None:
     """結果ページから {艇番: 着順} を返す。非完走(転覆/失格等)は着順 99。"""
     soup = _get(_race_url("raceresult", date, jcd, rno))

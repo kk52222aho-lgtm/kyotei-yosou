@@ -82,6 +82,8 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "honmei": rec["tansho"], "name": rec.get("tansho_name"),
                 "win_pct": rows[0]["win_pct"], "exacta3": rec["exacta3"],
                 "exacta3_p": rec.get("exacta3_p"),   # EV算出用(締切間際にオッズだけ取ればEV出せる)
+                "trio4": rec.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
+                "trio4_p": rec.get("trio4_p"),
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"
