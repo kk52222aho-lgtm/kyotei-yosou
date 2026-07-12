@@ -25,6 +25,7 @@ jobs:
           python-version: '3.12'
       - run: pip install pandas "numpy<2" scikit-learn==1.6.1 joblib requests beautifulsoup4 lxml
       - run: python -m src.papertrade capture_ev
+      - run: python -m src.papertrade capture_trifecta   # 3連単締切オッズ(万舟乖離の実測)
       - name: commit + push
         run: |
           git config user.name "kyotei-bot"

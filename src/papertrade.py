@@ -108,6 +108,29 @@ def cmd_capture_ev(today: str):
     print(f"{n}件のEVを更新（EV>{predict.EXACTA_EV_THRESHOLD}が買い帯）")
 
 
+def cmd_capture_trifecta(today: str):
+    """未精算の本日ピックの3連単締切オッズ(上位20点)を記録（overwrite=締切間際に収束）。
+
+    狙い＝万舟側(3連単)の『締切表示 vs 確定払戻』乖離をライブ実測する布石。
+    的中した万舟の deadline_odds×100 と settled払戻を後で比べれば、薄プール自己インパクト
+    (=319%の"勝ちすぎ"がライブでどれだけ削れるか)の proxy that取れる。分析はN蓄積後。
+    """
+    from . import scraper
+    rows = _load()
+    n = 0
+    for r in rows:
+        if r.get("settled") or r.get("date") != today or not r.get("trifecta_rank"):
+            continue
+        od = scraper.fetch_trifecta_odds(r["date"], r["jcd"], r["rno"])
+        if not od:
+            continue
+        top20 = (r.get("trifecta_rank") or [])[:20]
+        r["trifecta_odds"] = {c: od[c] for c in top20 if c in od}   # 締切近辺odds(overwrite)
+        n += 1
+    _save(rows)
+    print(f"{n}件の3連単締切オッズを記録（上位20点・万舟乖離の実測用）")
+
+
 def cmd_settle(today: str):
     """確定済みレースを精算（単勝フラット100円。確定オッズ=払戻として実払戻計算）。"""
     rows = _load()
@@ -154,6 +177,8 @@ def cmd_settle(today: str):
         r["trifecta_points"] = len(fpicks)
         r["trifecta_win"] = tf_hit
         r["trifecta_return"] = tf[1] if tf_hit else 0
+        # 万舟乖離の実測: 実的中組の締切オッズ(capture済なら)。deadline_odds×100 vs 確定tf[1] を後で比較
+        r["trifecta_win_dl_odds"] = (r.get("trifecta_odds") or {}).get(tf[0]) if tf else None
         r["settled"] = True
         n += 1
     _save(rows)
@@ -259,7 +284,8 @@ def main():
     lg = sub.add_parser("log"); lg.add_argument("--date", default=dt.date.today().strftime("%Y%m%d"))
     sub.add_parser("settle")
     sub.add_parser("report")
-    sub.add_parser("capture_ev")   # 締切間際に定期実行=2連単EVを台帳に記録
+    sub.add_parser("capture_ev")        # 締切間際に定期実行=2連単EVを台帳に記録
+    sub.add_parser("capture_trifecta")  # 締切間際=3連単締切オッズ(万舟乖離の実測用)
     args = ap.parse_args()
     today = dt.date.today().strftime("%Y%m%d")
     if args.cmd == "log":
@@ -270,6 +296,8 @@ def main():
         cmd_report()
     elif args.cmd == "capture_ev":
         cmd_capture_ev(today)
+    elif args.cmd == "capture_trifecta":
+        cmd_capture_trifecta(today)
 
 
 if __name__ == "__main__":
