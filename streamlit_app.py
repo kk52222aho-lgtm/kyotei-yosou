@@ -811,6 +811,11 @@ def page_dynamic():
                     st.caption("予測不可（出走表/オッズ未形成）")
                     continue
                 rows, d = r
+                if d.get("strongest"):
+                    st.success(f"💎 **最強妙味！**　本命勝率{d['p0']*100:.0f}% × 2連単EV{d['ex_ev3']:.1f}（>3.5）"
+                               "＝妙味×高確信×強割安が全部揃った（backtest最濃断面: 592%/全年/fat-tail頑健）")
+                elif d.get("ex_ev3") is not None:
+                    st.caption(f"💎条件 本命勝率≥45%×2連単EV>3.5 ／ 現在 {d['p0']*100:.0f}% × EV{d['ex_ev3']:.1f}")
                 if d["points"] == 0:
                     st.markdown(f"**割安ゼロ → 見送り**（EV>{th}の目なし＝市場が正しく値付け）")
                     continue

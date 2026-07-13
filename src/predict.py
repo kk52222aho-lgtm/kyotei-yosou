@@ -245,6 +245,10 @@ def predict_trifecta(date: str, jcd: str, rno: int, bundle=None, top: int = 10):
 # 動的買い目の割安ライン。2連単EV>2.0は検証済み。3連系は実験（3連単ライブ収集で調整予定）。
 DYNAMIC_EV_TH = 2.0
 
+# 💎最強妙味: 本命≠1号 × 本命勝率≥0.45 × 2連単top3(確率順)EV>3.5（backtest 592%/全年/頑健の最濃断面）
+STRONGEST_P0 = 0.45
+STRONGEST_EV = 3.5
+
 
 def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH, gate: dict | None = None) -> dict:
     """モデル確率×締切オッズで各賭式の全目のEVを出し、EV>th の割安だけ選抜（動的点数）。
@@ -284,7 +288,15 @@ def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH, gate: d
         else:
             buy[k] = [x for x in v if x["ev"] > th]
     pts = sum(len(v) for v in buy.values())
-    return {"buy": buy, "all": allb, "th": th, "points": pts, "cost": pts * 100, "off": off}
+    # 💎最強妙味: 本命≠1号 × p0≥.45 × 2連単top3(確率順)avg EV>3.5
+    honmei = max(p, key=p.get)
+    p0 = p[honmei]
+    ex3 = sorted(exa_p.items(), key=lambda x: -x[1])[:3]
+    exo = odds.get("exacta") or {}
+    ex_ev3 = (sum(pr * exo[c] for c, pr in ex3) / 3.0) if ex3 and all(exo.get(c) for c, _ in ex3) else None
+    strongest = (honmei != 1 and p0 >= STRONGEST_P0 and ex_ev3 is not None and ex_ev3 > STRONGEST_EV)
+    return {"buy": buy, "all": allb, "th": th, "points": pts, "cost": pts * 100, "off": off,
+            "p0": p0, "ex_ev3": ex_ev3, "strongest": strongest}
 
 
 def dynamic_for_race(date: str, jcd: str, rno: int, bundle=None,
