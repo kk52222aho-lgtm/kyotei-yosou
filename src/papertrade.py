@@ -77,6 +77,8 @@ def cmd_log(date: str):
             "trio4_p": p.get("trio4_p"),
             "trifecta3": p.get("trifecta3"),   # 3連単3点(着順あり・大きい方)
             "trifecta3_p": p.get("trifecta3_p"),
+            "trio_rank": p.get("trio_rank"),        # 全ランク(買い方くらべ日次のワイド系用)
+            "trifecta_rank": p.get("trifecta_rank"),
             "deadline": p.get("deadline"),
             "exacta_ev": None,                 # 締切間際にcapture_evで埋める
             "logged_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -179,6 +181,13 @@ def cmd_settle(today: str):
         r["trifecta_return"] = tf[1] if tf_hit else 0
         # 万舟乖離の実測: 実的中組の締切オッズ(capture済なら)。deadline_odds×100 vs 確定tf[1] を後で比較
         r["trifecta_win_dl_odds"] = (r.get("trifecta_odds") or {}).get(tf[0]) if tf else None
+        # 確定結果ブロブ（買い方くらべ日次＝styles.compute(pick,res)用。全ランクと合わせ全スタイル再計算可）
+        r["res_full"] = {
+            "winner": winner, "tansho_yen": r["tansho_return"],
+            "exacta_combo": ex[0] if ex else None, "exacta_yen": (ex[1] if ex else None),
+            "trio_combo": tr[0] if tr else None, "trio_yen": (tr[1] if tr else None),
+            "trifecta_combo": tf[0] if tf else None, "trifecta_yen": (tf[1] if tf else None),
+        }
         r["settled"] = True
         n += 1
     _save(rows)

@@ -54,3 +54,27 @@ def compute(pick: dict, res: dict) -> list[dict]:
         out.append({"name": name, "stake": stake, "ret": ret,
                     "pl": ret - stake, "computable": computable})
     return out
+
+
+def daily(settled: list[dict]) -> dict:
+    """前向き台帳(settled) → 日付別の各スタイル収支。res_full(確定結果)を持つ行のみ集計。
+
+    各行は pick そのもの(honmei/exacta3/trio4/trifecta3/trio_rank/trifecta_rank)＋res_full。
+    戻り: {date: {style_name: {"stake","ret","comp"}}}。compはワイド系that全ランクで計算できたか。
+    """
+    days: dict = {}
+    for r in settled:
+        res = r.get("res_full")
+        if not res:
+            continue
+        d = r.get("date")
+        day = days.setdefault(d, {name: {"stake": 0, "ret": 0, "comp": True}
+                                  for name, *_ in STYLES})
+        for s in compute(r, res):
+            cell = day[s["name"]]
+            if s["computable"]:
+                cell["stake"] += s["stake"]
+                cell["ret"] += s["ret"]
+            else:
+                cell["comp"] = False
+    return days

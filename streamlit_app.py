@@ -741,6 +741,27 @@ def page_styles():
     } for r in h["rows"]]), hide_index=True, use_container_width=True)
     st.info("🔑 " + h["note"])
 
+    st.subheader("毎日の記録（前向き・実トラック）")
+    st.caption("確定した日の各スタイル収支を毎日積む。上の3年トータルは机上、こっちが実際の前向き記録。"
+               "ワイド系は全ランク記録that要るので明日のscan以降から。")
+    dd = styles.daily([x for x in papertrade._load() if x.get("settled") and x.get("res_full")])
+    if not dd:
+        st.caption("まだ前向きの確定記録がありません（明日以降の scan→settle から毎日溜まります）。")
+    else:
+        names = [n for n, *_ in styles.STYLES]
+        cum = {n: 0 for n in names}
+        tbl = []
+        for d in sorted(dd):
+            row = {"日付": f"{d[4:6]}/{d[6:]}"}
+            for n in names:
+                c = dd[d][n]
+                pl = c["ret"] - c["stake"]
+                cum[n] += pl
+                row[n.split("（")[0]] = f"{pl:+,}" if c["comp"] else "—"
+            tbl.append(row)
+        tbl.append({"日付": "▶累計", **{n.split("（")[0]: f"{cum[n]:+,}" for n in names}})
+        st.dataframe(pd.DataFrame(tbl), hide_index=True, use_container_width=True)
+
     st.subheader("本日の勝負レースを各スタイルで見ると")
     st.caption("※本日ぶんは数レース＝ノイズ。判断は上の3年トータルで。")
     today = dt.date.today().strftime("%Y%m%d")
