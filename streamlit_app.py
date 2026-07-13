@@ -809,6 +809,14 @@ def page_styles():
     } for r in h["rows"]]), hide_index=True, use_container_width=True)
     st.info("🔑 " + h["note"])
 
+    st.subheader("点数×効率カーブ（3連単・妙味3年）")
+    st.caption("何点が一番効率（回収率）いいか。" + styles.TRIFECTA_CURVE["note"])
+    c = styles.TRIFECTA_CURVE
+    st.line_chart(pd.DataFrame({"回収率%": c["roi"], "的中率%": c["hit"]}, index=c["points"]))
+    st.markdown("🔥 **効率ピーク＝3点（533%）**（3〜5点that530%前後のプラトー）。点を増やすほど"
+                "**的中率↑・回収率↓**：20点319%／50点202%(総額ピーク+1,835万)／120点全張り99%=控除負け。"
+                "　※確定払戻・ライブ未証明。薄プール自己インパクトは多点(万舟依存)ほど効く＝**ライブは効率ピーク寄り(3〜5点)が安全**。")
+
     st.subheader("毎日の記録（前向き・実トラック）")
     st.caption("確定した日の各スタイル収支を毎日積む。上の3年トータルは机上、こっちが実際の前向き記録。"
                "ワイド系は全ランク記録that要るので明日のscan以降から。")
