@@ -783,6 +783,9 @@ def page_dynamic():
                "少ない→絞る＝『20倍つきそうなら20点』の正体（見た目の荒れでなくEV）。2連単EV>2.0は検証済／"
                "3連系は実験（3連単ライブ収集で調整中）。締切間際に押すのが正確。儲け保証なし。")
     th = st.slider("EV割安ライン（これ超えを買う）", 1.5, 4.0, 2.0, 0.1)
+    st.caption("📈 backtest(妙味クリーン年・確定払戻): 2連単EVは高いほどROI高く単調——"
+               "EV>2.0=316% / 2.5=344% / 3.0=370%、全年100%超・fat-tail頑健。"
+               "ただしライブ閾値は2.0で凍結（backtestで再最適化＝過学習を避ける）。上げるほど点数は減る。")
     today = dt.date.today().strftime("%Y%m%d")
     cache = scan.load_cache()
     bets = (cache or {}).get("picks", []) if cache and cache.get("date") == today else []
