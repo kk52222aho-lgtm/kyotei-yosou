@@ -710,7 +710,8 @@ def page_trifecta():
             if not ranking:
                 st.caption("予測不可（出走表未形成）")
                 continue
-            st.markdown("**モデル予想（上位10）**：" + " ／ ".join(ranking[:10]))
+            st.markdown("**モデル予想（買い目・上位20点）**")
+            st.markdown("　".join(f"{i+1}.{c}" for i, c in enumerate(ranking[:20])))
             res = _live_result(today, p["jcd"], p["rno"])
             if not res or not res.get("trifecta_combo"):
                 st.caption("⏳ 結果待ち（レース後およそ5分）")
@@ -719,11 +720,13 @@ def page_trifecta():
             rank = ranking.index(win) + 1 if win in ranking else None
             st.markdown(f"**実際：{win}（{yen:,}円）**")
             if rank:
-                st.markdown(f"🎯 **必要点数 {rank}点**（上位{rank}まで買えば的中）")
+                st.markdown(f"🎯 **必要点数 {rank}点**（上位から{rank}点買えば的中）")
                 if rank <= 20:
-                    st.success(f"20点買い → 的中！{yen:,}円（賭2,000円 → 収支 {yen-2000:+,}円）")
+                    st.success(f"20点内で的中（予想{rank}番目）！{yen:,}円　賭2,000円 → 収支 {yen-2000:+,}円")
                 else:
-                    st.warning(f"20点買い → ×（必要{rank}点。20点では届かず −2,000円）")
+                    st.warning(f"20点では届かず。当たるまで {rank}点必要（20点＝−2,000円）")
+                with st.expander(f"上位から当たるまでの買い目 全{rank}点を見る"):
+                    st.markdown("　".join(f"{i+1}.{c}" for i, c in enumerate(ranking[:rank])))
 
     st.subheader("これまでの記録：何点買えば当たってたか")
     st.caption("前向き台帳の3連単を、実結果that予想の何位か(必要点数)で集計。分布that『何点買えば当たるか』の答え。")
