@@ -681,6 +681,71 @@ def page_agent():
     _agent_feed(log)
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _trifecta_ranking(date, jcd, rno):
+    """レースのモデル3連単ランキング(120通り・確率降順)。1時間キャッシュ。"""
+    rows = predict.predict_race(date, jcd, rno, get_model())
+    if not rows:
+        return None
+    wp = {e["lane"]: e["win_prob"] for e in rows}
+    return [c for c, _ in sorted(predict.harville_trifecta(wp).items(), key=lambda x: -x[1])]
+
+
+def page_trifecta():
+    st.header("🎰 3連単ページ（予想／20点買い／何点で当たるか）")
+    st.caption("モデルの3連単予想と、20点買った場合の結果、そして『実際は何点目で当たったか』"
+               "＝当たりに必要な点数。3連単は着順あり120通り、20点＝上位20。確定払戻・儲け保証なし。")
+    today = dt.date.today().strftime("%Y%m%d")
+    cache = scan.load_cache()
+    bets = (cache or {}).get("picks", []) if cache and cache.get("date") == today else []
+
+    st.subheader("本日の妙味レース")
+    if not bets:
+        st.caption("本日の妙味レースなし、またはスキャン待ち。")
+    for p in bets:
+        with st.container(border=True):
+            st.markdown(f"### {p['venue']}{p['rno']}R　締切{p.get('deadline','')}")
+            with st.spinner("モデル3連単予想を計算中…"):
+                ranking = _trifecta_ranking(today, p["jcd"], p["rno"])
+            if not ranking:
+                st.caption("予測不可（出走表未形成）")
+                continue
+            st.markdown("**モデル予想（上位10）**：" + " ／ ".join(ranking[:10]))
+            res = _live_result(today, p["jcd"], p["rno"])
+            if not res or not res.get("trifecta_combo"):
+                st.caption("⏳ 結果待ち（レース後およそ5分）")
+                continue
+            win, yen = res["trifecta_combo"], res.get("trifecta_yen") or 0
+            rank = ranking.index(win) + 1 if win in ranking else None
+            st.markdown(f"**実際：{win}（{yen:,}円）**")
+            if rank:
+                st.markdown(f"🎯 **必要点数 {rank}点**（上位{rank}まで買えば的中）")
+                if rank <= 20:
+                    st.success(f"20点買い → 的中！{yen:,}円（賭2,000円 → 収支 {yen-2000:+,}円）")
+                else:
+                    st.warning(f"20点買い → ×（必要{rank}点。20点では届かず −2,000円）")
+
+    st.subheader("これまでの記録：何点買えば当たってたか")
+    st.caption("前向き台帳の3連単を、実結果that予想の何位か(必要点数)で集計。分布that『何点買えば当たるか』の答え。")
+    settled = [x for x in papertrade._load()
+               if x.get("settled") and x.get("trifecta_rank")
+               and (x.get("res_full") or {}).get("trifecta_combo")]
+    ranks = []
+    for r in settled:
+        win = r["res_full"]["trifecta_combo"]
+        rk = r["trifecta_rank"]
+        if win in rk:
+            ranks.append(rk.index(win) + 1)
+    if not ranks:
+        st.caption("まだ記録なし（明日以降の全ランク記録付き settle から溜まります）。")
+        return
+    import numpy as np
+    st.markdown(f"記録 **{len(ranks)}レース**｜必要点数 中央値 **{int(np.median(ranks))}点** ／ 平均 {np.mean(ranks):.0f}点")
+    for k in [1, 3, 6, 12, 20, 40, 60, 120]:
+        hit = sum(1 for x in ranks if x <= k) / len(ranks)
+        st.markdown(f"- 上位 **{k}点** 買い → 的中率 {hit*100:.0f}%")
+
+
 def page_dynamic():
     st.header("🎯 動的買い目（EV割安拾い＝毎レース点数が変わる）")
     st.caption("モデル確率×締切オッズでEVを出し、EV>閾値の『割安な目』だけ買う。割安が多い→点数増、"
@@ -795,14 +860,17 @@ def page_styles():
 st.title("🚤 競艇予想")
 status_banner()
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "🎯動的買い目", "🎙️エージェント実況", "💴買い方くらべ",
-                         "🌊荒れそうレース", "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
+                        ["本日の妙味レース", "🎯動的買い目", "🎰3連単", "🎙️エージェント実況",
+                         "💴買い方くらべ", "🌊荒れそうレース", "成績（予想vs実際）",
+                         "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
 elif page == "🎯動的買い目":
     page_dynamic()
+elif page == "🎰3連単":
+    page_trifecta()
 elif page == "🎙️エージェント実況":
     page_agent()
 elif page == "💴買い方くらべ":
