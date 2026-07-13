@@ -22,6 +22,8 @@ from . import storage
 from .features import CLASS_MAP
 
 WILD_CACHE = os.path.join(storage.DATA_DIR, "today_wild.json")
+WILD_LOG = os.path.join(storage.DATA_DIR, "wild_log.jsonl")   # 荒れ予想の結果検証ログ(前向き累積)
+MANSHU = 10000
 
 # class_num(A1=4..B2=1) → 弱さ / 強さ
 _WEAK = {4: 0.0, 3: 0.3, 2: 0.7, 1: 1.0, 0: 0.5}
@@ -60,11 +62,20 @@ def score_race(rows: list[dict]) -> dict:
 
 
 def save(date: str, races: list[dict], top: int = 12) -> None:
-    """波乱度上位topレースを today_wild.json に保存。races=[{...,'score','reasons'}]。"""
+    """波乱度上位topレースを today_wild.json に保存＋結果検証ログ(未精算)へ追記。"""
     os.makedirs(storage.DATA_DIR, exist_ok=True)
     ranked = sorted(races, key=lambda r: -r["score"])[:top]
     with open(WILD_CACHE, "w", encoding="utf-8") as f:
         json.dump({"date": date, "races": ranked}, f, ensure_ascii=False, indent=1)
+    # 結果検証ログに追記（(date,jcd,rno)で重複排除・未精算で置く）
+    log = _load_log()
+    seen = {(r["date"], r["jcd"], r["rno"]) for r in log}
+    for r in ranked:
+        if (date, r["jcd"], r["rno"]) in seen:
+            continue
+        log.append({"date": date, "jcd": r["jcd"], "rno": r["rno"], "venue": r["venue"],
+                    "score": r["score"], "honmei": r["honmei"], "settled": False})
+    _save_log(log)
 
 
 def load() -> dict | None:
@@ -72,3 +83,69 @@ def load() -> dict | None:
         return None
     with open(WILD_CACHE, encoding="utf-8") as f:
         return json.load(f)
+
+
+def _load_log() -> list[dict]:
+    if not os.path.exists(WILD_LOG):
+        return []
+    with open(WILD_LOG, encoding="utf-8") as f:
+        return [json.loads(ln) for ln in f if ln.strip()]
+
+
+def _save_log(rows: list[dict]) -> None:
+    os.makedirs(storage.DATA_DIR, exist_ok=True)
+    with open(WILD_LOG, "w", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def settle_log(today: str) -> int:
+    """未精算の荒れ予想レースの結果を取得＝『ほんとに荒れたか』を刻む（1号飛び/万舟）。"""
+    from . import scraper
+    log = _load_log()
+    n = 0
+    for r in log:
+        if r.get("settled") or r["date"] > today:
+            continue
+        res = scraper.fetch_result_full(r["date"], r["jcd"], r["rno"])
+        if not res or res.get("winner") is None:
+            continue
+        r["winner"] = res["winner"]
+        r["broke"] = res["winner"] != 1                      # 1号が飛んだ＝荒れた
+        r["trifecta_yen"] = res.get("trifecta_yen")
+        r["manshu"] = bool(res.get("trifecta_yen") and res["trifecta_yen"] >= MANSHU)
+        r["settled"] = True
+        n += 1
+    _save_log(log)
+    return n
+
+
+def log_stats() -> dict | None:
+    """精算済み荒れ予想の集計：本当に荒れた率(1号飛び)・万舟率・平均3連単配当。"""
+    settled = [r for r in _load_log() if r.get("settled")]
+    if not settled:
+        return None
+    n = len(settled)
+    ys = [r["trifecta_yen"] for r in settled if r.get("trifecta_yen")]
+    return {
+        "n": n,
+        "broke": sum(1 for r in settled if r.get("broke")) / n,
+        "manshu": sum(1 for r in settled if r.get("manshu")) / n,
+        "avg_yen": (sum(ys) / len(ys)) if ys else 0,
+        "recent": sorted(settled, key=lambda r: (r["date"], r["jcd"], r["rno"]), reverse=True)[:20],
+    }
+
+
+def main():
+    import datetime as dt
+    import sys
+    today = dt.date.today().strftime("%Y%m%d")
+    if len(sys.argv) > 1 and sys.argv[1] == "settle":
+        print(f"{settle_log(today)}件の荒れ予想レースを結果精算")
+    else:
+        s = log_stats()
+        print(s if s else "荒れ予想の精算記録なし")
+
+
+if __name__ == "__main__":
+    main()

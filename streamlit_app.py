@@ -607,6 +607,13 @@ def page_wild():
     st.caption("モデルのイン勝率that低い＝1号が信頼薄い順（本命that1号でも勝率が薄ければ入る）。"
                "**万舟が来る/儲かる保証ではない**（検証: 万舟率は条件によらず約24%で一定）。"
                "捉えてるのは『インの脆さ』だけ＝見て楽しむ/参考用。")
+    ls = wild.log_stats()
+    if ls:
+        st.success(f"📊 **検証（ほんとに荒れたか）**：荒れ予想 **{ls['n']}レース** ／ "
+                   f"本当に荒れた（1号飛び） **{ls['broke']*100:.0f}%** ／ 万舟(3連単≥1万) {ls['manshu']*100:.0f}% ／ "
+                   f"平均3連単配当 {ls['avg_yen']:,.0f}円")
+        st.caption("※全レースの1号飛び率は約46%。フラグ群がこれを上回れば『インの脆さ』を当ててる。"
+                   "万舟率≈24%は条件で動かない（荒れは当てても万舟は事前に読めない、の裏取り）。")
     w = wild.load()
     today = dt.date.today().strftime("%Y%m%d")
     if not w or not w.get("races"):
@@ -625,6 +632,16 @@ def page_wild():
             c2.markdown(f"**荒れ要因**：{reasons}")
             c2.caption(f"モデル本命 {r['honmei']}号（勝率 {r.get('win_pct', 0):.0f}%）"
                        + ("　＝インを疑ってる" if r.get("honmei") != 1 else "　＝インだが薄い"))
+            res = _live_result(w["date"], r["jcd"], r["rno"])
+            if res and res.get("winner") is not None:
+                broke = res["winner"] != 1
+                tf = res.get("trifecta_yen")
+                man = " ／💥万舟" if (tf and tf >= 10000) else ""
+                tag = "🔥 荒れた！（1号飛び）" if broke else "⚪ 不発（1号残り）"
+                paytxt = f" ／ 3連単 {tf:,}円{man}" if tf else ""
+                c2.markdown(f"**結果：{tag}**（勝ち {res['winner']}号{paytxt}）")
+            else:
+                c2.caption("⏳ 結果待ち")
     st.caption("※スコアは 1-モデルのイン勝率 / 1号の級 / 混戦度 / アウトの実力 の合成。"
                "インの脆さは捉えるが、それが小穴で終わるか万舟に化けるかは事前に読めない(=買い推奨ではない)。")
 
