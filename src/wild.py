@@ -114,6 +114,9 @@ def settle_log(today: str) -> int:
         r["broke"] = res["winner"] != 1                      # 1号が飛んだ＝荒れた
         r["trifecta_yen"] = res.get("trifecta_yen")
         r["manshu"] = bool(res.get("trifecta_yen") and res["trifecta_yen"] >= MANSHU)
+        # 「買えたのか」用: モデル本命の単勝で買ってたら（勝ち=本命なら払戻tansho_yen）
+        r["tan_win"] = res["winner"] == r.get("honmei")
+        r["tan_return"] = res.get("tansho_yen") if r["tan_win"] else 0
         r["settled"] = True
         n += 1
     _save_log(log)
@@ -127,11 +130,22 @@ def log_stats() -> dict | None:
         return None
     n = len(settled)
     ys = [r["trifecta_yen"] for r in settled if r.get("trifecta_yen")]
+
+    def tan_pl(grp):
+        m = len(grp)
+        ret = sum(r.get("tan_return") or 0 for r in grp)
+        hit = sum(1 for r in grp if r.get("tan_win"))
+        return {"n": m, "hit": hit / m if m else 0, "ret": ret,
+                "roi": ret / (m * 100) if m else 0, "pl": ret - m * 100}
+
+    contra = [r for r in settled if r.get("honmei") != 1]   # 実際に張る妙味(本命≠1号)
     return {
         "n": n,
         "broke": sum(1 for r in settled if r.get("broke")) / n,
         "manshu": sum(1 for r in settled if r.get("manshu")) / n,
         "avg_yen": (sum(ys) / len(ys)) if ys else 0,
+        "tan_all": tan_pl(settled),                          # 全フラグを本命単勝で買ったら
+        "tan_contra": tan_pl(contra) if contra else None,    # 本命≠1号だけ(＝妙味)
         "recent": sorted(settled, key=lambda r: (r["date"], r["jcd"], r["rno"]), reverse=True)[:20],
     }
 
