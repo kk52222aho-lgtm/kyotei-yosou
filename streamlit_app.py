@@ -277,6 +277,20 @@ def page_record():
 
     render_sensor(expanded=True)   # 持続センサー（本日ページと共通）
 
+    # 💎最強妙味の実績（backtest基準 vs 前向き）
+    sg = ps.get("strongest", {})
+    with st.expander("💎 最強妙味の実績（本命≠1号×本命勝率≥45%×締切2連単EV>3.5）", expanded=True):
+        st.caption("5方向×2市場を潰して残った唯一の勝ち筋の最濃断面。上げるほど紙とライブの乖離も最大。")
+        c = st.columns(2)
+        c[0].metric("backtest（3年・確定払戻）", "592%", "352レース・全年+・上位10本抜き395%")
+        if sg.get("races"):
+            roi_s = sg["ret"] / sg["stake"] if sg["stake"] else 0
+            c[1].metric(f"前向き実績（{sg['races']}レース）", f"{roi_s*100:.0f}%",
+                        f"{sg['pl']:+,}円 / 的中{sg['hit']}")
+        else:
+            c[1].metric("前向き実績", "N=0", "まだ発生せず（EV捕捉が回り次第）")
+        st.caption("※前向きは締切EV捕捉が要る＝ev-capture稼働後から。確定払戻592%that実弾で何%残るかをここで実測。")
+
     # 参考: 無フィルタ土台(track A=机上188.7の直接対照)
     with st.expander("参考：無フィルタ土台（全妙味レース＝机上OOFの直接対照）"):
         st.caption(f"全 {ps['races']} レース記録。単勝 {roi(ps['tansho']['ret'], ps['tansho']['stake'])}"

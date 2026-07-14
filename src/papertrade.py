@@ -71,6 +71,7 @@ def cmd_log(date: str):
             "date": date, "jcd": p["jcd"], "rno": p["rno"],
             "venue": p["venue"], "honmei": p["honmei"],
             "name": p.get("name"), "scan_odds": p.get("odds"),
+            "win_pct": p.get("win_pct"),   # 本命の正規化勝率(💎最強妙味判定 p0用)
             "exacta3": p["exacta3"],
             "exacta3_p": p.get("exacta3_p"),   # EV算出用
             "trio4": p.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
@@ -218,6 +219,13 @@ def portfolio_stats(rows: list[dict]) -> dict:
     tr_stake = sum(r.get("trio_points", 0) for r in settled) * 100
     tr_ret = sum(r.get("trio_return", 0) for r in settled)
     tr_hit = sum(1 for r in settled if r.get("trio_win"))
+    # 💎最強妙味: 本命勝率(win_pct)≥45 かつ 締切2連単EV>3.5 の2連単track（最濃断面の前向き実績）
+    from .predict import STRONGEST_P0, STRONGEST_EV
+    strong = [r for r in settled if (r.get("win_pct") or 0) >= STRONGEST_P0 * 100
+              and (r.get("exacta_ev") or 0) > STRONGEST_EV and r.get("exacta_points")]
+    s_stake = sum(r.get("exacta_points", 0) for r in strong) * 100
+    s_ret = sum(r.get("exacta_return", 0) for r in strong)
+    s_hit = sum(1 for r in strong if r.get("exacta_win"))
     # 3連単（上位3点・着順あり）: 大きい方・fat-tail。別枠track
     tf_settled = [r for r in settled if r.get("trifecta_points")]
     tf_stake = sum(r.get("trifecta_points", 0) for r in settled) * 100
@@ -251,6 +259,8 @@ def portfolio_stats(rows: list[dict]) -> dict:
         "exacta_ev": {"races": len(evf), "captured": len(captured),
                       "stake": evf_stake, "ret": evf_ret, "hit": evf_hit,
                       "pl": evf_ret - evf_stake},
+        "strongest": {"races": len(strong), "stake": s_stake, "ret": s_ret,
+                      "hit": s_hit, "pl": s_ret - s_stake},
     }
 
 
@@ -281,6 +291,10 @@ def cmd_report():
     if ev["captured"]:
         line(f"2連単EV>2.0", ev, ev["hit"])
         print(f"    （EV捕捉 {ev['captured']}レース中 EV>2.0で買い {ev['races']}レース）")
+    sg = s["strongest"]
+    if sg["races"]:
+        line("💎最強妙味", sg, sg["hit"])
+        print(f"    （本命勝率≥45%×締切EV>3.5＝最濃断面。backtest 592%・全年・頑健）")
     print(f"\n  ※「推奨」= 単勝1.5倍未満のレースを丸ごと見送った単勝+2連単（検証で最良）。"
           f"見送り {rc['skipped']}レース。")
     print(f"  ※「2連単EV>2.0」= 締切EVフィルタの前向きtrack（机上で堅く300-500%・要ライブ確認）。")
