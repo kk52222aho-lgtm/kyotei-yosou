@@ -112,6 +112,9 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "power_honmei": rec.get("power_honmei"),    # 💪実力型本命(地力top2)
                 "power_rival": rec.get("power_rival"),      # インが崩れた時の実力対抗
                 "power_rival_name": rec.get("power_rival_name"),
+                "taiko": rec.get("taiko"),                  # ○対抗(地力トップ非イン)
+                "taiko_name": rec.get("taiko_name"),
+                "power_ex": rec.get("power_ex"),            # 実力筋2連単(本命⇄対抗)
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"

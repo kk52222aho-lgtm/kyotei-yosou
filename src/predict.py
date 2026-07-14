@@ -128,6 +128,19 @@ def recommend(rows: list[dict]) -> dict:
     power_rival = rival_lanes[0] if rival_lanes else None
     rival_row = next((e for e in rows if e["lane"] == power_rival), None)
 
+    # ○対抗=地力トップの"非イン・非本命"艇。買い目に組込む:イン(#1)が崩れた時、勝者を決めるのは
+    #  実力(#2=地力38.6%>差し2号30.7)。本命が実力筋でも、対抗として実力2番手を必ず拾う。
+    taiko = next((l for l in power_order if l != 1 and l != honmei["lane"]), None)
+    taiko_row = next((e for e in rows if e["lane"] == taiko), None)
+    # 実力筋2連単: 本命⇄対抗(位置が崩れた世界の実力ワンツー)。既存exacta3(Harville)に無ければ足す
+    jitsuryoku_ex = []
+    if taiko is not None:
+        jitsuryoku_ex = [f"{honmei['lane']}-{taiko}", f"{taiko}-{honmei['lane']}"]
+    exacta_buy = [c for c, _ in ex[:3]]
+    for c in jitsuryoku_ex:                                     # 実力ワンツーを買い目に確実に含める
+        if c not in exacta_buy:
+            exacta_buy.append(c)
+
     return {
         "bet": True,
         "tansho": honmei["lane"],
@@ -146,6 +159,9 @@ def recommend(rows: list[dict]) -> dict:
         "power_honmei": power_honmei,                       # 💪実力型本命(地力top2=位置が崩れても実力で来る型)
         "power_rival": power_rival,                         # インが崩れた時の実力対抗(非イン地力トップ枠)
         "power_rival_name": rival_row.get("name") if rival_row else None,
+        "taiko": taiko,                                     # ○対抗=地力トップの非イン非本命艇(#2=実力)
+        "taiko_name": taiko_row.get("name") if taiko_row else None,
+        "power_ex": jitsuryoku_ex,                          # 実力筋2連単(本命⇄対抗)=位置崩れの実力ワンツー
         "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。位置(#1)が崩れれば地力(実力=#2)that勝者を決める"
                   f"(検証: 非イン勝者の最有力軸=全国勝率38.6%>差し2号30.7)。本命の地力{honmei_power_rank}位/6。"
                   "※確定払戻ベース・全券種ライブ再現(6艇)では控除の壁=エッジ主張はしない。",

@@ -188,13 +188,13 @@ def _render_today(date, rows):
                 c1.caption("🔥 高確信妙味（本命度that高い群）")
             pr = r.get("power_rank")
             if pr:
-                if r.get("power_honmei"):
-                    c1.caption(f"💪 実力型本命（地力{pr}位/6）＝位置that崩れても実力で来る型")
-                else:
-                    rv = r.get("power_rival")
-                    rvn = r.get("power_rival_name") or ""
-                    c1.caption(f"本命の地力{pr}位/6。イン崩れの実力対抗＝{rv}号{rvn}"
-                               if rv else f"本命の地力{pr}位/6")
+                tk = r.get("taiko")
+                tkn = r.get("taiko_name") or ""
+                pow_line = ("💪 実力型本命（地力{}位/6）".format(pr) if r.get("power_honmei")
+                            else "本命の地力{}位/6".format(pr))
+                if tk:
+                    pow_line += f"　○対抗 **{tk}号**{tkn}（地力筋）"
+                c1.caption(pow_line + "　位置that崩れれば実力(#2)")
             if r.get("deadline"):
                 c1.markdown(f"⏰ 締切 **{r['deadline']}**"
                             + ("" if r.get("settled") else "　までに投票"))
@@ -246,6 +246,12 @@ def _render_today(date, rows):
                         evtag = "（2連単EV: 締切間際に上のEVボタン）"
                     c2.markdown(f"**単勝 {r['honmei']}号**{odlbl} {nm} ／ "
                                 f"2連単 上位3点 {combos}  \n{evtag}　⏳ 結果待ち")
+                    pex = r.get("power_ex")
+                    if pex:
+                        c2.markdown(f"💪 実力筋2連単 {' ・ '.join(pex)}　"
+                                    f"<span style='color:gray'>(本命⇄対抗={r.get('taiko')}号・"
+                                    f"位置that崩れた時の実力ワンツー)</span>",
+                                    unsafe_allow_html=True)
                     if trio:
                         c2.markdown(f"🎲 3連複4点 {trio}　"
                                     f"<span style='color:gray'>(荒れ読みの頑健な器・別枠)</span>",
