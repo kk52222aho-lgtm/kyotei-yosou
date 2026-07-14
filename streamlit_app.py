@@ -185,7 +185,16 @@ def _render_today(date, rows):
             badge = " 🔥" if r.get("high_conf") else ""
             c1.markdown(f"### {r['venue']} {r['rno']}R{badge}")
             if r.get("high_conf"):
-                c1.caption("🔥 高確信妙味（本命度が高い群）")
+                c1.caption("🔥 高確信妙味（本命度that高い群）")
+            pr = r.get("power_rank")
+            if pr:
+                if r.get("power_honmei"):
+                    c1.caption(f"💪 実力型本命（地力{pr}位/6）＝位置that崩れても実力で来る型")
+                else:
+                    rv = r.get("power_rival")
+                    rvn = r.get("power_rival_name") or ""
+                    c1.caption(f"本命の地力{pr}位/6。イン崩れの実力対抗＝{rv}号{rvn}"
+                               if rv else f"本命の地力{pr}位/6")
             if r.get("deadline"):
                 c1.markdown(f"⏰ 締切 **{r['deadline']}**"
                             + ("" if r.get("settled") else "　までに投票"))

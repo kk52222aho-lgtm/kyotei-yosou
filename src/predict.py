@@ -115,6 +115,19 @@ def recommend(rows: list[dict]) -> dict:
     conf = honmei.get("win_pct")
     high_conf = bool(conf is not None and conf >= HIGH_CONF_PCT)
 
+    # 【#2の答え=地力(実力)】インが崩れた世界(本命≠1号)で勝者を決めるのは選手の地力。
+    #  test_when_inside_fails: 非イン勝者を当てる力=地力(全国勝率)38.6% > 当地34.9 > 展示/出足31
+    #  > 2号ベタ(差し定番)30.7 > 機力23.9。位置(#1)の次に効く柱は"実力"。定番の差し2号でも速さでもない。
+    #  ∴妙味の本命に地力ランクを添え、実力の裏付けthaある本命か(実力型)を示す＋インが飛んだ時の実力対抗も出す。
+    nat = {e["lane"]: (e.get("nat_win") or 0.0) for e in rows}
+    power_order = sorted(nat, key=lambda l: -nat[l])            # 地力(全国勝率)降順の枠
+    power_rank = {l: i + 1 for i, l in enumerate(power_order)}  # 1=6人中の地力最強
+    honmei_power_rank = power_rank.get(honmei["lane"])
+    power_honmei = bool(honmei_power_rank is not None and honmei_power_rank <= 2)  # 💪実力型本命
+    rival_lanes = [l for l in power_order if l != 1][:1]        # 非イン地力トップ=実力対抗
+    power_rival = rival_lanes[0] if rival_lanes else None
+    rival_row = next((e for e in rows if e["lane"] == power_rival), None)
+
     return {
         "bet": True,
         "tansho": honmei["lane"],
@@ -129,7 +142,13 @@ def recommend(rows: list[dict]) -> dict:
         "trifecta3_p": [round(pr, 5) for _, pr in tf[:3]],
         "trio_rank": [c for c, _ in trio],                 # 3連複全ランク(買い方くらべ用)
         "trifecta_rank": [c for c, _ in tf],               # 3連単全ランク(買い方くらべ用)
-        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。検証で単勝116.5%・2連単上位3点171%・3連複4点は荒れ読みで頑健・3連単は大きい方(脆い)。",
+        "power_rank": honmei_power_rank,                    # 本命の地力ランク(1=6人中の実力最強)
+        "power_honmei": power_honmei,                       # 💪実力型本命(地力top2=位置が崩れても実力で来る型)
+        "power_rival": power_rival,                         # インが崩れた時の実力対抗(非イン地力トップ枠)
+        "power_rival_name": rival_row.get("name") if rival_row else None,
+        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。位置(#1)が崩れれば地力(実力=#2)that勝者を決める"
+                  f"(検証: 非イン勝者の最有力軸=全国勝率38.6%>差し2号30.7)。本命の地力{honmei_power_rank}位/6。"
+                  "※確定払戻ベース・全券種ライブ再現(6艇)では控除の壁=エッジ主張はしない。",
     }
 
 

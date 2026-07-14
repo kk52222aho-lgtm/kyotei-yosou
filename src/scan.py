@@ -108,6 +108,10 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 "trifecta3_p": rec.get("trifecta3_p"),
                 "trio_rank": rec.get("trio_rank"),        # 3連複全ランク(買い方くらべ用)
                 "trifecta_rank": rec.get("trifecta_rank"),  # 3連単全ランク(買い方くらべ用)
+                "power_rank": rec.get("power_rank"),        # 本命の地力ランク(#2の答え=実力)
+                "power_honmei": rec.get("power_honmei"),    # 💪実力型本命(地力top2)
+                "power_rival": rec.get("power_rival"),      # インが崩れた時の実力対抗
+                "power_rival_name": rec.get("power_rival_name"),
                 "odds": odds, "deadline": deadlines.get(rno),
             })
             od = f"{odds:.1f}倍" if odds else "—"
