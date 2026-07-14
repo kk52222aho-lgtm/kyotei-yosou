@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper, sensor, wild, commentary, styles
+from src import predict, papertrade, scan, scraper, sensor, wild, commentary, styles, katai
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -935,14 +935,49 @@ def page_styles():
 
 st.title("🚤 競艇予想")
 status_banner()
+def page_katai():
+    st.header("🏆 本日の勝てる目（高的中の堅い本命）")
+    st.caption("**当たる目だけ**を出すページ。逆張り妙味(逆に賭ける)でなく、"
+               "『1にイン(位置)・2に地力(実力)』that揃った堅い本命。"
+               "検証(確定払戻・6艇)：イン×地力1位で単勝**的中73.7%**、イン×地力1-2位で68.8%、"
+               "モデル確信≥50%で63.3%。")
+    st.warning("⚠️ ただし**回収は89〜94%＝当たっても控除で儲けは出ない**（市場that実力を正しく値付け済）。"
+               "これは「当てて楽しむ／自信度」用で、儲けの主張はしない。今日確定した結論"
+               "＝競艇も市場効率・エッジ無し、に沿った正直な出し方。")
+    k = katai.load()
+    today = dt.date.today().strftime("%Y%m%d")
+    if not k or not k.get("picks"):
+        st.info("まだ堅軸データthaありません（毎朝の自動スキャンで生成されます）。")
+        return
+    if k.get("date") != today:
+        st.caption(f"（直近スキャン: {k['date'][4:6]}/{k['date'][6:]} 分）")
+    picks = sorted(k["picks"], key=lambda x: -x.get("hit_pct", 0))
+    st.markdown(f"**{len(picks)}レース**that堅軸（的中率順）")
+    for r in picks:
+        with st.container(border=True):
+            c1, c2 = st.columns([1, 3])
+            c1.markdown(f"### {r['venue']} {r['rno']}R")
+            c1.markdown(f"**{r.get('tier','')}**")
+            if r.get("deadline"):
+                c1.caption(f"⏰ 締切 {r['deadline']}")
+            ipr = r.get("in_power_rank")
+            note = (f"イン地力{ipr}位・" if ipr else "") + f"確信{r.get('conf')}%"
+            c2.markdown(f"**単勝 {r['tansho']}号 {r.get('name','')}**（{note}）  \n"
+                        f"🎯 想定的中 **約{r.get('hit_pct')}%**  \n"
+                        f"2連単 本命流し3点：{' ・ '.join(r.get('exacta3') or [])}")
+    st.caption("※想定的中は過去3年の同型(確定払戻)の実測値。回収<100%は不変＝儲け保証なし。")
+
+
 page = st.sidebar.radio("ページ",
-                        ["本日の妙味レース", "🎯動的買い目", "🎰3連単", "🎙️エージェント実況",
-                         "💴買い方くらべ", "🌊荒れそうレース", "成績（予想vs実際）",
-                         "プロの見方", "レース個別予想", "解説"])
+                        ["本日の妙味レース", "🏆勝てる目（堅軸）", "🎯動的買い目", "🎰3連単",
+                         "🎙️エージェント実況", "💴買い方くらべ", "🌊荒れそうレース",
+                         "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "本日の妙味レース":
     page_today()
+elif page == "🏆勝てる目（堅軸）":
+    page_katai()
 elif page == "🎯動的買い目":
     page_dynamic()
 elif page == "🎰3連単":

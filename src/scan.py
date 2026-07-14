@@ -19,7 +19,7 @@ import json
 import os
 import time
 
-from . import predict, scraper, storage, wild, commentary
+from . import predict, scraper, storage, wild, commentary, katai
 from .venues import name as venue_name
 
 CACHE_PATH = os.path.join(storage.DATA_DIR, "today_picks.json")
@@ -55,6 +55,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
     picks = []
     wild_all = []      # 全レースの荒れ度(参考ページ用)
     agent_all = []     # 全レースのエージェント判断(実況ページ用)
+    katai_all = []     # 全レースの勝てる目=堅い本命(高的中ページ用)
     races_scanned = 0
     for jcd in venues:
         deadlines = scraper.fetch_deadlines(date, jcd)  # {rno: "HH:MM"} 場ごと1発
@@ -73,6 +74,15 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                 e["jcd"] = jcd
             rows = predict.predict_entries(entries, bundle)
             rec = predict.recommend(rows)
+            # 勝てる目=堅い本命(高的中)。妙味(逆張り)と別軸で全レースから拾う。非致命。
+            try:
+                kt = katai.select(rows)
+                if kt:
+                    kt.update({"jcd": jcd, "venue": venue_name(jcd), "rno": rno,
+                               "deadline": deadlines.get(rno)})
+                    katai_all.append(kt)
+            except Exception:
+                pass
             # 全レースの荒れ度(インの脆さ)を採点＝参考ページ用（妙味でなくても）。非致命。
             try:
                 ws = wild.score_race(rows)
@@ -123,6 +133,7 @@ def scan(date: str, with_odds: bool = True, bundle=None):
                   f"{rec.get('tansho_name','')} (予想{rows[0]['win_pct']}% / {od})  2連単{'・'.join(rec['exacta3'])}")
     wild.save(date, wild_all)   # 荒れ度上位を today_wild.json へ（参考ページ用）
     commentary.save_log(date, agent_all)   # 全レース判断を today_agent.json へ（実況ページ用）
+    katai.save(date, katai_all)   # 勝てる目=堅い本命を today_katai.json へ（高的中ページ用）
     return picks, {"venues_checked": len(venues), "races_scanned": races_scanned}
 
 
