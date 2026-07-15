@@ -66,21 +66,77 @@ def _exacta_odds(date, jcd, rno):
     return scraper.fetch_exacta_odds(date, jcd, rno) or {}
 
 
+# 監査済(test_nearlock_audit=BT物差し・walk-forward・6艇クリーン・N/CI付、
+#  test_nearlock_live_gap=展示前でも較正保持・保守的を確認)。(確信閾, 的中%, CI, 回収%)
+_NEARLOCK = [(85, 88, "86-90", 96), (80, 84, "83-85", 95)]
+
+
 def page_ichiten():
-    st.header("🔒 本日の『これは獲れる』（準備中）")
-    st.warning(
-        "**準備中＝数字を外して公開中。** このページの想定的中(84%等)は client に出す前提を"
-        "まだ満たしてない:\n\n"
-        "① 対応表(確信→的中)that**5視点監査を未通過**（walk-forward・各バケツのN・CI・≥.85のN未確認）。"
-        "110.9%を殺した同じパイプラインの数字＝無検品では出さない。\n\n"
-        "② ライブは**展示前スキャンで確信の物差しthaがバックテストと別分布**。"
-        "『確信66%→的中75%』の換算that無効な入力に適用になる＝再スキャンthat通るまで数字は意味不明。\n\n"
-        "③ 的中を出すなら**収支(EV)も必ず併記**。確信84%＝オッズ約1.2倍＝当たっても控除で負ける。"
-        "『当たるけど負けるサイト』を自分で晒さない。")
-    st.caption("商品コンセプトは生かす: 確信80%級の near-lock だけ『これは獲れる』と言い切り、"
-               "無い日は『今日は無し』と言う(初日66%で0件→正直🈳は機能した=設計の勝ち)。"
-               "①表を監査 ②展示込み再スキャンでライブ確信とBT確信の分布照合(通らねば表差し替え) "
-               "が済んだら、数字と収支ごと再公開する。**客に見せる数字は検品済み＝正直の堀の一枚目。**")
+    st.header("🔒 本日の『これは獲れる』")
+    st.caption("撒かない。**確信80%級だけ**を『これは獲れる』と言い切る（監査済＝実測的中84%・"
+               "CI[83,85]・3年安定・展示前でも較正保持）。無い日は『今日は無し』。")
+    k = katai.load()
+    today = dt.date.today().strftime("%Y%m%d")
+    picks = (k or {}).get("picks", [])
+    if not picks:
+        st.info("本日のデータ待ち（毎朝の自動スキャンで生成）。")
+        return
+    if k.get("date") != today:
+        st.caption(f"（直近スキャン {k['date'][4:6]}/{k['date'][6:]} 分）")
+    best = max(picks, key=lambda x: (x.get("conf") or 0))
+    conf = best.get("conf") or 0
+    hit = ci = ret = None
+    for th, h, c, r in _NEARLOCK:
+        if conf >= th:
+            hit, ci, ret = h, c, r
+            break
+
+    if hit is None:
+        st.warning(f"🈳 **今日は『これは獲れる』級（確信80%↑）that無し＝見送り推奨。**\n\n"
+                   f"本日の最強でも確信{conf:.0f}%で、言い切れる near-lock に届かん。"
+                   f"**無理に張らんのthaが勝ち。** 当てにいくだけなら🏆勝てる目ページへ。")
+        st.caption(f"（参考・本日の最強格: {best['venue']} {best['rno']}R 単勝{best['tansho']}号 "
+                   f"{best.get('name','')} 確信{conf:.0f}%）")
+        return
+
+    jcd, rno, date = best["jcd"], best["rno"], k["date"]
+    st.subheader(f"{best['venue']} {best['rno']}R　🔒 単勝 {best['tansho']}号 {best.get('name','')}")
+    dl = f"　⏰締切 {best['deadline']}" if best.get("deadline") else ""
+    st.caption(f"確信{conf:.0f}% ＝ **的中 約{hit}%**（監査済 実測・CI[{ci}]）／"
+               f"**回収 約{ret}%**（当たっても控除で微減＝これは『当てる』用・儲けは主張せん）{dl}")
+
+    res = _live_result(date, jcd, rno)
+    if res and res.get("winner"):
+        w = res["winner"]
+        if w == best["tansho"]:
+            od = (res.get("tansho_yen") or 0) / 100
+            st.success(f"🎯 **的中！** {best['tansho']}号that1着（{od:.1f}倍）。渾身、獲ったで💪")
+        else:
+            st.error(f"💥 **外れた…** 勝ちは **{w}号**。**わいAIでアホですんませーん🙇** "
+                     f"（的中{hit}%＝{100-hit}%は外す。当たった時だけ覚えとかんとってな）")
+
+    stake = st.number_input("賭け金（1点あたり・円）", min_value=100, value=1000, step=100)
+    wo = _win_odds(date, jcd, rno)
+    eo = _exacta_odds(date, jcd, rno)
+    tan = wo.get(best["tansho"]) or wo.get(str(best["tansho"]))
+    ex3 = best.get("exacta3") or []
+    rows = []
+    if tan and tan > 1.0:
+        rows.append([f"単勝 {best['tansho']}号", f"{tan:.1f}倍", f"約{hit}%",
+                     f"¥{int(stake*tan):,}"])
+    for c in ex3[:3]:
+        o = eo.get(c)
+        if o:
+            rows.append([f"2連単 {c}", f"{o:.1f}倍", "—", f"¥{int(stake*o):,}"])
+    if rows:
+        import pandas as _pd
+        st.markdown(f"### 💴 {stake:,}円 賭けたら")
+        st.table(_pd.DataFrame(rows, columns=["買い目", "オッズ", "的中目安", "当たれば"]))
+        if not tan or tan <= 1.0:
+            st.caption("※単勝オッズがまだ形成前（締切前に確定オッズが出る）。")
+    st.caption("正直に：確信80%級でも単勝回収は約95%（控除の壁で長期は微減）＝"
+               "**これは『当てる』喜び用。儲けは主張せん。** 締切前にオッズ確定→投票直前に再確認を。"
+               "購入はテレボート等で自己責任。")
 
     jcd, rno, date = best["jcd"], best["rno"], k["date"]
     # 結果that出てたら隠さず出す（外れも謝る）
