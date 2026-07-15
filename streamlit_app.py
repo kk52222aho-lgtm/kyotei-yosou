@@ -189,10 +189,14 @@ def _render_today(date, rows):
     for r in eff:
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
-            badge = " 🔥" if r.get("high_conf") else ""
+            gyaku_in = (r.get("win_pct") or 0) >= 55        # 逆イン本命=強い外本命(FLB妙味候補)
+            badge = (" 🎯" if gyaku_in else "") + (" 🔥" if r.get("high_conf") else "")
             c1.markdown(f"### {r['venue']} {r['rno']}R{badge}")
+            if gyaku_in:
+                c1.caption("🎯 **逆イン本命**（外本命that確信55%↑＝イン脳バイアスで過小人気の妙味候補・"
+                           "歴史108%だが未確定→前向き検証中。持続センサーの『逆イン本命』で答え合わせ）")
             if r.get("high_conf"):
-                c1.caption("🔥 高確信妙味（本命度that高い群）")
+                c1.caption("🔥 高確信（本命度that高い群）")
             pr = r.get("power_rank")
             if pr:
                 tk = r.get("taiko")

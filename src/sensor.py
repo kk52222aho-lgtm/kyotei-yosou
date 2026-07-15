@@ -31,11 +31,15 @@ from . import storage
 from .papertrade import ODDS_FLOOR
 
 LEDGER = os.path.join(storage.DATA_DIR, "papertrade.jsonl")
-MIN_N = {"単勝(≥1.5)": 60, "2連単3点": 60, "3連複4点": 120, "3連単3点": 120}
+MIN_N = {"単勝(≥1.5)": 60, "2連単3点": 60, "3連複4点": 120, "3連単3点": 120,
+         "逆イン本命": 50}
+# 逆イン本命 = 本命≠1号 × 確信(win_pct)≥55% の単勝。FLB検証(test_flb_outside_oos)で
+#  唯一100%超えた候補=イン脳バイアスで強い外本命が過小人気。ただしN597で点108%/CI[97,126]/
+#  trim99=歴史では未確定。真値100-108%の薄い本物を前向き実測で確定/棄却する専用track。
 
 # センサートラック→動的買い目の賭式キー
 TRACK_TO_KEY = {"単勝(≥1.5)": "tansho", "2連単3点": "exacta",
-                "3連複4点": "trio", "3連単3点": "trifecta"}
+                "3連複4点": "trio", "3連単3点": "trifecta", "逆イン本命": "tansho"}
 TRAIL_DAYS = 45
 BOOT = 2000
 
@@ -53,6 +57,11 @@ def _bets(settled, track):
     for r in settled:
         if track == "単勝(≥1.5)":
             if (r.get("final_odds") or 0) < ODDS_FLOOR:
+                continue
+            out.append((r["date"], 100, r.get("tansho_return", 0)))
+        elif track == "逆イン本命":
+            # 本命≠1号(妙味台帳は既にこれのみ)×確信≥55% の単勝1点。FLB妙味候補の前向き証明
+            if r.get("honmei") == 1 or (r.get("win_pct") or 0) < 55:
                 continue
             out.append((r["date"], 100, r.get("tansho_return", 0)))
         elif track == "2連単3点":
