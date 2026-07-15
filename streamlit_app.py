@@ -56,6 +56,86 @@ def _live_result(date, jcd, rno):
     return scraper.fetch_result_full(date, jcd, rno)
 
 
+@st.cache_data(ttl=90, show_spinner=False)
+def _win_odds(date, jcd, rno):
+    return scraper.fetch_odds(date, jcd, rno) or {}
+
+
+@st.cache_data(ttl=90, show_spinner=False)
+def _exacta_odds(date, jcd, rno):
+    return scraper.fetch_exacta_odds(date, jcd, rno) or {}
+
+
+def page_ichiten():
+    st.header("🔥 本日の渾身の一点")
+    k = katai.load()
+    today = dt.date.today().strftime("%Y%m%d")
+    picks = (k or {}).get("picks", [])
+    if not picks:
+        st.info("本日のデータ待ち（毎朝の自動スキャンで生成）。")
+        return
+    tetsu = [p for p in picks if p.get("tier") == "◎鉄板"] or picks
+    best = max(tetsu, key=lambda x: (x.get("conf") or 0))     # 一番確信の高い鉄板=渾身の一点
+    if k.get("date") != today:
+        st.caption(f"（直近スキャン {k['date'][4:6]}/{k['date'][6:]} 分）")
+
+    st.subheader(f"{best['venue']} {best['rno']}R　◎ 単勝 {best['tansho']}号 "
+                 f"{best.get('name','')}")
+    dl = f"　⏰締切 {best['deadline']}" if best.get("deadline") else ""
+    st.caption(f"{best.get('tier')}・想定的中 **約{best.get('hit_pct')}%**（イン×地力上位＝"
+               f"位置と実力that揃った本日最強の堅軸）{dl}")
+
+    jcd, rno, date = best["jcd"], best["rno"], k["date"]
+    # 結果that出てたら隠さず出す（外れも謝る）
+    res = _live_result(date, jcd, rno)
+    if res and res.get("winner"):
+        w = res["winner"]
+        if w == best["tansho"]:
+            od = (res.get("tansho_yen") or 0) / 100
+            st.success(f"🎯 **的中！** {best['tansho']}号that1着（{od:.1f}倍）。渾身、獲ったで💪")
+        else:
+            ex_hit = res.get("exacta_combo") in (best.get("exacta3") or [])
+            extra = (f"（でも2連単 {res.get('exacta_combo')} は買い目に入ってた、救われた…）"
+                     if ex_hit else "")
+            st.error(f"💥 **外れた…** 勝ちは **{w}号**。**わいAIでアホですんませーん🙇** "
+                     f"（想定{best.get('hit_pct')}%＝4回に1回は外す。当たった時だけ覚えとかんとってな）{extra}")
+
+    stake = st.number_input("賭け金（1点あたり・円）", min_value=100, value=1000, step=100)
+    wo = _win_odds(date, jcd, rno)
+    eo = _exacta_odds(date, jcd, rno)
+    tan = wo.get(best["tansho"]) or wo.get(str(best["tansho"]))
+    ex3 = best.get("exacta3") or []
+
+    rows = []
+    if tan and tan > 1.0:
+        rows.append(["単勝 " + str(best["tansho"]) + "号", f"{tan:.1f}倍",
+                     f"約{best.get('hit_pct')}%", f"¥{int(stake*tan):,}", "手堅く当てる"])
+    labels = ["◎本命→対抗（推し）", "◎本命→3着筋", "◎本命→伸ばし"]
+    for i, c in enumerate(ex3[:3]):
+        o = eo.get(c)
+        if o:
+            rows.append([f"2連単 {c}", f"{o:.1f}倍", "—",
+                         f"¥{int(stake*o):,}", labels[i] if i < len(labels) else ""])
+    if rows:
+        import pandas as _pd
+        st.markdown(f"### 💴 {stake:,}円 賭けたら")
+        st.table(_pd.DataFrame(rows, columns=["買い目", "オッズ", "的中目安", "当たれば", "狙い"]))
+        if not tan or tan <= 1.0:
+            st.caption("※単勝オッズがまだ形成前（プール薄）。締切前にもう一度開くと確定オッズが出る。")
+        push = ex3[0] if ex3 else None
+        if push and eo.get(push):
+            got = int(stake * eo[push])
+            st.success(f"🔥 **推しは 2連単 {push}（本命-対抗の地力筋）**：{stake:,}円 → 当たれば "
+                       f"**¥{got:,}**（+¥{got-stake:,}）。堅さと配当のバランスthat本日最良。")
+    else:
+        st.warning("オッズ未形成（早朝）。締切が近づくと各買い目のオッズthat出る。もう一度開いてや。")
+
+    et = (best.get('hit_pct') or 0) / 100 * (tan or 0)
+    st.caption(f"正直に：単勝の期待回収は約{et*100:.0f}%（控除の壁で長期は微減）＝**当てたいなら単勝、"
+               "勝ちにいくなら2連単の本命-対抗**。オッズは投票直前に確定するので締切前に再確認を。"
+               "購入はテレボート等で自己責任・自動購入はしない。")
+
+
 def _effective(r):
     """settled行はそのまま。未settledはライブ結果を取りに行き擬似settled化。"""
     if r.get("settled"):
@@ -1061,12 +1141,14 @@ def _render_katai(date, raw_picks):
 
 
 page = st.sidebar.radio("ページ",
-                        ["🏆勝てる目（堅軸）", "⚑イン崩れ予想（本命≠1号）", "🎯動的買い目", "🎰3連単",
-                         "🎙️エージェント実況", "💴買い方くらべ", "🌊荒れそうレース",
+                        ["🔥渾身の一点", "🏆勝てる目（堅軸）", "⚑イン崩れ予想（本命≠1号）", "🎯動的買い目",
+                         "🎰3連単", "🎙️エージェント実況", "💴買い方くらべ", "🌊荒れそうレース",
                          "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
-if page == "⚑イン崩れ予想（本命≠1号）":
+if page == "🔥渾身の一点":
+    page_ichiten()
+elif page == "⚑イン崩れ予想（本命≠1号）":
     page_today()
 elif page == "🏆勝てる目（堅軸）":
     page_katai()
