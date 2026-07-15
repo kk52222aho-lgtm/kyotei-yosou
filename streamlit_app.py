@@ -935,6 +935,24 @@ def page_styles():
 
 st.title("🚤 競艇予想")
 status_banner()
+def _katai_effective(date, p):
+    """堅軸pickにライブ結果を付ける（未確定は _settled=False）。_live_result(120秒cache)流用。"""
+    res = _live_result(date, p["jcd"], p["rno"])
+    if not res:
+        return {**p, "_settled": False}
+    e = dict(p)
+    e["_settled"] = True
+    e["winner"] = res["winner"]
+    e["tansho_win"] = res["winner"] == p["tansho"]
+    e["tansho_return"] = res["tansho_yen"] if (e["tansho_win"] and res["tansho_yen"]) else 0
+    e["final_odds"] = round(res["tansho_yen"] / 100, 1) if (e["tansho_win"] and res["tansho_yen"]) else None
+    ex3 = p.get("exacta3", []) or []
+    e["exacta_result"] = res["exacta_combo"]
+    e["exacta_win"] = res["exacta_combo"] in ex3
+    e["exacta_return"] = res["exacta_yen"] if (e["exacta_win"] and res["exacta_yen"]) else 0
+    return e
+
+
 def page_katai():
     st.header("🏆 本日の勝てる目（高的中の堅い本命）")
     st.caption("**当たる目だけ**を出すページ。逆張り妙味(逆に賭ける)でなく、"
@@ -951,8 +969,33 @@ def page_katai():
         return
     if k.get("date") != today:
         st.caption(f"（直近スキャン: {k['date'][4:6]}/{k['date'][6:]} 分）")
-    picks = sorted(k["picks"], key=lambda x: -x.get("hit_pct", 0))
-    st.markdown(f"**{len(picks)}レース**that堅軸（的中率順）")
+    _render_katai(k["date"], k["picks"])
+
+
+@st.fragment(run_every=180)
+def _render_katai(date, raw_picks):
+    picks = [_katai_effective(date, p) for p in raw_picks]        # ライブ結果込み(3分毎更新)
+    picks.sort(key=lambda x: (-int(x.get("_settled", False)), -x.get("hit_pct", 0)))
+    settled = [p for p in picks if p.get("_settled")]
+    n = len(settled)
+    t_hit = sum(1 for p in settled if p.get("tansho_win"))
+    t_ret = sum(p.get("tansho_return", 0) for p in settled)
+    e_hit = sum(1 for p in settled if p.get("exacta_win"))
+    e_ret = sum(p.get("exacta_return", 0) for p in settled)
+
+    c = st.columns(4)
+    c[0].metric("堅軸レース", f"{len(picks)} 件")
+    c[1].metric("結果確定", f"{n} 件")
+    c[2].metric("単勝 的中率", f"{t_hit/n*100:.0f}%" if n else "—",
+                help="想定74%(◎鉄板)。確定分の実績。")
+    c[3].metric("単勝 回収率", f"{t_ret/(n*100)*100:.0f}%" if n else "—",
+                help="100円ずつ。<100%=当たるが控除で負ける(市場効率)。")
+    if n:
+        st.caption(f"実績（確定{n}件）：単勝 的中{t_hit}/{n}・回収{t_ret/(n*100)*100:.0f}% ／ "
+                   f"2連単3点 的中{e_hit}/{n}・回収{e_ret/(n*300)*100:.0f}%　"
+                   "※結果はレース後およそ5分で自動反映（3分毎更新）。")
+    st.divider()
+
     for r in picks:
         with st.container(border=True):
             c1, c2 = st.columns([1, 3])
@@ -962,10 +1005,21 @@ def page_katai():
                 c1.caption(f"⏰ 締切 {r['deadline']}")
             ipr = r.get("in_power_rank")
             note = (f"イン地力{ipr}位・" if ipr else "") + f"確信{r.get('conf')}%"
-            c2.markdown(f"**単勝 {r['tansho']}号 {r.get('name','')}**（{note}）  \n"
-                        f"🎯 想定的中 **約{r.get('hit_pct')}%**  \n"
-                        f"2連単 本命流し3点：{' ・ '.join(r.get('exacta3') or [])}")
-    st.caption("※想定的中は過去3年の同型(確定払戻)の実測値。回収<100%は不変＝儲け保証なし。")
+            head = (f"**単勝 {r['tansho']}号 {r.get('name','')}**（{note}）　"
+                    f"🎯想定的中 約{r.get('hit_pct')}%")
+            ex3 = ' ・ '.join(r.get("exacta3") or [])
+            if r.get("_settled"):
+                t = (f"🎯的中 **{r.get('final_odds')}倍**" if r.get("tansho_win")
+                     else f"×ハズレ（勝ち **{r.get('winner')}号**）")
+                e = (f"🎯的中 {r.get('exacta_return')}円" if r.get("exacta_win")
+                     else f"×ハズレ（結果 {r.get('exacta_result') or '?'}）")
+                c2.markdown(f"{head}  \n"
+                            f"単勝: {t} ｜ 2連単3点 {ex3}: {e}")
+            else:
+                c2.markdown(f"{head}  \n"
+                            f"2連単 本命流し3点：{ex3}　⏳ 結果待ち")
+    st.caption("※想定的中は過去3年の同型(確定払戻)の実測値。回収<100%は不変＝儲け保証なし。"
+               "確定分の実績（上の指標）that想定に近いか＝前向きの答え合わせ。")
 
 
 page = st.sidebar.radio("ページ",
