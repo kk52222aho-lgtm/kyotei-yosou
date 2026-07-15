@@ -66,48 +66,21 @@ def _exacta_odds(date, jcd, rno):
     return scraper.fetch_exacta_odds(date, jcd, rno) or {}
 
 
-def _nearlock(conf):
-    """確信(正規化勝率)→(獲れる級か, 想定的中%)。実測: ≥.80=84% / ≥.75=81 / ≥.70=78。"""
-    if conf >= 80:
-        return True, 84
-    if conf >= 75:
-        return True, 81
-    if conf >= 70:
-        return True, 78
-    return False, None
-
-
 def page_ichiten():
-    st.header("🔒 本日の『これは獲れる』")
-    st.caption("撒かない。**確信80%級＝実測的中84%の near-lock だけ**を出す。"
-               "該当that無い日は正直に『今日は無し』＝出さない勇気thaが信用。")
-    k = katai.load()
-    today = dt.date.today().strftime("%Y%m%d")
-    picks = (k or {}).get("picks", [])
-    if not picks:
-        st.info("本日のデータ待ち（毎朝の自動スキャンで生成）。")
-        return
-    if k.get("date") != today:
-        st.caption(f"（直近スキャン {k['date'][4:6]}/{k['date'][6:]} 分）")
-    best = max(picks, key=lambda x: (x.get("conf") or 0))
-    conf = best.get("conf") or 0
-    lock, hit = _nearlock(conf)
-
-    if not lock:
-        st.warning(f"🈳 **今日は『これは獲れる』級that無し（見送り推奨）。**\n\n"
-                   f"本日の最強でも確信{conf:.0f}%（＝的中75%前後）で、"
-                   f"言い切れる near-lock(確信70%↑)に届かん。**無理に張らんのthaが勝ち。** "
-                   f"当てにいくだけなら🏆勝てる目ページへ。")
-        st.caption(f"（参考・本日の最強格: {best['venue']} {best['rno']}R 単勝{best['tansho']}号 "
-                   f"{best.get('name','')} 確信{conf:.0f}%）")
-        return
-
-    st.subheader(f"{best['venue']} {best['rno']}R　🔒 単勝 {best['tansho']}号 "
-                 f"{best.get('name','')}")
-    dl = f"　⏰締切 {best['deadline']}" if best.get("deadline") else ""
-    st.caption(f"**確信{conf:.0f}%＝想定的中 約{hit}%**（イン×地力上位that揃った near-lock。"
-               f"これは言い切れる）{dl}")
-    best = {**best, "hit_pct": hit}
+    st.header("🔒 本日の『これは獲れる』（準備中）")
+    st.warning(
+        "**準備中＝数字を外して公開中。** このページの想定的中(84%等)は client に出す前提を"
+        "まだ満たしてない:\n\n"
+        "① 対応表(確信→的中)that**5視点監査を未通過**（walk-forward・各バケツのN・CI・≥.85のN未確認）。"
+        "110.9%を殺した同じパイプラインの数字＝無検品では出さない。\n\n"
+        "② ライブは**展示前スキャンで確信の物差しthaがバックテストと別分布**。"
+        "『確信66%→的中75%』の換算that無効な入力に適用になる＝再スキャンthat通るまで数字は意味不明。\n\n"
+        "③ 的中を出すなら**収支(EV)も必ず併記**。確信84%＝オッズ約1.2倍＝当たっても控除で負ける。"
+        "『当たるけど負けるサイト』を自分で晒さない。")
+    st.caption("商品コンセプトは生かす: 確信80%級の near-lock だけ『これは獲れる』と言い切り、"
+               "無い日は『今日は無し』と言う(初日66%で0件→正直🈳は機能した=設計の勝ち)。"
+               "①表を監査 ②展示込み再スキャンでライブ確信とBT確信の分布照合(通らねば表差し替え) "
+               "が済んだら、数字と収支ごと再公開する。**客に見せる数字は検品済み＝正直の堀の一枚目。**")
 
     jcd, rno, date = best["jcd"], best["rno"], k["date"]
     # 結果that出てたら隠さず出す（外れも謝る）
