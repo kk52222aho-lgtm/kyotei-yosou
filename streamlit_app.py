@@ -193,8 +193,9 @@ def _render_today(date, rows):
             badge = (" 🎯" if gyaku_in else "") + (" 🔥" if r.get("high_conf") else "")
             c1.markdown(f"### {r['venue']} {r['rno']}R{badge}")
             if gyaku_in:
-                c1.caption("🎯 **逆イン本命**（外本命that確信55%↑＝イン脳バイアスで過小人気の妙味候補・"
-                           "歴史108%だが未確定→前向き検証中。持続センサーの『逆イン本命』で答え合わせ）")
+                c1.caption("🎯 **逆イン本命(probe)**（外本命that確信55%↑）。機構(客はコースを値付け・薄い単勝プール"
+                           "で歪みが生存)は妥当だが、歴史110.9%は5視点監査で**breakevenと統計的に区別不可**"
+                           "(多重探索+fat-tail+FLB相乗り)＝未証明の仮説。極小probeのみ・増資禁止・前向き検証中。")
             if r.get("high_conf"):
                 c1.caption("🔥 高確信（本命度that高い群）")
             pr = r.get("power_rank")

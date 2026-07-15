@@ -59,6 +59,8 @@ def eval_year(test: pd.DataFrame):
     tan_b = tan_h = tan_r = 0
     ex_b = ex_h = ex_r = 0
     for _, g in test.groupby(["date", "jcd", "rno"]):
+        if len(g) != 6:                    # 6艇そろいのみ=飛び艇survivorship除去(監査指摘)
+            continue
         g = g.sort_values("p", ascending=False)
         s = g["p"].sum()
         if s <= 0:

@@ -66,10 +66,11 @@ def _add_tenkai(df: pd.DataFrame) -> pd.DataFrame:
     if "avg_st" in w:
         st = st.fillna(pd.to_numeric(w["avg_st"], errors="coerce"))
     w["_st"] = st
-    w["_st"] = w["_st"].fillna(w.groupby(keys)["_st"].transform("mean")).fillna(w["_st"].mean()).fillna(0.18)
+    # レース内平均→定数(0.18)でフォールバック。※全df平均は使わない=test年統計のリーク防止(監査指摘)
+    w["_st"] = w["_st"].fillna(w.groupby(keys)["_st"].transform("mean")).fillna(0.18)
     tt = pd.to_numeric(w["tenji_time"], errors="coerce") if "tenji_time" in w else pd.Series(np.nan, index=w.index)
     w["_tt"] = tt
-    w["_tt"] = w["_tt"].fillna(w.groupby(keys)["_tt"].transform("mean")).fillna(w["_tt"].mean()).fillna(6.8)
+    w["_tt"] = w["_tt"].fillna(w.groupby(keys)["_tt"].transform("mean")).fillna(6.8)
     w["_pw"] = (pd.to_numeric(w["nat_win"], errors="coerce").fillna(0.0) if "nat_win" in w
                 else pd.Series(0.0, index=w.index))
 
