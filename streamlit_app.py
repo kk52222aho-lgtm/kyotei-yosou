@@ -972,9 +972,27 @@ def page_katai():
     _render_katai(k["date"], k["picks"])
 
 
+def _deadline_passed(deadline, now_min, buffer=10):
+    """締切(HH:MM)+buffer分that今(JST分)を過ぎたか。過ぎた分だけ結果を取りに行く。"""
+    if not deadline:
+        return False
+    try:
+        h, m = deadline.split(":")
+        return now_min >= int(h) * 60 + int(m) + buffer
+    except Exception:
+        return False
+
+
 @st.fragment(run_every=180)
 def _render_katai(date, raw_picks):
-    picks = [_katai_effective(date, p) for p in raw_picks]        # ライブ結果込み(3分毎更新)
+    now = dt.datetime.utcnow() + dt.timedelta(hours=9)            # JST
+    now_min, today = now.hour * 60 + now.minute, now.strftime("%Y%m%d")
+    # 当日はレース済み(締切+10分経過)だけライブ精算。過去日は全件精算。開催前は0取得=即表示
+    picks = [
+        _katai_effective(date, p) if (date != today or _deadline_passed(p.get("deadline"), now_min))
+        else {**p, "_settled": False}
+        for p in raw_picks
+    ]
     picks.sort(key=lambda x: (-int(x.get("_settled", False)), -x.get("hit_pct", 0)))
     settled = [p for p in picks if p.get("_settled")]
     n = len(settled)
