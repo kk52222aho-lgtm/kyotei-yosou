@@ -251,13 +251,40 @@ def render_sensor(expanded=True):
                         f"回収 {life['roi']*100:.0f}% {ci} ／ **{t['verdict']}** — {t['why']}")
 
 
+def _ichi_break(p1):
+    """1号の予測勝率→崩れ率(=1号が2着以下になる率)。検証済(展示前でも較正保持・N巨大・3年安定):
+    予測<30%→崩れ78% / 30-40→65 / 40-50→51 / 50-60→38 / ≥60→25。"""
+    if p1 is None:
+        return None
+    if p1 < 30:
+        return 78
+    if p1 < 40:
+        return 65
+    if p1 < 50:
+        return 51
+    if p1 < 60:
+        return 38
+    return 25
+
+
 def page_today():
-    st.header("⚑ 本日のイン崩れ予想（本命≠1号）")
-    st.caption("モデルthaイン(1号)以外を本命に見たレース＝**インthat崩れる読み**。"
+    st.header("⚑ 本日のイン崩れ予想（1号 崩れ読み）")
+    st.caption("モデルthaイン(1号)以外を本命に見たレース＝**1号that崩れる読み**。"
                "#2=地力(実力)+展開(相対ST/出足)で『位置が崩れたら誰that勝つか』を出す。")
-    st.warning("⚠️ これは**予測（逆張りの読み）で、儲けの手段ではない**。検証(6艇クリーン・確定払戻)："
-               "逆張り単勝の回収は**82〜95%＝当たっても控除で負ける**（妙味エッジは元々"
-               "1号飛びレースを結果から拾ったsurvivorship水増しで、実際は市場効率）。当てる読みとして見る用。")
+    with st.expander("📊 この『崩れ読み』の的中実績（15.4万レースで較正済・検品済）", expanded=False):
+        st.markdown(
+            "**モデルthaが1号を予測◯%と見た時、実際に1号that崩れる率（展示前スキャンでも保持）:**\n\n"
+            "| モデルの1号予測勝率 | 実際の1号 崩れ率 | 件数 |\n"
+            "|---|---|---|\n"
+            "| 30%未満 | **78%崩れる** | 8,066 |\n"
+            "| 30–40% | **65%崩れる** | 27,975 |\n"
+            "| 40–50% | 51%崩れる | 36,314 |\n"
+            "| 50–60% | 38%崩れる | 42,492 |\n"
+            "| 60%以上 | 25%崩れる | 39,215 |\n\n"
+            "予測≈実測でピタリ較正・3年安定。＝**『どの1号that崩れるか』は当てられる**（撒くサイトは"
+            "全部1号本命、うちだけthat『1号that危ない日』を名指しできる）。")
+    st.warning("⚠️ ただし**当てる読みで、儲けの手段ではない**。逆張り単勝の回収は**82〜95%＝"
+               "当たっても控除で負ける**（市場も同じ読みでオッズthat動く）。1号を疑う『情報』として使う用。")
     today = dt.date.today().strftime("%Y%m%d")
     cache = scan.load_cache()
     scanned_today = bool(cache and cache.get("date") == today)
@@ -325,6 +352,11 @@ def _render_today(date, rows):
             gyaku_in = (r.get("win_pct") or 0) >= 55        # 逆イン本命=強い外本命(FLB妙味候補)
             badge = (" 🎯" if gyaku_in else "") + (" 🔥" if r.get("high_conf") else "")
             c1.markdown(f"### {r['venue']} {r['rno']}R{badge}")
+            brk = _ichi_break(r.get("ichi_pct"))
+            if brk is not None:
+                emo = "🚨" if brk >= 65 else ("⚠️" if brk >= 50 else "🔸")
+                c1.markdown(f"{emo} **1号 崩れ率 約{brk}%**"
+                            + (f"（1号予測{r['ichi_pct']:.0f}%・較正済）" if r.get("ichi_pct") else ""))
             if gyaku_in:
                 c1.caption("🎯 **逆イン本命(probe)**（外本命that確信55%↑）。機構(客はコースを値付け・薄い単勝プール"
                            "で歪みが生存)は妥当だが、歴史110.9%は5視点監査で**breakevenと統計的に区別不可**"

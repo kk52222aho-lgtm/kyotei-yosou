@@ -72,6 +72,7 @@ def cmd_log(date: str):
             "venue": p["venue"], "honmei": p["honmei"],
             "name": p.get("name"), "scan_odds": p.get("odds"),
             "win_pct": p.get("win_pct"),   # 本命の正規化勝率(💎最強妙味判定 p0用)
+            "ichi_pct": p.get("ichi_pct"),  # 1号の予測勝率→崩れ率badge用
             "exacta3": p["exacta3"],
             "exacta3_p": p.get("exacta3_p"),   # EV算出用
             "trio4": p.get("trio4"),           # 3連複4点(荒れ読みの頑健な器)
