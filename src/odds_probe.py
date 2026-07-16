@@ -16,6 +16,10 @@
    kill=N>=100でCI上限<100 or N>=200で生涯ROI<90%。継続=CIが100跨ぎ。閾値を動かす=新規登録でN振り直し。
  ※スリッページ注記: 記録するオッズは"見えた瞬間"の値。実約定はその後=採点時はEVを保守側に割引く
    (張る側の指摘)。この収集器は賭けを執行しない=痕跡の記録のみ。
+ ※初日(2026-07-16)の実測知見: 早い窓(T-15/T-10)はオッズ未形成の暫定値=偽の高EVが出る
+   (例: T-18で3号24.5倍→T-1で7.1倍に収束、暫定EV7.08は蜃気楼)。∴全窓を録って"いつ安定
+   するか"を実証する設計で正しいが、採点時は早い窓のEVを信用しない=late窓(T-3/T-1)基準で
+   評価する。この発火窓の変更(all→late)を確定する時は新規事前登録でN振り直し(閾値凍結の掟)。
 """
 from __future__ import annotations
 
@@ -97,7 +101,7 @@ def snapshot(date, now, bundle=None, schedule=None):
             if not od:
                 continue
             p = r["win_prob"]
-            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                          (date, str(jcd), rno, stamp, hit, "tansho", str(r["lane"]),
                           od, p, round(p * od, 3), int(top["lane"]), gyaku))
             written += 1
