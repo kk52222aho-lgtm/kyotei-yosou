@@ -52,47 +52,55 @@ def _mins_to(deadline_hhmm, now):
     return round((dl - now).total_seconds() / 60)
 
 
-def snapshot(date, now, bundle=None):
+def fetch_schedule(date):
+    """{(jcd, rno): 'HH:MM'} 開催全レースの締切表。ループ側that30分キャッシュして使い回す用。"""
+    sched = {}
+    for jcd in scraper.fetch_held_venues(date):
+        for rno, dl in (scraper.fetch_deadlines(date, jcd) or {}).items():
+            sched[(str(jcd), rno)] = dl
+    return sched
+
+
+def snapshot(date, now, bundle=None, schedule=None):
     """今この瞬間、締切窓に入っているレースのオッズ+展示込みモデル確率を1回録る。
-    定期(毎分)に呼ぶ想定。returns 記録件数。now は呼び出し側that渡す(Date.now禁止環境対策)。"""
+    定期(毎分)に呼ぶ想定。returns 記録件数。now/schedule は呼び出し側that渡す(再フェッチ削減)。"""
     bundle = bundle or predict.load_model()
+    if schedule is None:
+        schedule = fetch_schedule(date)
     conn = storage.connect()
     ensure_schema(conn)
-    venues = scraper.fetch_held_venues(date)
     stamp = now.strftime("%Y-%m-%d %H:%M")
     written = 0
-    for jcd in venues:
-        deadlines = scraper.fetch_deadlines(date, jcd)
-        for rno, dl in (deadlines or {}).items():
-            mtd = _mins_to(dl, now)
-            if mtd is None:
+    for (jcd, rno), dl in schedule.items():
+        mtd = _mins_to(dl, now)
+        if mtd is None:
+            continue
+        hit = next((w for w in WINDOWS if abs(mtd - w) <= TOL), None)
+        if hit is None:
+            continue
+        # 既にこの窓を録ってたら二度録りしない
+        got = conn.execute("SELECT 1 FROM odds_timeseries WHERE date=? AND jcd=? AND rno=? "
+                           "AND mins_to_deadline=? LIMIT 1", (date, str(jcd), rno, hit)).fetchone()
+        if got:
+            continue
+        entries = scraper.fetch_racelist(date, jcd, rno)   # 締切前=展示込み
+        if not entries:
+            continue
+        for e in entries:
+            e["jcd"] = jcd
+        rows = predict.predict_entries(entries, bundle)     # 展示込みモデル確率
+        top = rows[0]
+        gyaku = int(top["lane"] != 1)
+        wo = scraper.fetch_odds(date, jcd, rno) or {}
+        for r in rows:                                       # 単勝を全艇録る(1号含む=R1/R2用)
+            od = wo.get(r["lane"])
+            if not od:
                 continue
-            hit = next((w for w in WINDOWS if abs(mtd - w) <= TOL), None)
-            if hit is None:
-                continue
-            # 既にこの窓を録ってたら二度録りしない
-            got = conn.execute("SELECT 1 FROM odds_timeseries WHERE date=? AND jcd=? AND rno=? "
-                               "AND mins_to_deadline=? LIMIT 1", (date, str(jcd), rno, hit)).fetchone()
-            if got:
-                continue
-            entries = scraper.fetch_racelist(date, jcd, rno)   # 締切前=展示込み
-            if not entries:
-                continue
-            for e in entries:
-                e["jcd"] = jcd
-            rows = predict.predict_entries(entries, bundle)     # 展示込みモデル確率
-            top = rows[0]
-            gyaku = int(top["lane"] != 1)
-            wo = scraper.fetch_odds(date, jcd, rno) or {}
-            for r in rows:                                       # 単勝を全艇録る(1号含む=R1/R2用)
-                od = wo.get(r["lane"])
-                if not od:
-                    continue
-                p = r["win_prob"]
-                conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-                             (date, str(jcd), rno, stamp, hit, "tansho", str(r["lane"]),
-                              od, p, round(p * od, 3), int(top["lane"]), gyaku))
-                written += 1
+            p = r["win_prob"]
+            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                         (date, str(jcd), rno, stamp, hit, "tansho", str(r["lane"]),
+                          od, p, round(p * od, 3), int(top["lane"]), gyaku))
+            written += 1
     conn.commit()
     conn.close()
     return written
