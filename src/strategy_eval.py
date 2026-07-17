@@ -58,6 +58,9 @@ def evaluate(query, min_n=80, dev_only=False):
                 "hit": round(part["won"].mean() * 100, 1)}
 
     dev = stats(sel[sel["yr"].isin(DEV)])
+    by_yr = {y: stats(sel[sel["yr"] == y]) for y in DEV}       # 年別=年跨ぎ安定の判定用
+    dev["by_year"] = {y: s["roi"] for y, s in by_yr.items()}
+    dev["stable"] = all((s["roi"] or 0) > 100 for s in by_yr.values())  # 各年>100か
     if dev_only:
         return {"valid": dev["n"] >= min_n, "query": query, "dev": dev,
                 "holdout": "HIDDEN(dev生成中は審判年を伏せる)"}
