@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import streamlit as st
 
-from src import predict, papertrade, scan, scraper, sensor, wild, commentary, styles, katai
+from src import predict, papertrade, scan, scraper, sensor, wild, commentary, styles, katai, staking
 from src.venues import VENUES, LOCAL_VENUES, name as venue_name
 
 st.set_page_config(page_title="競艇予想", page_icon="🚤", layout="wide")
@@ -329,6 +329,16 @@ def page_today():
                     r.get("exacta3"), r.get("exacta3_p"), lv)
         st.session_state["exacta_ev"] = evs
 
+    st.divider()
+    bc1, bc2 = st.columns([1, 2])
+    st.session_state["stake_budget"] = bc1.number_input(
+        "1レースの予算（円）", min_value=300, value=st.session_state.get("stake_budget", 1000), step=100)
+    st.session_state["stake_flavor"] = bc2.radio(
+        "買い方の好み", ["safe", "balanced", "dream"], index=1, horizontal=True,
+        format_func=lambda x: {"safe": "手堅く(単勝厚め)", "balanced": "標準",
+                               "dream": "一発(3連単厚め)"}[x])
+    st.caption("💴 各レースに**確信で重み付けした配分**を表示（全部100円均等やのうて、当てやすい単勝に厚く・"
+               "荒れる日は散らす）。※配分で控除は超えん＝的中頻度と分散管理の道具。")
     _render_today(date, rows)
 
 
@@ -437,6 +447,17 @@ def _render_today(date, rows):
                         c2.markdown(f"🎰 3連単3点 {tfecta}　"
                                     f"<span style='color:gray'>(大きい方・fat-tailで脆い・別枠)</span>",
                                     unsafe_allow_html=True)
+                    pl = staking.plan(r, st.session_state.get("stake_budget", 1000),
+                                      st.session_state.get("stake_flavor", "balanced"))
+                    lines = [f"💴 **配分 計{pl['total']:,}円**（{pl['ratio']}・{pl['note']}）",
+                             f"　単勝 {pl['tansho']['target']}号 **{pl['tansho']['yen']:,}円**"]
+                    if pl["exacta"]:
+                        lines.append("　2連単 " + " / ".join(f"{e['combo']} {e['yen']:,}円"
+                                                            for e in pl["exacta"]))
+                    if pl["trifecta"]:
+                        lines.append("　3連単 " + " / ".join(f"{t['combo']} {t['yen']:,}円"
+                                                            for t in pl["trifecta"]))
+                    c2.markdown("  \n".join(lines))
 
 
 def page_record():
