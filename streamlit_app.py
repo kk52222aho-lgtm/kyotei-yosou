@@ -346,12 +346,16 @@ def page_today():
 def _render_today(date, rows):
     eff = [_effective(r) for r in rows]           # ライブ結果込み（3分ごと自動更新）
     ps = papertrade.portfolio_stats(eff)
+    settled = [r for r in eff if r.get("settled") and r.get("winner")]
+    broke = sum(1 for r in settled if int(r["winner"]) != 1)     # 予想通り1号が崩れた=勝ち
+    brate = broke / len(settled) * 100 if settled else 0
     c = st.columns(4)
-    c[0].metric("対象日", date)
-    c[1].metric("イン崩れ予想", f"{len(eff)} 件")
-    c[2].metric("結果確定", f"{ps['races']} 件")
-    c[3].metric("合計収支(単勝+2連単)", f"{ps['total']['pl']:+,} 円")
-    st.caption("各レース：単勝=本命／2連単=上位3点・各100円。結果はレース後およそ5分で自動反映（3分毎更新）。"
+    c[0].metric("🎯 1号崩れ 的中率", f"{brate:.0f}%")
+    c[1].metric("読み的中", f"{broke} / {len(settled)}")
+    c[2].metric("本日のイン崩れ予想", f"{len(eff)} 件")
+    c[3].metric("対象日", date)
+    st.caption(f"各レース：単勝=本命／2連単=上位3点・各100円。結果はレース後およそ5分で自動反映。"
+               f"　※参考・累計収支 {ps['total']['pl']:+,}円（当てても控除の壁で長期は微減＝的中を楽しむ道具）。"
                "購入は自分でテレボート入力・自己責任。")
 
     live_odds = st.session_state.get("live_odds", {})
