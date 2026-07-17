@@ -34,11 +34,13 @@ def plan(pick, budget=1000, flavor="balanced"):
     """pick(win_pct/tansho/exacta3(_p)/trifecta3(_p))と予算→配分。
     返り: {tansho:{target,yen}, exacta:[..], trifecta:[..], total, ratio, note}。"""
     c = min(max((pick.get("win_pct") or 40) / 100.0, 0.20), 0.90)   # 本命の確信
-    tilt = {"safe": 0.15, "balanced": 0.0, "dream": -0.18}.get(flavor, 0.0)
-    w_tan = min(max(c + tilt, 0.25), 0.85)                          # 確信that高いほど単勝厚く
+    tilt = {"safe": 0.12, "balanced": 0.0, "dream": -0.15}.get(flavor, 0.0)
+    # 単勝=当たりを拾う錨。確信で 0.46→0.66 の狭い帯だけ動かす(極端にしない)
+    w_tan = min(max(0.45 + 0.25 * (c - 0.3) + tilt, 0.38), 0.66)
     rem = 1.0 - w_tan
-    w_tri = min(max(rem * (0.35 - tilt * 1.6), 0.0), rem)           # dreamで3連単を厚く
-    w_ex = rem - w_tri
+    # 3連単=夢。最低10%は必ず残す(上ブレの芽を消さない)、荒れ/dreamほど厚く最大32%
+    w_tri = min(max(0.12 + (0.60 - c) * 0.25 - tilt * 1.3, 0.10), min(0.32, rem - 0.10))
+    w_ex = rem - w_tri                                              # 2連単=常に主力(最低10%残る)
 
     tan = {"target": pick.get("tansho"), "yen": _r100(budget * w_tan)}
     ex = _split(pick.get("exacta3"), pick.get("exacta3_p"), budget * w_ex)
@@ -53,7 +55,7 @@ def plan(pick, budget=1000, flavor="balanced"):
         return round(y / total * 100) if total else 0
     ratio = (f"単勝{pct(tan['yen'])}% / 2連単{pct(sum(e['yen'] for e in ex))}% / "
              f"3連単{pct(sum(t['yen'] for t in tri))}%")
-    note = ("堅い→単勝厚く" if c >= 0.6 else "荒れ→散らして夢も") + f"（確信{c*100:.0f}%・{flavor}）"
+    note = ("堅い→単勝を錨に上も少し" if c >= 0.6 else "荒れ→散らして夢を厚く") + f"（確信{c*100:.0f}%・{flavor}）"
     return {"tansho": tan, "exacta": ex, "trifecta": tri, "total": total,
             "ratio": ratio, "note": note}
 

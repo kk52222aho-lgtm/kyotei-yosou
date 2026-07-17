@@ -55,6 +55,13 @@ def fired(conn, date):
             if ev is not None and ev >= 1.10:
                 bets.append({"rule": "R2", "date": date, "jcd": jcd, "rno": rno, "target": honmei,
                              "odds": od, "ev": ev, "reg": reg})
+        # R3(純EVフィルタ=控除超える目を"つくる"): 艇を問わず late窓EVが最大&≥1.15 の1艇だけ買う。
+        # 順位でなく"価格that割に合う瞬間"だけ拾う=+EVを値から構築する唯一の手。
+        best = max(lanes, key=lambda ln: (lanes[ln][3] or 0))
+        _, od, p, ev, _, _, reg = lanes[best]
+        if ev is not None and ev >= 1.15:
+            bets.append({"rule": "R3", "date": date, "jcd": jcd, "rno": rno, "target": best,
+                         "odds": od, "ev": ev, "reg": reg})
     return bets
 
 
@@ -114,7 +121,7 @@ def main():
     print(f"収集日 {dates}  発火した賭け(R1/R2) 計{len(all_bets)}件")
     settled = settle(all_bets)
     print("\n=== 前向き成績(=勝ちの一行that出る場所) ===")
-    for rule in ["R1", "R2"]:
+    for rule in ["R1", "R2", "R3"]:
         rows = [s for s in settled if s["rule"] == rule]
         n = len(rows)
         if n == 0:
