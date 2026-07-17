@@ -15,6 +15,9 @@
    R3(純EVフィルタ=控除超える目を"値から構築"): 艇を問わず late窓でEV=P×オッズが最大&≥1.15の
       1艇だけ単勝1点。順位で機械的に買わず"価格that割に合う瞬間だけ"拾う=+EVを作る唯一の手段
       (歴史では全艇のその時のオッズが無く構築不能=前向き収集でしか作れない)。
+   R4(戦略トーナメント発=B1級インの構造妙味): 1号がracer_class=='B1'かつ全国勝率>5.5 の単勝1点。
+      78戦略の探索でdev+holdout+機構that揃った唯一の筋(客がB1を格下と見て割引くがイン有利+実力で
+      上回る)。Bonferroni strictは未達=確定でなく前向き確定待ちの仮説。
  判定: 前向き実settleで各ルール N>=200。合格=racer_idクラスタboot生涯ROI CI下限≥100。
    kill=N>=100でCI上限<100 or N>=200で生涯ROI<90%。継続=CIが100跨ぎ。閾値を動かす=新規登録でN振り直し。
  ※スリッページ注記: 記録するオッズは"見えた瞬間"の値。実約定はその後=採点時はEVを保守側に割引く
@@ -43,13 +46,15 @@ def ensure_schema(conn):
             bet_type TEXT, combo TEXT,       -- 'tansho'/'exacta', combo='1' or '1-3'
             odds REAL, model_p REAL, ev REAL,
             honmei INTEGER, gyaku INTEGER,   -- 本命艇, 逆イン(本命≠1号)フラグ
-            reg TEXT                         -- その艇の選手登録番号(採点のracer_idクラスタCI用)
+            reg TEXT,                        -- その艇の選手登録番号(採点のracer_idクラスタCI用)
+            racer_class TEXT, nat_win REAL   -- 級別/全国勝率(トーナメント発のR4=B1インの前向き検証用)
         )
     """)
-    try:                                     # 既存テーブルへの後付けマイグレーション(冪等)
-        conn.execute("ALTER TABLE odds_timeseries ADD COLUMN reg TEXT")
-    except Exception:
-        pass
+    for col, typ in [("reg", "TEXT"), ("racer_class", "TEXT"), ("nat_win", "REAL")]:
+        try:                                 # 既存テーブルへの後付けマイグレーション(冪等)
+            conn.execute(f"ALTER TABLE odds_timeseries ADD COLUMN {col} {typ}")
+        except Exception:
+            pass
     conn.execute("""CREATE INDEX IF NOT EXISTS ix_ots ON odds_timeseries(date,jcd,rno,mins_to_deadline)""")
     conn.commit()
 
@@ -109,9 +114,11 @@ def snapshot(date, now, bundle=None, schedule=None):
             if not od:
                 continue
             p = r["win_prob"]
-            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (date, str(jcd), rno, stamp, hit, "tansho", str(r["lane"]),
-                          od, p, round(p * od, 3), int(top["lane"]), gyaku, str(r.get("reg"))))
+                          od, p, round(p * od, 3), int(top["lane"]), gyaku, str(r.get("reg")),
+                          r.get("racer_class"),
+                          float(r["nat_win"]) if r.get("nat_win") is not None else None))
             written += 1
     conn.commit()
     conn.close()

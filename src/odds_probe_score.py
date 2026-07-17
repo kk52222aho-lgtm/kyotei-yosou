@@ -26,7 +26,8 @@ def _decision_rows(conn, date):
     for jcd, rno in races:
         rows = None
         for w in LATE:
-            r = conn.execute("SELECT combo,odds,model_p,ev,honmei,gyaku,reg FROM odds_timeseries "
+            r = conn.execute("SELECT combo,odds,model_p,ev,honmei,gyaku,reg,racer_class,nat_win "
+                             "FROM odds_timeseries "
                              "WHERE date=? AND jcd=? AND rno=? AND mins_to_deadline=? AND bet_type='tansho'",
                              (date, jcd, rno, w)).fetchall()
             if r:
@@ -45,23 +46,30 @@ def fired(conn, date):
         honmei, gyaku = int(any_row[4]), int(any_row[5])
         # R1(大衆過剰反応): 本命=1号 & P(1号)≥.55 & 単勝EV(1号)≥1.05
         if honmei == 1 and 1 in lanes:
-            _, od, p, ev, _, _, reg = lanes[1]
+            _, od, p, ev, _, _, reg = lanes[1][:7]
             if p is not None and p >= 0.55 and ev is not None and ev >= 1.05:
                 bets.append({"rule": "R1", "date": date, "jcd": jcd, "rno": rno, "target": 1,
                              "odds": od, "ev": ev, "reg": reg})
         # R2(逆イン時系列): 本命≠1号 & 単勝EV(本命)≥1.10
         if gyaku == 1 and honmei in lanes:
-            _, od, p, ev, _, _, reg = lanes[honmei]
+            _, od, p, ev, _, _, reg = lanes[honmei][:7]
             if ev is not None and ev >= 1.10:
                 bets.append({"rule": "R2", "date": date, "jcd": jcd, "rno": rno, "target": honmei,
                              "odds": od, "ev": ev, "reg": reg})
         # R3(純EVフィルタ=控除超える目を"つくる"): 艇を問わず late窓EVが最大&≥1.15 の1艇だけ買う。
         # 順位でなく"価格that割に合う瞬間"だけ拾う=+EVを値から構築する唯一の手。
         best = max(lanes, key=lambda ln: (lanes[ln][3] or 0))
-        _, od, p, ev, _, _, reg = lanes[best]
+        _, od, p, ev, _, _, reg = lanes[best][:7]
         if ev is not None and ev >= 1.15:
             bets.append({"rule": "R3", "date": date, "jcd": jcd, "rno": rno, "target": best,
                          "odds": od, "ev": ev, "reg": reg})
+        # R4(トーナメント発=B1級インの構造妙味): 1号がB1級&全国勝率>5.5 の単勝1点。
+        # dev+holdout+機構that揃った唯一の筋(strictは未達)。前向きで確定させる。
+        if 1 in lanes and len(lanes[1]) >= 9:
+            _, od1, p1, ev1, _, _, reg1, rcls, natw = lanes[1][:9]
+            if rcls == "B1" and natw is not None and natw > 5.5:
+                bets.append({"rule": "R4", "date": date, "jcd": jcd, "rno": rno, "target": 1,
+                             "odds": od1, "ev": ev1, "reg": reg1})
     return bets
 
 
@@ -121,7 +129,7 @@ def main():
     print(f"収集日 {dates}  発火した賭け(R1/R2) 計{len(all_bets)}件")
     settled = settle(all_bets)
     print("\n=== 前向き成績(=勝ちの一行that出る場所) ===")
-    for rule in ["R1", "R2", "R3"]:
+    for rule in ["R1", "R2", "R3", "R4"]:
         rows = [s for s in settled if s["rule"] == rule]
         n = len(rows)
         if n == 0:
