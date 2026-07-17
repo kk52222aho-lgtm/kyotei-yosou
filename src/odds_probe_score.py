@@ -26,8 +26,8 @@ def _decision_rows(conn, date):
     for jcd, rno in races:
         rows = None
         for w in LATE:
-            r = conn.execute("SELECT combo,odds,model_p,ev,honmei,gyaku,reg,racer_class,nat_win "
-                             "FROM odds_timeseries "
+            r = conn.execute("SELECT combo,odds,model_p,ev,honmei,gyaku,reg,racer_class,nat_win,"
+                             "loc_2rate FROM odds_timeseries "
                              "WHERE date=? AND jcd=? AND rno=? AND mins_to_deadline=? AND bet_type='tansho'",
                              (date, jcd, rno, w)).fetchall()
             if r:
@@ -63,11 +63,13 @@ def fired(conn, date):
         if ev is not None and ev >= 1.15:
             bets.append({"rule": "R3", "date": date, "jcd": jcd, "rno": rno, "target": best,
                          "odds": od, "ev": ev, "reg": reg})
-        # R4(トーナメント発=B1級インの構造妙味): 1号がB1級&全国勝率>5.5 の単勝1点。
-        # dev+holdout+機構that揃った唯一の筋(strictは未達)。前向きで確定させる。
-        if 1 in lanes and len(lanes[1]) >= 9:
-            _, od1, p1, ev1, _, _, reg1, rcls, natw = lanes[1][:9]
-            if rcls == "B1" and natw is not None and natw > 5.5:
+        # R4(トーナメント発=旅人割引): 1号がB1級&当地2連率<=8(よそ者)&実力(nat_win>=5)の単勝1点。
+        # K=209の全戦略でBonferroni補正を唯一くぐった筋(ROI111%・3年独立・格下×よそ者の二重人間バイアス
+        # ×イン残り、地元人気は過大の裏面も一致)。実効K>209で厳密確定は前向きのみ→ここで採点。
+        if 1 in lanes and len(lanes[1]) >= 10:
+            _, od1, p1, ev1, _, _, reg1, rcls, natw, loc = lanes[1][:10]
+            if (rcls == "B1" and loc is not None and loc <= 8
+                    and natw is not None and natw >= 5):
                 bets.append({"rule": "R4", "date": date, "jcd": jcd, "rno": rno, "target": 1,
                              "odds": od1, "ev": ev1, "reg": reg1})
     return bets
