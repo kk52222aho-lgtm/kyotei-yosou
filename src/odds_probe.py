@@ -39,9 +39,14 @@ def ensure_schema(conn):
             captured_at TEXT, mins_to_deadline INTEGER,
             bet_type TEXT, combo TEXT,       -- 'tansho'/'exacta', combo='1' or '1-3'
             odds REAL, model_p REAL, ev REAL,
-            honmei INTEGER, gyaku INTEGER    -- 本命艇, 逆イン(本命≠1号)フラグ
+            honmei INTEGER, gyaku INTEGER,   -- 本命艇, 逆イン(本命≠1号)フラグ
+            reg TEXT                         -- その艇の選手登録番号(採点のracer_idクラスタCI用)
         )
     """)
+    try:                                     # 既存テーブルへの後付けマイグレーション(冪等)
+        conn.execute("ALTER TABLE odds_timeseries ADD COLUMN reg TEXT")
+    except Exception:
+        pass
     conn.execute("""CREATE INDEX IF NOT EXISTS ix_ots ON odds_timeseries(date,jcd,rno,mins_to_deadline)""")
     conn.commit()
 
@@ -101,9 +106,9 @@ def snapshot(date, now, bundle=None, schedule=None):
             if not od:
                 continue
             p = r["win_prob"]
-            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            conn.execute("INSERT INTO odds_timeseries VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                          (date, str(jcd), rno, stamp, hit, "tansho", str(r["lane"]),
-                          od, p, round(p * od, 3), int(top["lane"]), gyaku))
+                          od, p, round(p * od, 3), int(top["lane"]), gyaku, str(r.get("reg"))))
             written += 1
     conn.commit()
     conn.close()
