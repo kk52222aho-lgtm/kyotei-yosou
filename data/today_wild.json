@@ -1,10 +1,69 @@
 {
- "date": "20260723",
+ "date": "20260724",
  "races": [
   {
-   "jcd": "01",
-   "venue": "桐生",
-   "rno": 1,
+   "jcd": "14",
+   "venue": "鳴門",
+   "rno": 6,
+   "score": 91.4,
+   "reasons": [
+    "モデルthaイン軽視(1号13%)",
+    "1号thatB2",
+    "アウトにA1(5号)"
+   ],
+   "honmei": 3,
+   "win_pct": 39.7,
+   "deadline": "10:59"
+  },
+  {
+   "jcd": "14",
+   "venue": "鳴門",
+   "rno": 7,
+   "score": 87.7,
+   "reasons": [
+    "モデルthaイン軽視(1号26%)",
+    "1号thatB2",
+    "混戦(勝率that割れてる)",
+    "アウトにA1(6号)"
+   ],
+   "honmei": 2,
+   "win_pct": 35.3,
+   "deadline": "11:28"
+  },
+  {
+   "jcd": "02",
+   "venue": "戸田",
+   "rno": 8,
+   "score": 82.9,
+   "reasons": [
+    "モデルthaイン軽視(1号22%)",
+    "1号thatB1",
+    "混戦(勝率that割れてる)",
+    "アウトにA1(6号)"
+   ],
+   "honmei": 2,
+   "win_pct": 21.9,
+   "deadline": "14:16"
+  },
+  {
+   "jcd": "02",
+   "venue": "戸田",
+   "rno": 4,
+   "score": 80.7,
+   "reasons": [
+    "モデルthaイン軽視(1号27%)",
+    "1号thatB2",
+    "混戦(勝率that割れてる)",
+    "アウトにA2(4号)"
+   ],
+   "honmei": 2,
+   "win_pct": 28.0,
+   "deadline": "12:14"
+  },
+  {
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 3,
    "score": 80.1,
    "reasons": [
     "モデルthaイン軽視(1号29%)",
@@ -13,14 +72,29 @@
     "アウトにA1(6号)"
    ],
    "honmei": 1,
-   "win_pct": 28.9,
-   "deadline": "15:27"
+   "win_pct": 28.7,
+   "deadline": "16:33"
   },
   {
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 7,
-   "score": 79.7,
+   "jcd": "01",
+   "venue": "桐生",
+   "rno": 9,
+   "score": 79.9,
+   "reasons": [
+    "モデルthaイン軽視(1号27%)",
+    "1号thatB1",
+    "混戦(勝率that割れてる)",
+    "アウトにA1(4号)"
+   ],
+   "honmei": 1,
+   "win_pct": 27.4,
+   "deadline": "19:09"
+  },
+  {
+   "jcd": "03",
+   "venue": "江戸川",
+   "rno": 4,
+   "score": 79.8,
    "reasons": [
     "モデルthaイン軽視(1号27%)",
     "1号thatB1",
@@ -28,157 +102,82 @@
     "アウトにA1(5号)"
    ],
    "honmei": 1,
-   "win_pct": 26.7,
-   "deadline": "14:35"
+   "win_pct": 27.2,
+   "deadline": "12:35"
+  },
+  {
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 9,
+   "score": 78.6,
+   "reasons": [
+    "モデルthaイン軽視(1号29%)",
+    "1号thatB1",
+    "混戦(勝率that割れてる)",
+    "アウトにA1(5号)"
+   ],
+   "honmei": 1,
+   "win_pct": 29.3,
+   "deadline": "14:30"
+  },
+  {
+   "jcd": "14",
+   "venue": "鳴門",
+   "rno": 8,
+   "score": 78.0,
+   "reasons": [
+    "モデルthaイン軽視(1号30%)",
+    "1号thatB1",
+    "混戦(勝率that割れてる)",
+    "アウトにA1(4号)"
+   ],
+   "honmei": 1,
+   "win_pct": 30.5,
+   "deadline": "11:58"
   },
   {
    "jcd": "23",
    "venue": "唐津",
    "rno": 8,
-   "score": 79.7,
-   "reasons": [
-    "モデルthaイン軽視(1号27%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(5号)"
-   ],
-   "honmei": 5,
-   "win_pct": 28.7,
-   "deadline": "11:53"
-  },
-  {
-   "jcd": "01",
-   "venue": "桐生",
-   "rno": 4,
-   "score": 79.3,
-   "reasons": [
-    "モデルthaイン軽視(1号26%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(6号)"
-   ],
-   "honmei": 2,
-   "win_pct": 28.4,
-   "deadline": "17:00"
-  },
-  {
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 9,
-   "score": 79.3,
+   "score": 77.8,
    "reasons": [
     "モデルthaイン軽視(1号29%)",
+    "1号thatB1",
+    "アウトにA1(4号)"
+   ],
+   "honmei": 4,
+   "win_pct": 31.6,
+   "deadline": "11:50"
+  },
+  {
+   "jcd": "13",
+   "venue": "尼崎",
+   "rno": 7,
+   "score": 77.2,
+   "reasons": [
+    "モデルthaイン軽視(1号32%)",
     "1号thatB1",
     "混戦(勝率that割れてる)",
     "アウトにA1(4号)"
    ],
    "honmei": 1,
-   "win_pct": 29.1,
-   "deadline": "15:40"
+   "win_pct": 31.6,
+   "deadline": "13:20"
   },
   {
-   "jcd": "01",
-   "venue": "桐生",
-   "rno": 5,
-   "score": 78.3,
-   "reasons": [
-    "モデルthaイン軽視(1号30%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(6号)"
-   ],
-   "honmei": 1,
-   "win_pct": 30.0,
-   "deadline": "17:24"
-  },
-  {
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 2,
-   "score": 78.3,
-   "reasons": [
-    "モデルthaイン軽視(1号31%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(5号)"
-   ],
-   "honmei": 1,
-   "win_pct": 30.6,
-   "deadline": "12:03"
-  },
-  {
-   "jcd": "23",
-   "venue": "唐津",
+   "jcd": "17",
+   "venue": "宮島",
    "rno": 9,
-   "score": 78.0,
-   "reasons": [
-    "モデルthaイン軽視(1号27%)",
-    "1号thatB1",
-    "アウトにA1(5号)"
-   ],
-   "honmei": 2,
-   "win_pct": 41.7,
-   "deadline": "12:24"
-  },
-  {
-   "jcd": "01",
-   "venue": "桐生",
-   "rno": 3,
-   "score": 77.4,
-   "reasons": [
-    "モデルthaイン軽視(1号34%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(6号)"
-   ],
-   "honmei": 1,
-   "win_pct": 34.0,
-   "deadline": "16:27"
-  },
-  {
-   "jcd": "21",
-   "venue": "芦屋",
-   "rno": 6,
-   "score": 77.4,
-   "reasons": [
-    "モデルthaイン軽視(1号33%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(6号)"
-   ],
-   "honmei": 1,
-   "win_pct": 32.7,
-   "deadline": "10:45"
-  },
-  {
-   "jcd": "08",
-   "venue": "常滑",
-   "rno": 2,
-   "score": 76.9,
+   "score": 77.1,
    "reasons": [
     "モデルthaイン軽視(1号35%)",
     "1号thatB1",
     "混戦(勝率that割れてる)",
-    "アウトにA1(5号)"
+    "アウトにA1(6号)"
    ],
    "honmei": 1,
-   "win_pct": 35.1,
-   "deadline": "11:08"
-  },
-  {
-   "jcd": "22",
-   "venue": "福岡",
-   "rno": 11,
-   "score": 76.8,
-   "reasons": [
-    "モデルthaイン軽視(1号34%)",
-    "1号thatB1",
-    "混戦(勝率that割れてる)",
-    "アウトにA1(4号)"
-   ],
-   "honmei": 1,
-   "win_pct": 34.2,
-   "deadline": "17:27"
+   "win_pct": 34.7,
+   "deadline": "15:03"
   }
  ]
 }
