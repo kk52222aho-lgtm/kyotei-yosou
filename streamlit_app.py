@@ -469,9 +469,18 @@ def page_record():
         return
 
     ps = papertrade.portfolio_stats(settled)
-    # --- 主表示: 単勝1.5倍未満のレースを丸ごと見送った成績 ---
+    rebuilt = any(r.get("rebuilt") for r in settled)
+    if rebuilt:
+        st.warning("""🧪 **この成績は『再現記録（バックテスト）』です。前向き記録ではありません。**
+
+過去のレースに、現在のモデルを**後から**当てて集計したものです。実際にその日に賭けた
+記録ではないので、「先に予想を出して当たったか」を示すものではありません。
+
+また過去の締切オッズは再取得できないため、**「単勝1.5倍未満は見送り」フィルタは
+再現できません**（下は全レースの成績）。""")
+    # --- 主表示: 単勝1.5倍未満のレースを丸ごと見送った成績（再現記録では無フィルタ） ---
     FLOOR = papertrade.ODDS_FLOOR
-    kept = [r for r in settled if (r.get("final_odds") or 0) >= FLOOR]
+    kept = settled if rebuilt else [r for r in settled if (r.get("final_odds") or 0) >= FLOOR]
     skipped = len(settled) - len(kept)
     f_tan_st = len(kept) * 100
     f_tan_ret = sum(r.get("tansho_return", 0) for r in kept)
@@ -480,9 +489,13 @@ def page_record():
     f_tot_st, f_tot_ret = f_tan_st + f_ex_st, f_tan_ret + f_ex_ret
 
     def roi(ret, st_): return f"{ret/st_:.1%}" if st_ else "―"
-    st.caption(f"**単勝1.5倍未満のレースは丸ごと見送った成績**（買った {len(kept)} / 見送り {skipped} レース）")
+    st.caption(("**全レースの成績**（再現記録・オッズフィルタなし）" if rebuilt else
+                f"**単勝1.5倍未満のレースは丸ごと見送った成績**（買った {len(kept)} / 見送り {skipped} レース）")
+               + f"　対象 {len(kept)} レース")
+    t_hit = sum(1 for r in kept if r.get("tansho_win"))
     c = st.columns(4)
-    c[0].metric("買ったレース", len(kept))
+    c[0].metric("単勝 的中率", f"{t_hit/len(kept)*100:.0f}%" if kept else "―",
+                f"{t_hit} / {len(kept)}")
     c[1].metric("単勝 回収率", roi(f_tan_ret, f_tan_st), f"{f_tan_ret - f_tan_st:+,}円")
     c[2].metric("2連単 回収率", roi(f_ex_ret, f_ex_st), f"{f_ex_ret - f_ex_st:+,}円")
     c[3].metric("合計 回収率", roi(f_tot_ret, f_tot_st), f"{f_tot_ret - f_tot_st:+,}円")
