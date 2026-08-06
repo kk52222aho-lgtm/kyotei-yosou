@@ -117,7 +117,7 @@ def cmd_capture_trifecta(today: str):
 
     狙い＝万舟側(3連単)の『締切表示 vs 確定払戻』乖離をライブ実測する布石。
     的中した万舟の deadline_odds×100 と settled払戻を後で比べれば、薄プール自己インパクト
-    (=319%の"勝ちすぎ"がライブでどれだけ削れるか)の proxy that取れる。分析はN蓄積後。
+    (=319%の"勝ちすぎ"がライブでどれだけ削れるか)の proxy が取れる。分析はN蓄積後。
     """
     from . import scraper
     rows = _load()
@@ -295,10 +295,10 @@ def cmd_report():
     sg = s["strongest"]
     if sg["races"]:
         line("💎最強妙味", sg, sg["hit"])
-        print(f"    （本命勝率≥45%×締切EV>3.5＝最濃断面。backtest 592%・全年・頑健）")
+        print(f"    （本命勝率≥45%×締切EV>3.5＝3条件が揃った最濃断面）")
     print(f"\n  ※「推奨」= 単勝1.5倍未満のレースを丸ごと見送った単勝+2連単（検証で最良）。"
           f"見送り {rc['skipped']}レース。")
-    print(f"  ※「2連単EV>2.0」= 締切EVフィルタの前向きtrack（机上で堅く300-500%・要ライブ確認）。")
+    print(f"  ※「2連単EV>2.0」= 締切EVフィルタの前向きtrack（要ライブ確認）。")
     print(f"  ※前向き記録だけが本物。1日でなく数十〜百本の平均で判断。")
 
 

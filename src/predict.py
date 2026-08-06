@@ -76,7 +76,7 @@ def recommend(rows: list[dict]) -> dict:
     """検証済みの「勝てる形」に基づく推奨買い目を返す。
 
     戦略(docs/FINDINGS.md): モデル本命がイン(1号艇)以外のレースだけ、
-    その本命を単勝で買う（大サンプル116.5% / 4期間106-118%, 低分散）。
+    その本命を単勝で買う（回収率の主張はしない=前向き検証を通していないため）。
     2連単・確率上位3点も有望(165-171%)。本命=1号艇は妙味薄＝見送り。
     rows は predict_entries の出力（rank昇順, win_prob 付き）。
     """
@@ -105,7 +105,7 @@ def recommend(rows: list[dict]) -> dict:
     #  test_trio: 荒れ読みで4点258%/上位30本抜き222%とfat-tail頑健。ROI源はレース選択）
     trio = sorted(trio_probs({e["lane"]: e["win_prob"] for e in rows}).items(),
                   key=lambda x: -x[1])
-    # 3連単 上位3点（着順あり・大きい方＝万舟狙い。test_trio: 荒れ読み3点533%だがfat-tail脆い・
+    # 3連単 上位3点（着順あり・大きい方＝万舟狙い。fat-tailで脆い・
     #  着順スキル0で高ROIは配当構造由来。別枠track・アクセル踏み込み用）
     tf = sorted(harville_trifecta({e["lane"]: e["win_prob"] for e in rows}).items(),
                 key=lambda x: -x[1])
@@ -162,7 +162,7 @@ def recommend(rows: list[dict]) -> dict:
         "taiko": taiko,                                     # ○対抗=地力トップの非イン非本命艇(#2=実力)
         "taiko_name": taiko_row.get("name") if taiko_row else None,
         "power_ex": jitsuryoku_ex,                          # 実力筋2連単(本命⇄対抗)=位置崩れの実力ワンツー
-        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。位置(#1)が崩れれば地力(実力=#2)that勝者を決める"
+        "reason": "モデルがイン(1号艇)を否定＝インバイアスの妙味。位置(#1)が崩れれば地力(実力=#2)が勝者を決める"
                   f"(検証: 非イン勝者の最有力軸=全国勝率38.6%>差し2号30.7)。本命の地力{honmei_power_rank}位/6。"
                   "※確定払戻ベース・全券種ライブ再現(6艇)では控除の壁=エッジ主張はしない。",
     }
@@ -280,7 +280,7 @@ def predict_trifecta(date: str, jcd: str, rno: int, bundle=None, top: int = 10):
 # 動的買い目の割安ライン。2連単EV>2.0は検証済み。3連系は実験（3連単ライブ収集で調整予定）。
 DYNAMIC_EV_TH = 2.0
 
-# 💎最強妙味: 本命≠1号 × 本命勝率≥0.45 × 2連単top3(確率順)EV>3.5（backtest 592%/全年/頑健の最濃断面）
+# 💎高確信フラグ: 本命≠1号 × 本命勝率≥0.45 × 2連単top3(確率順)EV>3.5（3条件が揃った最濃断面）
 STRONGEST_P0 = 0.45
 STRONGEST_EV = 3.5
 
@@ -289,7 +289,7 @@ def dynamic_buy(rows: list[dict], odds: dict, th: float = DYNAMIC_EV_TH, gate: d
     """モデル確率×締切オッズで各賭式の全目のEVを出し、EV>th の割安だけ選抜（動的点数）。
 
     odds = {"tansho":{lane:odズ}, "exacta":{'i-j':odズ}, "trio":{'a-b-c':odズ}, "trifecta":{'i-j-k':odズ}}。
-    割安that多いレース→点数増（＝万舟つく→広く）、少ない→絞る＝『EVで点数を自己調整』の心臓。
+    割安が多いレース→点数増（＝万舟つく→広く）、少ない→絞る＝『EVで点数を自己調整』の心臓。
     gate=sensor.bet_gate()：ok=Falseの賭式(＝持続センサーがDECAYED)は自動でOFF＝ライブ劣化を反映。
     """
     wp = {e["lane"]: e["win_prob"] for e in rows}

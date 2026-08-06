@@ -1,11 +1,11 @@
 """持続センサー: 「確定払戻で見えたエッジが"未来も通用してるか"」を前向き台帳で継続監視。
 
 背景([[project_kyotei_yosou]]の議論): バックテスト(過去)は忠実な"取れてた額"だが、
-  ライブとの差は①パリミュチュエル自己インパクト(薄プールで自分の票that払戻を削る)
+  ライブとの差は①パリミュチュエル自己インパクト(薄プールで自分の票が払戻を削る)
   ②過去≠未来(歪みが今年も残ってるか)。①は少額なら小さい。②を測るのがこのセンサー。
 
-思想: エッジの本体は contrarian race selection。低分散の 単勝(≥1.5)/2連単that"持続カナリア"、
-  3連複は高分散(fat-tail)の収穫器で informational。前向きの単/2連that 100% を割り"続けたら"
+思想: エッジの本体は contrarian race selection。低分散の 単勝(≥1.5)/2連単が"持続カナリア"、
+  3連複は高分散(fat-tail)の収穫器で informational。前向きの単/2連が 100% を割り"続けたら"
   =歪みが消えたサイン=3連複も道連れ。3連複を直接ROI判定するのはノイズ過多で不可(数百本要る)。
 
 規律(過学習/ノイズ回避):
@@ -131,7 +131,7 @@ def status() -> dict:
 def bet_gate() -> dict:
     """動的買い目用ゲート: 各賭式(tansho/exacta/trio/trifecta)を張ってよいか。
 
-    DECAYED(前向きで confidently 100%割れ)の賭式だけ ok=False で自動OFF。
+    DECAYED(前向きで確信をもって100%割れ)の賭式だけ ok=False で自動OFF。
     INSUFFICIENT/HOLDING/WATCH は ok=True（"疑わしきは罰せず"＝崩れ確定まで張る）。
     ＝ライブ実エッジの劣化が、次の買い目に自動反映される（ループを閉じる）。
     """
@@ -164,7 +164,7 @@ def main():
     print()
     for track, t in s["tracks"].items():
         print(f"  ・{track}: {t['verdict']} — {t['why']}")
-    print("\n  ※判定は低分散の 単勝/2連単that本命(カナリア)。3連複はfat-tailで参考。")
+    print("\n  ※判定は低分散の 単勝/2連単が本命(カナリア)。3連複はfat-tailで参考。")
     print("  ※単/2連が前向きで confidently 100%割れ(DECAYED)＝歪み消滅サイン＝3連複も道連れ。")
     print("  ※bootstrap CIは裾を過小評価しがち＝盲信せず、trailingの失速と併せて読む。")
 

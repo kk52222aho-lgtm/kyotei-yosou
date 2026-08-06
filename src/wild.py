@@ -2,7 +2,7 @@
 
 思想: 観察可能なレース前情報だけで、透明に"荒れやすさ"を採点し理由も出す。
   ※これは分散(荒れやすさ)の指標であって期待値(儲かる)ではない。荒れ条件は公開情報で
-    市場that織り込む→当てても勝てるとは限らん([[insight_adversarial_domains]]・test_trio_wide・
+    市場が織り込む→当てても勝てるとは限らん([[insight_adversarial_domains]]・test_trio_wide・
     地合いablationで確認済み)。見て楽しむ/参考用。だが"荒れを捉えてるか"は test_wild で裏取り。
 
 スコア成分(各0-1→加重100点):
@@ -52,9 +52,9 @@ def score_race(rows: list[dict]) -> dict:
     if anti >= 0.55:
         reasons.append(f"モデルthaイン軽視(1号{p1*100:.0f}%)")
     if weak >= 0.6 and row1:
-        reasons.append(f"1号that{str(row1.get('racer_class', '')).strip() or '格下'}")
+        reasons.append(f"1号が{str(row1.get('racer_class', '')).strip() or '格下'}")
     if ent >= 0.85:
-        reasons.append("混戦(勝率that割れてる)")
+        reasons.append("混戦(勝率が割れてる)")
     if outp >= 0.6 and out_rows:
         ol = max(out_rows, key=lambda r: _STRONG.get(_cnum(r.get("racer_class")), 0))
         reasons.append(f"アウトに{str(ol.get('racer_class', '')).strip()}({int(ol['lane'])}号)")

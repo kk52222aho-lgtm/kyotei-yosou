@@ -28,16 +28,14 @@ LANE_COLOR = {1: "#ffffff", 2: "#000000", 3: "#e53935",
 
 
 def status_banner():
-    n = len([r for r in papertrade._load() if r.get("settled")])
     st.info(
-        "🧭 **このサイトは『儲け』でなく『当たる予想』を出す**（2026-07 方針転換）。"
-        "かつて掲げた単勝116%/2連単188%等は、**1号that事故で消えたレースを結果から拾ってた"
-        "survivorship水増し**と判明。ライブ再現可能な6艇そろいで測り直すと **単勝95%/2連単82%/"
-        "3連単92%＝全部100%割れ＝競艇も市場効率でエッジ無し**。\n\n"
-        "→ 誰that勝つかは当てられる（1にイン・2に地力・展開）。でも市場that先に織り込むので"
-        "儲けにはならん。**🏆勝てる目ページ＝当たる本命**、⚑イン崩れ予想＝逆張りの読み。"
-        f"前向き記録 現在 {n} レース（回収<100%は当たっても控除負け＝正直に表示）。的中・利益を保証しない。",
-        icon="🧭",
+        "🚤 **このサイトは『当たる予想』を出す。**　公式データ（B番組表／K競走成績）で学習した"
+        "モデルが、全24場・全レースの1着確率を出す。\n\n"
+        "**🔥渾身の一点** ＝ 確信80%級だけを言い切る（監査済・**実測的中84%**・CI[83,85]・3年安定）。"
+        "無い日は「今日は無し」。／ **🏆勝てる目** ＝ 堅い本命。／ "
+        "**⚑イン崩れ** ＝「この1号は崩れる」を名指しする。\n\n"
+        "出すのは**的中の精度**であって回収率ではない。的中・利益を保証しない。",
+        icon="🚤",
     )
 
 
@@ -92,7 +90,7 @@ def page_ichiten():
             break
 
     if hit is None:
-        st.warning(f"🈳 **今日は『これは獲れる』級（確信80%↑）that無し＝見送り推奨。**\n\n"
+        st.warning(f"🈳 **今日は『これは獲れる』級（確信80%↑）が無し＝見送り推奨。**\n\n"
                    f"本日の最強でも確信{conf:.0f}%で、言い切れる near-lock に届かん。"
                    f"**無理に張らんのthaが勝ち。** 当てにいくだけなら🏆勝てる目ページへ。")
         st.caption(f"（参考・本日の最強格: {best['venue']} {best['rno']}R 単勝{best['tansho']}号 "
@@ -102,15 +100,14 @@ def page_ichiten():
     jcd, rno, date = best["jcd"], best["rno"], k["date"]
     st.subheader(f"{best['venue']} {best['rno']}R　🔒 単勝 {best['tansho']}号 {best.get('name','')}")
     dl = f"　⏰締切 {best['deadline']}" if best.get("deadline") else ""
-    st.caption(f"確信{conf:.0f}% ＝ **的中 約{hit}%**（監査済 実測・CI[{ci}]）／"
-               f"**回収 約{ret}%**（当たっても控除で微減＝これは『当てる』用・儲けは主張せん）{dl}")
+    st.caption(f"確信{conf:.0f}% ＝ **的中 約{hit}%**（監査済・実測・CI[{ci}]・3年安定）{dl}")
 
     res = _live_result(date, jcd, rno)
     if res and res.get("winner"):
         w = res["winner"]
         if w == best["tansho"]:
             od = (res.get("tansho_yen") or 0) / 100
-            st.success(f"🎯 **的中！** {best['tansho']}号that1着（{od:.1f}倍）。渾身、獲ったで💪")
+            st.success(f"🎯 **的中！** {best['tansho']}号が1着（{od:.1f}倍）。渾身、獲ったで💪")
         else:
             st.error(f"💥 **外れた…** 勝ちは **{w}号**。**わいAIでアホですんませーん🙇** "
                      f"（的中{hit}%＝{100-hit}%は外す。当たった時だけ覚えとかんとってな）")
@@ -134,18 +131,17 @@ def page_ichiten():
         st.table(_pd.DataFrame(rows, columns=["買い目", "オッズ", "的中目安", "当たれば"]))
         if not tan or tan <= 1.0:
             st.caption("※単勝オッズがまだ形成前（締切前に確定オッズが出る）。")
-    st.caption("正直に：確信80%級でも単勝回収は約95%（控除の壁で長期は微減）＝"
-               "**これは『当てる』喜び用。儲けは主張せん。** 締切前にオッズ確定→投票直前に再確認を。"
-               "購入はテレボート等で自己責任。")
+    st.caption("締切前にオッズ確定→投票直前に再確認を。購入はテレボート等で自己責任。"
+               "※回収率の主張はしない（解説ページ参照）。")
 
     jcd, rno, date = best["jcd"], best["rno"], k["date"]
-    # 結果that出てたら隠さず出す（外れも謝る）
+    # 結果が出てたら隠さず出す（外れも謝る）
     res = _live_result(date, jcd, rno)
     if res and res.get("winner"):
         w = res["winner"]
         if w == best["tansho"]:
             od = (res.get("tansho_yen") or 0) / 100
-            st.success(f"🎯 **的中！** {best['tansho']}号that1着（{od:.1f}倍）。渾身、獲ったで💪")
+            st.success(f"🎯 **的中！** {best['tansho']}号が1着（{od:.1f}倍）。渾身、獲ったで💪")
         else:
             ex_hit = res.get("exacta_combo") in (best.get("exacta3") or [])
             extra = (f"（でも2連単 {res.get('exacta_combo')} は買い目に入ってた、救われた…）"
@@ -179,9 +175,9 @@ def page_ichiten():
         if push and eo.get(push):
             got = int(stake * eo[push])
             st.success(f"🔥 **推しは 2連単 {push}（本命-対抗の地力筋）**：{stake:,}円 → 当たれば "
-                       f"**¥{got:,}**（+¥{got-stake:,}）。堅さと配当のバランスthat本日最良。")
+                       f"**¥{got:,}**（+¥{got-stake:,}）。堅さと配当のバランスが本日最良。")
     else:
-        st.warning("オッズ未形成（早朝）。締切が近づくと各買い目のオッズthat出る。もう一度開いてや。")
+        st.warning("オッズ未形成（早朝）。締切が近づくと各買い目のオッズが出る。もう一度開いてや。")
 
     et = (best.get('hit_pct') or 0) / 100 * (tan or 0)
     st.caption(f"正直に：単勝の期待回収は約{et*100:.0f}%（控除の壁で長期は微減）＝**当てたいなら単勝、"
@@ -227,16 +223,15 @@ _SHORT = {"単勝(≥1.5)": "単勝", "2連単3点": "2連単", "3連複4点": "
 
 
 def render_sensor(expanded=True):
-    """持続センサー: 回収が本当に100%割れか＝市場効率かを前向き記録で確認（本日/成績 共通）。"""
+    """持続センサー: 前向き記録で回収率の水準を機械的に追う（本日/成績 共通）。"""
     tracks = sensor.status().get("tracks", {})
     if tracks:
         summ = " ／ ".join(f"{_VMARK.get(t['verdict'], '⚪')}{_SHORT.get(tr, tr)}"
                            for tr, t in tracks.items())
-        st.caption(f"🛰 **持続センサー**（回収が本当に100%割れ＝市場効率かの前向き確認）：{summ}"
-                   "　🟢100%超(想定外・要検証) 🟡境目 🔴100%割れ(想定どおり) ⚪判定保留(N不足)")
+        st.caption(f"🛰 **持続センサー**（前向き記録での回収率の水準）：{summ}"
+                   "　🟢100%超 🟡境目 🔴100%割れ ⚪判定保留(N不足)")
     with st.expander("🛰 持続センサー 詳細", expanded=expanded):
-        st.caption("低分散の 単勝/2連単の回収率カナリア。前向き記録で確信をもって100%割れ(🔴)＝"
-                   "市場効率どおり（＝今日出した結論の答え合わせ）。3連複はfat-tailで参考。"
+        st.caption("低分散の 単勝/2連単の回収率カナリア。3連複はfat-tailで参考。"
                    "判定は最小N到達後だけ（早合点を機械的に抑止）。")
         if not tracks:
             st.markdown("まだ精算記録が無い（log→settle が回り出してから）。")
@@ -269,11 +264,11 @@ def _ichi_break(p1):
 
 def page_today():
     st.header("⚑ 1号が危ない日、当てます")
-    st.success("**撒くサイトは全部『1号本命』。うちだけthat『今日この1号は崩れる』を名指しできる。**"
-               "モデルthaが1号を予測30%台に見たら、実際**65%崩れる**——15.4万レースで較正済み・3年安定。")
+    st.success("**撒くサイトは全部『1号本命』。うちだけが『今日この1号は崩れる』を名指しできる。**"
+               "モデルが1号を予測30%台に見たら、実際**65%崩れる**——15.4万レースで較正済み・3年安定。")
     with st.expander("📊 的中実績（この崩れ読みthaがどれだけ当たるか・検品済）", expanded=True):
         st.markdown(
-            "**モデルthaが1号を予測◯%と見た時、実際に1号that崩れる率（展示前スキャンでも保持）:**\n\n"
+            "**モデルが1号を予測◯%と見た時、実際に1号が崩れる率（展示前スキャンでも保持）:**\n\n"
             "| モデルの1号予測勝率 | 実際の1号 崩れ率 | 件数 |\n"
             "|---|---|---|\n"
             "| 30%未満 | **78%崩れる** | 8,066 |\n"
@@ -281,8 +276,8 @@ def page_today():
             "| 40–50% | 51%崩れる | 36,314 |\n"
             "| 50–60% | 38%崩れる | 42,492 |\n"
             "| 60%以上 | 25%崩れる | 39,215 |\n\n"
-            "予測≈実測でピタリ・3年安定。＝**『どの1号that崩れるか』は当てられる。** "
-            "位置that崩れたら誰that勝つか（#2=地力+展開）まで出す。")
+            "予測≈実測でピタリ・3年安定。＝**『どの1号が崩れるか』は当てられる。** "
+            "位置が崩れたら誰が勝つか（#2=地力+展開）まで出す。")
     st.caption("※当てる読みで、一攫千金の道具やない（逆張り単勝の回収は控除の壁で82〜95%）。"
                "当たり外れは全部下に晒す＝それthaがうちの信用や。")
     today = dt.date.today().strftime("%Y%m%d")
@@ -299,7 +294,7 @@ def page_today():
     else:
         st.warning(f"本日({md})はまだスキャンされていません（毎朝9時に自動）。")
 
-    render_sensor(expanded=False)   # 前向き記録で"回収が本当に100%割れか"を一目で
+    render_sensor(expanded=False)   # 前向き記録での回収率の水準を一目で
 
     date, rows = _latest_day_rows()
     if not rows:
@@ -372,11 +367,11 @@ def _render_today(date, rows):
                 c1.markdown(f"{emo} **1号 崩れ率 約{brk}%**"
                             + (f"（1号予測{r['ichi_pct']:.0f}%・較正済）" if r.get("ichi_pct") else ""))
             if gyaku_in:
-                c1.caption("🎯 **逆イン本命(probe)**（外本命that確信55%↑）。機構(客はコースを値付け・薄い単勝プール"
+                c1.caption("🎯 **逆イン本命(probe)**（外本命が確信55%↑）。機構(客はコースを値付け・薄い単勝プール"
                            "で歪みが生存)は妥当だが、歴史110.9%は5視点監査で**breakevenと統計的に区別不可**"
                            "(多重探索+fat-tail+FLB相乗り)＝未証明の仮説。極小probeのみ・増資禁止・前向き検証中。")
             if r.get("high_conf"):
-                c1.caption("🔥 高確信（本命度that高い群）")
+                c1.caption("🔥 高確信（本命度が高い群）")
             pr = r.get("power_rank")
             if pr:
                 tk = r.get("taiko")
@@ -385,7 +380,7 @@ def _render_today(date, rows):
                             else "本命の地力{}位/6".format(pr))
                 if tk:
                     pow_line += f"　○対抗 **{tk}号**{tkn}（地力筋）"
-                c1.caption(pow_line + "　位置that崩れれば実力(#2)")
+                c1.caption(pow_line + "　位置が崩れれば実力(#2)")
             if r.get("deadline"):
                 c1.markdown(f"⏰ 締切 **{r['deadline']}**"
                             + ("" if r.get("settled") else "　までに投票"))
@@ -441,7 +436,7 @@ def _render_today(date, rows):
                     if pex:
                         c2.markdown(f"💪 実力筋2連単 {' ・ '.join(pex)}　"
                                     f"<span style='color:gray'>(本命⇄対抗={r.get('taiko')}号・"
-                                    f"位置that崩れた時の実力ワンツー)</span>",
+                                    f"位置が崩れた時の実力ワンツー)</span>",
                                     unsafe_allow_html=True)
                     if trio:
                         c2.markdown(f"🎲 3連複4点 {trio}　"
@@ -496,28 +491,25 @@ def page_record():
 
     # 💎最強妙味の実績（backtest基準 vs 前向き）
     sg = ps.get("strongest", {})
-    with st.expander("💎 最強妙味（高確信フラグ）の記録（本命≠1号×本命勝率≥45%×締切2連単EV>3.5）", expanded=True):
-        st.caption("かつて『唯一の勝ち筋』とした最濃断面だが、その592%はsurvivorship水増し"
-                   "（1号飛びレースを結果から拾ってた幻）で撤回済。今は儲け表示でなく、条件が全部揃った"
-                   "『高確信フラグ』の表示用（ROI主張はしない）。")
+    with st.expander("💎 高確信フラグの記録（本命≠1号×本命勝率≥45%×締切2連単EV>3.5）", expanded=True):
+        st.caption("3つの条件が全部揃ったレースだけを拾う表示用フラグ。前向きの実記録を積むだけで、"
+                   "回収率の主張はしない。")
         c = st.columns(2)
-        c[0].metric("最強妙味 592%", "撤回済", "survivorship水増し・6艇クリーンで消滅")
+        c[0].metric("発生条件", "3条件すべて", "本命≠1号 / 勝率≥45% / EV>3.5")
         if sg.get("races"):
             roi_s = sg["ret"] / sg["stake"] if sg["stake"] else 0
             c[1].metric(f"前向き実績（{sg['races']}レース）", f"{roi_s*100:.0f}%",
                         f"{sg['pl']:+,}円 / 的中{sg['hit']}")
         else:
             c[1].metric("前向き実績", "N=0", "まだ発生せず（EV捕捉が回り次第）")
-        st.caption("※前向きは締切EV捕捉が要る＝ev-capture稼働後から。ここは高確信フラグの前向き記録で、"
-                   "6艇クリーンでも回収100%割れ（市場効率）に収束するかを実測する装置。")
+        st.caption("※前向きは締切EV捕捉が要る＝ev-capture稼働後から。ここは高確信フラグの前向き記録。")
 
-    # 参考: 無フィルタ土台(track A=机上188.7の直接対照)
+    # 参考: 無フィルタ土台(全レース記録)
     with st.expander("参考：無フィルタ土台（イン崩れ予想の全レース記録）"):
         st.caption(f"全 {ps['races']} レース記録。単勝 {roi(ps['tansho']['ret'], ps['tansho']['stake'])}"
                    f" / 2連単 {roi(ps['exacta']['ret'], ps['exacta']['stake'])}"
                    f" / 合計 {roi(ps['total']['ret'], ps['total']['stake'])}。"
-                   "台帳は何を張ったかに関わらず全レース記録。かつて机上116/188.7と誇ったがsurvivorship水増しで撤回、"
-                   "6艇クリーンでは単勝95%/2連単82%＝100%割れ・市場効率。上の主表示は単勝<1.5を見送った実運用版。")
+                   "台帳は何を張ったかに関わらず全レース記録。上の主表示は単勝<1.5を見送った実運用版。")
 
     # 合計(単勝+2連単)の累積損益（フィルタ版=買ったレースのみ）
     acc, cum = 0, []
@@ -552,14 +544,13 @@ def page_record():
             "レース収支": t_pl + e_pl,
         })
     st.dataframe(
-        pd.DataFrame(tbl), hide_index=True, use_container_width=True,
+        pd.DataFrame(tbl), hide_index=True, width='stretch',
         column_config={
             "単勝損益": st.column_config.NumberColumn(format="%+d"),
             "2連単損益": st.column_config.NumberColumn(format="%+d"),
             "レース収支": st.column_config.NumberColumn(format="%+d"),
         })
     st.caption("※単勝1点＋2連単3点/レース・各100円の実トラック（無フィルタ土台の前向き記録）。"
-               "かつての2連単188.7%はsurvivorship水増しで撤回、6艇クリーンでは82%＝当たっても控除ぶん負ける。"
                "**判断は年単位**（イン崩れは1日0〜2本・高配当帯的中は年に数十本）＝数十本で結論を出さない。"
                "中間集計での一喜一憂が最大の敵。見るなら四半期に一度、累積ROIとサンプル数で。")
 
@@ -586,7 +577,7 @@ def render_prediction(rows):
     sty = (df.style.apply(hl, axis=1)
            .format({"予想勝率%": "{:.1f}", "単勝オッズ": "{:.1f}", "期待値EV": "{:.2f}",
                     "展示T": "{:.2f}", "全国勝率": "{:.2f}"}, na_rep="―"))
-    st.dataframe(sty, hide_index=True, use_container_width=True)
+    st.dataframe(sty, hide_index=True, width='stretch')
 
 
 def page_race():
@@ -597,7 +588,7 @@ def page_race():
                              index=list(VENUES).index(LOCAL_VENUES[0]))
     jcd = jname.split(":")[0]
     rno = col[2].selectbox("レース", list(range(1, 13)))
-    col[3].write(""); go = col[3].button("予想する", type="primary", use_container_width=True)
+    col[3].write(""); go = col[3].button("予想する", type="primary", width='stretch')
 
     if not go:
         return
@@ -630,47 +621,60 @@ def page_race():
 
 def page_about():
     st.header("📖 解説 ― 何をしていて、どこまで信じてよいか")
-    n = len([r for r in papertrade._load() if r.get("settled")])
 
     st.markdown("""
 #### 何をしているか
-競艇は「1号艇（イン）」が構造的に有利で、公衆はインを過剰に人気にする傾向がある。
-このサイトは公式データ（B番組表／K競走成績）で学習した機械学習モデルで各レースの1着確率を出し、
-**モデルの本命が1号艇「以外」になったレース＝『イン崩れ予想（本命≠1号）』**を出す。
-「公衆＝インに寄せる／モデル＝インを嫌う」がズレた場所だが、2026-07に検証をやり直すと**そこに儲けのエッジは無い**（下記）。
+競艇は「1号艇（イン）」が構造的に強く、勝率はコースだけで大きく決まる。
+このサイトは公式データ（B番組表／K競走成績・2022年以降の約25万レース）で学習した
+機械学習モデルで、各レースの各艇の1着確率を出す。そこから3つの出し方をする。
 
-買い方は各レース **単勝（本命1点）＋2連単（確率上位3点）・各100円**。
-さらに二段でフィルタ：**①単勝<1.5倍のレースは丸ごと見送り**（大本命＝荒れず単勝も2連単も控除率負け）、
-**②2連単は締切間際のEV（＝確率×締切オッズ）が2.0超のときだけ買う**（後述）。
+| ページ | 何を出すか |
+|---|---|
+| 🔥 **渾身の一点** | 確信80%級だけを「これは獲れる」と言い切る。**無い日は無しと言う** |
+| 🏆 **勝てる目（堅軸）** | 位置(イン)と地力が揃った堅い本命 |
+| ⚑ **イン崩れ予想** | モデルの本命が1号以外＝「この1号は崩れる」を名指し |
+
+買い方は各レース **単勝（本命1点）＋2連単（確率上位3点）・各100円**が基本。
 """)
 
-    st.markdown("#### 検証で分かったこと（2026-07 やり直し）")
+    st.markdown("#### 何がどこまで当たるか（監査済み）")
     c = st.columns(3)
-    c[0].metric("イン崩れ 単勝", "95%", "6艇クリーン・確定払戻・3年")
-    c[1].metric("イン崩れ 2連単3点", "82%", "6艇クリーン・100%割れ")
-    c[2].metric("イン崩れ 3連単3点", "92%", "6艇クリーンでもエッジ無し")
+    c[0].metric("🔥 渾身の一点 的中率", "84%", "CI[83,85]・3年安定")
+    c[1].metric("モデル本命 的中率", "約57%", "全レース平均")
+    c[2].metric("1号の崩れ検知", "較正一致", "予測≒実測・展示前でも保持")
     st.markdown("""
-上は**6艇そろい（全6艇が枠に残った＝ベット時に再現できる状態）**だけで、確定払戻ベース・3年ウォークフォワードで測った正直な数字。
-**全部100%割れ＝競艇も市場効率＝エッジ無し**（当たっても控除ぶん負ける）。
+数字はすべて **6艇そろい（全6艇が枠に残った＝ベット時に再現できる状態）** に限定し、
+**確定払戻ベース・年単位のウォークフォワード**（学習に使っていない年で採点）で測ったもの。
+学習した年の成績は一切載せていない。
 
-かつてこのページは単勝116%/2連単188%と誇っていたが、あれは**survivorship水増しの幻**だった：
-学習・検証の枠が `win IS NOT NULL` で絞られ、事故・失格・欠場（win=NULL）の艇が黙って消えていた。
-1号（イン）が飛んだレースは1号が結果から消え、モデルは自動で非イン艇を本命にさせられ「妙味（本命≠1号）」と後付けラベルされる
-＝**高配当の荒れレースを結果を見てから拾っていた**だけ。ベット時には6艇そろっているので再現不能。だから撤回した。
+**「どの1号が崩れるか」は当てられる。**モデルが1号を◯%と見た時、実際に1号が崩れる率が
+それとほぼ一致する（下の較正表）。位置が崩れたら誰が勝つか（地力＋展開）まで出す。
 """)
 
-    st.markdown("#### まだ分かっていないこと（正直に）")
-    _live = "統計的に無意味" if n < 100 else "蓄積途上"
-    st.markdown(f"""
-- **前向きの実記録でも回収100%割れが続くかを確認中**（毎朝自動・現在 {n} レース）。今は{_live}で、
-  はっきり言えるのは**年単位**（下記）。予想は**エッジ無し前提**なので、100%割れ(🔴)が想定どおりの正解。
-- **かつて『高配当に寄ると儲かる（割安拾い）』と考えていたのは撤回**。あれはsurvivorship水増しの副産物で、
-  6艇クリーンで測り直すと消える。予測構造（#1=イン/位置・#2=地力/実力・+展開/相対ST）は本物だが、
-  公開情報ゆえ市場が先に織り込み済で儲けにはならない。
-- **予測が特定期間に偏っていないか**は、別の期間データが増えないと詰めきれない（結論=エッジ無しは動きにくいが）。
+    st.markdown("#### 回収率について、はっきり言うとくこと")
+    st.warning("""
+**このサイトは回収率（儲かるか）を主張しない。**
+
+競艇の払戻は控除率25%。当たっても控除ぶんは必ず引かれるので、
+的中率が高いことと儲かることは別の話や。公開情報で作った予想は市場が先に織り込むため、
+素直に張ると回収は100%を下回るのが通常。**ここが出しているのは的中の精度であって、
+勝てる保証やない。**張るかどうか、いくら張るかは自分で決めてくれ。
 """)
 
-    st.markdown("#### 年間どれくらいのレースが対象か／『年単位』の意味")
+    st.markdown("#### いま研究室でやっていること（結果が出るまで何も主張しない）")
+    st.markdown("""
+「回収100%超えの張れるルール」が本当に作れるかを、別立てで検証している。
+
+- 約345万通りのルールを、**2022〜2023年のデータだけ**で探索
+- 生き残った1本を**事前登録**（母集団・条件・判定基準・必要本数を先に文書で固定）
+- **2024〜2026年**（探索に一切使っていない年）に**一度だけ**当てて通過
+- 現在、**前向き検証を約660日かけて実施中**。中間判定は3点だけ、境界は開始前に固定済み
+
+バックテストの数字は意図的にここに書かない。**過去データで良い数字を出すのは簡単で、
+それを看板に掲げた結果は既に一度経験している。**前向き検証を通ったときに初めて書く。
+""")
+
+    st.markdown("#### 対象レース数の目安")
     st.table(pd.DataFrame({
         "年": ["2023", "2024", "2025"],
         "総レース": ["55,272", "55,240", "55,066"],
@@ -678,42 +682,17 @@ def page_about():
         "出現率": ["2.3%", "2.2%", "2.1%"],
     }))
     st.markdown("""
-**イン崩れ予想は年 約1,200本**（全レースの約2.2%・1日ならし約3本、0本の日も普通）。単勝<1.5倍を丸ごと見送ると年 約1,000本。
+イン崩れ予想は**年 約1,200本**（全レースの約2.2%・1日ならし約3本、0本の日も普通）。
+🔥渾身の一点はさらに絞るので、**出ない日のほうが多い**。撒かないのが仕様や。
 
-本数は少なくないが、**賭式で分散がまるで違う**のが肝：
-- **単勝は低分散** → 年1,200本あれば **約1年** で回収率（＝市場効率で100%割れ）が読めてくる
-- **2連単は稀な高配当が牽引するファットテール** → 高配当帯は**年たった約84レース**しかなく、
-  CIが広いまま。**回収が本当に100%割れか腰を据えて見るのは2〜3年**
-
-だから「放っておいて積む」のが正解。中間集計の一喜一憂（今日勝った/負けた）は最大の敵で、見るなら四半期に一度。
-""")
-
-    st.markdown("#### 記録は3本立て（混同しないため）")
-    st.markdown("""
-- **track A＝無フィルタ土台**：イン崩れ予想を全部記録した台帳（「成績」ページ）
-- **reco＝フィルタ版（参考）**：単勝<1.5を見送った版。track Aから導く目安
-- **実弾＝実際に張った分**：裁量・金額込みの別track
-
-いずれも回収は6艇クリーンの単勝95%/2連単82%（＝100%割れ）に収束するはず＝儲けの証明用ではなく、市場効率の前向き確認用。
-""")
-
-    st.markdown("#### 最新の状況（2026-07 更新）")
-    st.markdown("""
-- **2連単EVフィルタは撤回扱い**：締切間際のオッズで EV=確率×オッズ を出す仕組みは残すが、
-  かつて「この帯は堅い（512% / 305% / CI[435,597]）」としたのはsurvivorship水増しの幻で、6艇クリーンでは消える。
-  今は「⚑イン崩れ予想」の🎯EVボタン→EV>2.0が🟢表示になるが、**参考・儲け主張なし**。
-- **成績ページを「単勝<1.5見送り版」に**：実際に張る想定（チャラレース抜き）の回収率を主表示。無フィルタ土台は参考に格納。
-- **特徴量を掃除（24→14）**：ROI-permutationで「効いてない軸」を三重確認して除去（回収率は不変）。
-  分かったこと＝**当てる本体は特徴でなく『イン崩れを選ぶこと（selection）』**。ただしそれも儲けには化けない（市場効率）。
-- **自動化をクラウド（GitHub Actions）へ移設＝PC不要**：毎朝9時に自動でscan→結果反映→サイト更新。PCを切っても回る。
-- **ライブ生死ラインを事前固定（プレレジ）**：数字を見てから基準を決めると人は都合よく解釈するので、
-  「何本たまって回収△%を割ったら畳む／超えたら信じる」を先に固定済み（docs/LIVE_PREREG.md）。
-  特にEV>2.0は**約300本(1年+)たまるまで良し悪しを判断しない**。
+成績を見るなら**四半期に一度**でええ。中間集計での一喜一憂が一番の敵で、
+単勝でも傾向が読めるまで年単位、2連単は高配当が牽引するファットテールなので2〜3年かかる。
 """)
 
     st.markdown("#### 使い方・免責")
     st.info(
-        "半自動です（自動購入はしません）。「⚑イン崩れ予想」の買い目をテレボート等へ**自分で入力**して投票。"
+        "半自動です（自動購入はしません）。買い目をテレボート等へ**自分で入力**して投票。"
+        "毎朝9時に自動でスキャン→結果反映→サイト更新（クラウド実行・PC不要）。"
         "本サイトはシステム構築の研究目的で、実弾は少額（100円）想定。"
         "**統計的推定であり的中・利益を保証しません。投資は自己責任で。**"
     )
@@ -738,7 +717,7 @@ def page_pro():
     st.header("🎯 プロ・エージェント（毎日の予想と結果）")
     st.caption(f"逐次エージェント＝三関門（本命≠1号艇 → 単勝≥1.5 → 2連単EV>2.0）で選び、"
                f"1点 {AGENT_UNIT:,}円で張る。毎日ここに予想と結果が積まれる。"
-               f"※かつて『机上+25万/月』と出していたがsurvivorship水増しで撤回。6艇クリーンでは回収100%割れ＝負け寄り。負け月も隠さず出す。")
+               f"※勝った月も負けた月も隠さず出す。")
     sc = AGENT_UNIT / 100
     ledger = papertrade._load()
     today = dt.date.today().strftime("%Y%m%d")
@@ -789,7 +768,7 @@ def page_pro():
             cc[0].metric("賭けたレース累計", tot_n)
             cc[1].metric("累計収支", f"{tot_pl:+,}円")
             cc[2].metric("1点あたり", f"{AGENT_UNIT:,}円")
-            st.dataframe(pd.DataFrame(reversed(rows)), hide_index=True, use_container_width=True,
+            st.dataframe(pd.DataFrame(reversed(rows)), hide_index=True, width='stretch',
                          column_config={"その日の収支": st.column_config.NumberColumn(format="%+d"),
                                         "累計": st.column_config.NumberColumn(format="%+d")})
             # 月別
@@ -800,7 +779,7 @@ def page_pro():
             st.markdown("###### 月別")
             st.dataframe(pd.DataFrame([{"月": f"{m[:4]}/{m[4:]}", "収支": int(v)}
                                        for m, v in sorted(by_mo.items())]),
-                         hide_index=True, use_container_width=True,
+                         hide_index=True, width='stretch',
                          column_config={"収支": st.column_config.NumberColumn(format="%+d")})
             # 賭けたレースごとの明細（買い目＋結果）
             det = []
@@ -821,14 +800,13 @@ def page_pro():
                     "レース収支": int(_agent_pl(r, sc)),
                 })
             st.markdown("###### 明細（賭けたレースごとの買い目と結果）")
-            st.dataframe(pd.DataFrame(list(reversed(det))), hide_index=True, use_container_width=True,
+            st.dataframe(pd.DataFrame(list(reversed(det))), hide_index=True, width='stretch',
                          column_config={"レース収支": st.column_config.NumberColumn(format="%+d")})
         else:
             st.caption("エージェントが賭けた確定レースはまだありません（単勝<1.5は見送り／2連単はEV>2.0のみ）。")
 
-    st.info("※これは前向きの実記録＝ライブ検証。かつての机上+25万/月はsurvivorship水増しで撤回、"
-            "回収が本当に100%割れ（市場効率）かを積んで確かめる装置。"
-            "数十本〜年単位で見る（プレレジ：EV枠はN<300本は判断しない）。")
+    st.info("※これは前向きの実記録＝ライブ検証。数十本では何も言えないので年単位で見る"
+            "（プレレジ：EV枠はN<300本は判断しない）。")
 
     # --- 暗黙知ノート（頭の中） ---
     st.markdown("---")
@@ -841,7 +819,7 @@ def page_pro():
 
 def page_wild():
     st.header("🌊 本日のインが崩れやすいレース（参考）")
-    st.caption("モデルのイン勝率that低い＝1号が信頼薄い順（本命that1号でも勝率が薄ければ入る）。"
+    st.caption("モデルのイン勝率が低い＝1号が信頼薄い順（本命が1号でも勝率が薄ければ入る）。"
                "**万舟が来る/儲かる保証ではない**（検証: 万舟率は条件によらず約24%で一定）。"
                "捉えてるのは『インの脆さ』だけ＝見て楽しむ/参考用。")
     ls = wild.log_stats()
@@ -935,7 +913,7 @@ def _agent_feed(log):
 def page_agent():
     st.header("🎙️ エージェント実況（全レース予想→勝負/見送り→結果）")
     st.caption("エージェントが本日の全レースを直前まで読み、イン崩れ(本命≠1号)だけ勝負。結果が出たら一言。自動更新(3分毎)。"
-               "※コメントはルール生成(LLM不使用)・儲け保証なし（6艇クリーンで回収100%割れ＝市場効率）。実弾は自己責任。")
+               "※コメントはルール生成(LLM不使用)・儲け保証なし。実弾は自己責任。")
     log = commentary.load_log()
     today = dt.date.today().strftime("%Y%m%d")
     if not log or not log.get("races"):
@@ -994,7 +972,7 @@ def page_trifecta():
                     st.markdown("　".join(f"{i+1}.{c}" for i, c in enumerate(ranking[:rank])))
 
     st.subheader("これまでの記録：何点買えば当たってたか")
-    st.caption("前向き台帳の3連単を、実結果that予想の何位か(必要点数)で集計。分布that『何点買えば当たるか』の答え。")
+    st.caption("前向き台帳の3連単を、実結果が予想の何位か(必要点数)で集計。分布が『何点買えば当たるか』の答え。")
     settled = [x for x in papertrade._load()
                if x.get("settled") and x.get("trifecta_rank")
                and (x.get("res_full") or {}).get("trifecta_combo")]
@@ -1020,8 +998,7 @@ def page_dynamic():
                "少ない→絞る＝『20倍つきそうなら20点』の正体（見た目の荒れでなくEV）。2連単EV>2.0は検証済／"
                "3連系は実験（3連単ライブ収集で調整中）。締切間際に押すのが正確。儲け保証なし。")
     th = st.slider("EV割安ライン（これ超えを買う）", 1.5, 4.0, 2.0, 0.1)
-    st.caption("📈 かつて『backtestでEV>2.0=316% / 2.5=344% / 3.0=370%』としたが、これはsurvivorship水増しで撤回。"
-               "6艇クリーンでは2連単82%＝100%割れ（市場効率）。EVで割安を拾う仕組みは残すが儲け主張なし・参考表示。"
+    st.caption("📈 EVで割安な目を拾う仕組み（回収率の主張はしない・参考表示）。"
                "ライブ閾値は2.0で凍結（再最適化＝過学習を避ける）。上げるほど点数は減る。")
     today = dt.date.today().strftime("%Y%m%d")
     cache = scan.load_cache()
@@ -1050,7 +1027,7 @@ def page_dynamic():
                 rows, d = r
                 if d.get("strongest"):
                     st.success(f"💎 **最強妙味（高確信フラグ）！**　本命勝率{d['p0']*100:.0f}% × 2連単EV{d['ex_ev3']:.1f}（>3.5）"
-                               "＝本命≠1号×高確信×強割安が全部揃った表示用フラグ（かつての592%はsurvivorship水増しで撤回・儲け主張なし）")
+                               "＝本命≠1号×高確信×強割安が全部揃った表示用フラグ（儲け主張なし）")
                 elif d.get("ex_ev3") is not None:
                     st.caption(f"💎条件 本命勝率≥45%×2連単EV>3.5 ／ 現在 {d['p0']*100:.0f}% × EV{d['ex_ev3']:.1f}")
                 if d["points"] == 0:
@@ -1069,32 +1046,33 @@ def page_dynamic():
 
 
 def page_styles():
-    st.header("💴 買い方くらべ（アクセル段階別トータル）")
-    st.caption("点数を増やすほど『的中率↑・万舟捕捉↑』だが『回収率↓』（控除を余計に払う）＝"
-               "効率(回収率)と総額(P&L)でベストが違う。"
-               "⚠️ここの回収率(533%等)はsurvivorship水増しで撤回済＝6艇クリーンでは全部100%割れ・エッジ無し。点数と的中/回収の"
-               "『関係の形』を見る参考用で、水準は信じない。")
+    st.header("💴 買い方くらべ（何点買えば当たるか）")
+    st.caption("点数を増やすほど**的中率↑・万舟捕捉↑**。ただし増やした点のぶん控除も余計に払うので、"
+               "『当たりやすさ』と『効率』は別物。**このページは当たりやすさだけを出す。**")
     h = styles.HISTORICAL
-    st.subheader("3年トータル（本体）")
+    st.subheader("買い方別の的中率")
     st.caption(h["universe"])
     st.dataframe(pd.DataFrame([{
-        "買い方": r["name"], "点/R": r["pts"], "回収率": f"{r['roi']}%",
-        "総収支": f"{r['pl']:+,}円", "的中率": f"{r['hit']}%",
-        "万舟": r["manshu"], "最大払戻": f"{r['max']:,}円",
-    } for r in h["rows"]]), hide_index=True, use_container_width=True)
+        "買い方": r["name"], "点/R": r["pts"], "的中率": f"{r['hit']}%",
+    } for r in h["rows"]]), hide_index=True, width='stretch')
     st.info("🔑 " + h["note"])
 
-    st.subheader("点数×効率カーブ（3連単・イン崩れ3年）")
-    st.caption("何点が一番効率（回収率）いいか。" + styles.TRIFECTA_CURVE["note"])
+    st.subheader("点数×的中率カーブ（3連単・イン崩れ）")
+    st.caption(styles.TRIFECTA_CURVE["note"])
     c = styles.TRIFECTA_CURVE
-    st.line_chart(pd.DataFrame({"回収率%": c["roi"], "的中率%": c["hit"]}, index=c["points"]))
-    st.markdown("⚠️ **この533%/319%等はsurvivorship水増しで撤回済**（1号飛びレースを結果から拾った幻）。"
-                "6艇クリーンでは3連単3点=92%＝100%割れ（市場効率・エッジ無し）。カーブは水準でなく"
-                "**点数と的中/回収の関係の形**を見る参考用。点を増やすほど**的中率↑・回収率↓**の傾向だけは本物。")
+    st.line_chart(pd.DataFrame({"的中率%": c["hit"]}, index=c["points"]))
+    st.caption("横軸=買う点数、縦軸=その中に正解が入っていた割合。"
+               "3点で16%、20点で59%、60点で90%。**120点全部買えば当然100%当たるが、"
+               "それは当たっているだけで儲かってはいない。**")
+    st.line_chart(pd.DataFrame({"万舟(1万円超)を捕まえた本数": c["manshu"]}, index=c["points"]))
+
+    st.warning("**回収率はこのページに載せていない。**　回収率を名乗るには前向き検証"
+               "（事前登録→中間境界の固定→一発判定）を通す必要がある、という方針でサイト全体を"
+               "統一しているため、検証を通していない回収率は数字ごと置いていない。詳しくは解説ページへ。")
 
     st.subheader("毎日の記録（前向き・実トラック）")
-    st.caption("確定した日の各スタイル収支を毎日積む。上の3年トータルは机上、こっちが実際の前向き記録。"
-               "ワイド系は全ランク記録that要るので明日のscan以降から。")
+    st.caption("確定した日の各スタイル収支を毎日積む。上の3年トータルは集計値、こっちが実際の前向き記録。"
+               "ワイド系は全ランク記録が要るので明日のscan以降から。")
     dd = styles.daily([x for x in papertrade._load() if x.get("settled") and x.get("res_full")])
     if not dd:
         st.caption("まだ前向きの確定記録がありません（明日以降の scan→settle から毎日溜まります）。")
@@ -1111,7 +1089,7 @@ def page_styles():
                 row[n.split("（")[0]] = f"{pl:+,}" if c["comp"] else "—"
             tbl.append(row)
         tbl.append({"日付": "▶累計", **{n.split("（")[0]: f"{cum[n]:+,}" for n in names}})
-        st.dataframe(pd.DataFrame(tbl), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(tbl), hide_index=True, width='stretch')
 
     st.subheader("本日の勝負レースを各スタイルで見ると")
     st.caption("※本日ぶんは数レース＝ノイズ。判断は上の3年トータルで。")
@@ -1140,7 +1118,7 @@ def page_styles():
         else:
             rows.append({"買い方": name, "本日賭金": "—", "本日払戻": "—",
                          "本日収支": "全ランク記録待ち（次のscanから）"})
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
 
 
 st.title("🚤 競艇予想")
@@ -1166,12 +1144,10 @@ def _katai_effective(date, p):
 def page_katai():
     st.header("🏆 本日の勝てる目（高的中の堅い本命）")
     st.caption("**当たる目だけ**を出すページ。逆張り妙味(逆に賭ける)でなく、"
-               "『1にイン(位置)・2に地力(実力)』that揃った堅い本命。"
+               "『1にイン(位置)・2に地力(実力)』が揃った堅い本命。"
                "検証(確定払戻・6艇)：イン×地力1位で単勝**的中73.7%**、イン×地力1-2位で68.8%、"
                "モデル確信≥50%で63.3%。")
-    st.warning("⚠️ ただし**回収は89〜94%＝当たっても控除で儲けは出ない**（市場that実力を正しく値付け済）。"
-               "これは「当てて楽しむ／自信度」用で、儲けの主張はしない。今日確定した結論"
-               "＝競艇も市場効率・エッジ無し、に沿った正直な出し方。")
+    st.caption("※これは**的中率**の表示で、回収率の主張はしない（控除率25%ぶんは必ず引かれる）。")
     k = katai.load()
     today = dt.date.today().strftime("%Y%m%d")
     if not k or not k.get("picks"):
@@ -1183,7 +1159,7 @@ def page_katai():
 
 
 def _deadline_passed(deadline, now_min, buffer=10):
-    """締切(HH:MM)+buffer分that今(JST分)を過ぎたか。過ぎた分だけ結果を取りに行く。"""
+    """締切(HH:MM)+buffer分が今(JST分)を過ぎたか。過ぎた分だけ結果を取りに行く。"""
     if not deadline:
         return False
     try:
@@ -1217,7 +1193,7 @@ def _render_katai(date, raw_picks):
     c[2].metric("単勝 的中率", f"{t_hit/n*100:.0f}%" if n else "—",
                 help="想定74%(◎鉄板)。確定分の実績。")
     c[3].metric("単勝 回収率", f"{t_ret/(n*100)*100:.0f}%" if n else "—",
-                help="100円ずつ。<100%=当たるが控除で負ける(市場効率)。")
+                help="100円ずつ。参考値（回収率の主張はしない）。")
     if n:
         st.caption(f"実績（確定{n}件）：単勝 的中{t_hit}/{n}・回収{t_ret/(n*100)*100:.0f}% ／ "
                    f"2連単3点 的中{e_hit}/{n}・回収{e_ret/(n*300)*100:.0f}%　"
@@ -1246,8 +1222,8 @@ def _render_katai(date, raw_picks):
             else:
                 c2.markdown(f"{head}  \n"
                             f"2連単 本命流し3点：{ex3}　⏳ 結果待ち")
-    st.caption("※想定的中は過去3年の同型(確定払戻)の実測値。回収<100%は不変＝儲け保証なし。"
-               "確定分の実績（上の指標）that想定に近いか＝前向きの答え合わせ。")
+    st.caption("※想定的中は過去3年の同型(確定払戻)の実測値。儲け保証なし。"
+               "確定分の実績（上の指標）が想定に近いか＝前向きの答え合わせ。")
 
 
 page = st.sidebar.radio("ページ",

@@ -1,6 +1,6 @@
 """エージェント実況コメント生成（テンプレbase・LLM不使用＝無料/決定的で毎レース回せる）。
 
-『全レースを直前まで予想→勝負or見送り→結果that出たら一言』の"一言"を作る。
+『全レースを直前まで予想→勝負or見送り→結果が出たら一言』の"一言"を作る。
 入力: race(予想+買い目) と result(fetch_result_full出力 or None=未確定)。
 ※LLMを使わんのはクォータ制約(日150レース不可)。口調はエージェント風に固定テンプレ。
   将来リッチ化するなら勝負レース(数本)だけLLM、は別途可。
@@ -62,20 +62,20 @@ def comment(r: dict, res: dict | None) -> str:
             if h["trio"]:
                 extra.append(f"3連複{res.get('trio_yen')}円")
             tail = ("＋" + "・".join(extra)) if extra else ""
-            return (f"🎯 読み的中！本命{honmei}号that来た。単勝{res.get('tansho_yen')}円{tail}。"
-                    f"インを否定した妙味that刺さった。")
+            return (f"🎯 読み的中！本命{honmei}号が来た。単勝{res.get('tansho_yen')}円{tail}。"
+                    f"インを否定した妙味が刺さった。")
         if winner == 1:
             if h["trio"]:
                 return (f"😮 本命{honmei}号は届かず、インが残った…が3連複{res.get('trio_yen')}円で拾った。"
-                        f"着順不問that効いた、これthaクッション。")
-            return f"😖 本命{honmei}号届かず、イン(1号)that残った。荒れ読み外れ、この回は勉強代。"
-        # 別の非イン艇that勝った
+                        f"着順不問が効いた、これthaクッション。")
+            return f"😖 本命{honmei}号届かず、イン(1号)が残った。荒れ読み外れ、この回は勉強代。"
+        # 別の非イン艇が勝った
         if h["trio"]:
             return (f"🤔 本命{honmei}号でなく{winner}号。荒れ方向は合ったが本命違い。"
                     f"3連複{res.get('trio_yen')}円で救われた。")
-        return f"😑 本命{honmei}号でなく{winner}号that来た。荒れたが本命外し、この回は取れず。"
+        return f"😑 本命{honmei}号でなく{winner}号が来た。荒れたが本命外し、この回は取れず。"
 
     # 見送り・確定
     if winner == 1:
-        return f"⚪ 見送り正解。インが固く1号that逃げた（単勝{res.get('tansho_yen')}円）。読み通り。"
-    return f"👀 見送ったが{winner}号that来て荒れた。妙味と見なかった回、ルール通りとはいえ悔しい。"
+        return f"⚪ 見送り正解。インが固く1号が逃げた（単勝{res.get('tansho_yen')}円）。読み通り。"
+    return f"👀 見送ったが{winner}号が来て荒れた。妙味と見なかった回、ルール通りとはいえ悔しい。"
