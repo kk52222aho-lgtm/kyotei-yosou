@@ -531,12 +531,14 @@ def page_record():
                 + (r.get("exacta_return", 0) - r.get("exacta_points", 0) * 100))
         cum.append(acc)
     if cum:
-        st.line_chart(pd.DataFrame({"累積損益(単勝<1.5見送り・円)": cum}))
+        st.line_chart(pd.DataFrame(
+            {("累積損益(全レース・円)" if rebuilt else "累積損益(単勝<1.5見送り・円)"): cum}))
 
     st.markdown("#### 明細（1点100円・単勝1点＋2連単3点）")
     tbl = []
     for r in reversed(settled):
-        bet_race = (r.get("final_odds") or 0) >= FLOOR   # 単勝1.5未満は見送り＝損益0
+        # 再現記録は締切オッズが無い＝1.5倍フィルタを掛けられないので全レースを「買」とする
+        bet_race = True if rebuilt else (r.get("final_odds") or 0) >= FLOOR
         e_stake = r.get("exacta_points", 0) * 100
         t_pl = (r.get("tansho_return", 0) - 100) if bet_race else 0
         e_pl = (r.get("exacta_return", 0) - e_stake) if bet_race else 0
@@ -716,7 +718,14 @@ AGENT_EV_TH = 2.0
 
 
 def _agent_pl(r, sc):
-    """エージェントの1レースP&L（円）。単勝<1.5は見送り(None)。2連単はEV>2.0のみ。"""
+    """エージェントの1レースP&L（円）。単勝<1.5は見送り(None)。2連単はEV>2.0のみ。
+
+    再現記録(rebuilt)は締切オッズ・締切EVを再取得できないため、
+    三関門のうち「単勝≥1.5」「2連単EV>2.0」を再現できない。
+    その場合は単勝のみ・全レースを対象として集計する（画面側に注記を出す）。
+    """
+    if r.get("rebuilt"):
+        return (r.get("tansho_return", 0) - 100) * sc
     if (r.get("final_odds") or 0) < papertrade.ODDS_FLOOR:
         return None
     pl = (r.get("tansho_return", 0) - 100) * sc
@@ -731,6 +740,12 @@ def page_pro():
     st.caption(f"逐次エージェント＝三関門（本命≠1号艇 → 単勝≥1.5 → 2連単EV>2.0）で選び、"
                f"1点 {AGENT_UNIT:,}円で張る。毎日ここに予想と結果が積まれる。"
                f"※勝った月も負けた月も隠さず出す。")
+    if any(r.get("rebuilt") for r in papertrade._load()):
+        st.warning("🧪 **いまの台帳は再現記録（バックテスト）です。**　"
+                   "三関門のうち「単勝≥1.5」と「2連単EV>2.0」は締切時点のオッズが要りますが、"
+                   "過去分は再取得できません。そのため下の集計は**単勝のみ・全レース対象**で、"
+                   "本来のエージェント（三関門通過だけを張る）とは別物です。"
+                   "本来の姿は明日以降の前向き記録で積み直します。")
     sc = AGENT_UNIT / 100
     ledger = papertrade._load()
     today = dt.date.today().strftime("%Y%m%d")
