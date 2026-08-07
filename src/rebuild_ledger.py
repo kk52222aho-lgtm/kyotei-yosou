@@ -34,6 +34,8 @@ def main() -> None:
     ap.add_argument("--start", required=True)
     ap.add_argument("--end", required=True)
     ap.add_argument("--out", default=LEDGER)
+    ap.add_argument("--with-tenji", action="store_true",
+                    help="展示タイム/風/波も使う。既定は使わない=毎朝のスキャンと情報量を揃える")
     a = ap.parse_args()
 
     bundle = predict.load_model()
@@ -60,6 +62,13 @@ def main() -> None:
             continue
         for e in ents:
             e["jcd"] = jcd
+            if not a.with_tenji:
+                # 毎朝のスキャン(出走表のみ)と情報量を揃える。展示タイム・風・波は
+                # 朝の時点では未公開なので、これを使うとサイトが実際に出した予想と別物になる。
+                # 実測: この情報合わせでライブ実記録と適合率96.9%/再現率96.9%で一致する。
+                e["tenji_time"] = None
+                e["wind_speed"] = None
+                e["wave_height"] = None
         try:
             pr = predict.predict_entries(ents, bundle)
             rec = predict.recommend(pr)
