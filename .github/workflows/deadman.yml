@@ -1,0 +1,68 @@
+name: deadman
+
+# 収集の死活を「外から」見る唯一の目。
+#
+# 2026-09-05〜09-08 に常駐が3日死んだ時、watchdog は検知して286回再起動を試み、
+# 286回とも失敗し、ログにも書いた。**そのログを読む者が居らんかった。**
+# HC_ODDS_LOOP / HC_ODDS_EXPORT / HEALTHCHECK_DAILY は3本とも未設定のまま。
+#
+# ここは新しい登録を一切要らん経路や:
+#   ローカル(毎朝) → src.status_beacon push → data/status.json を Contents API で直push
+#   ここ(毎日)     → その status.json を読んで、鮮度が切れとったら **落ちる**
+#                  → GitHub が失敗メールを飛ばす(既定で有効)
+#
+# PC ごと落ちた場合も捕まる: status.json の generated_at が古いままになるので落ちる。
+# watchdog はプロセス死しか見れんので、この経路でしか捕まらんケースや。
+
+on:
+  schedule:
+    - cron: "0 3 * * *"      # 12:00 JST。ローカルの 07:30 収集の5時間後
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: assert collectors are alive
+        run: |
+          python - <<'PY'
+          import json, sys, datetime as dt
+
+          try:
+              st = json.load(open("data/status.json", encoding="utf-8"))
+          except FileNotFoundError:
+              sys.exit("DEADMAN: data/status.json が無い。ローカルの beacon が一度も押せてへん。")
+
+          gen = dt.datetime.fromisoformat(st["generated_at"])
+          age = (dt.datetime.now() - gen).days
+          print(f"beacon generated_at {st['generated_at']} ({age}日前)")
+
+          fail = []
+          # ① 灯台そのものが古い = ローカルが動いてへん(PC停止・タスク死・push失敗)
+          if age > 2:
+              fail.append(f"beacon 自体が {age}日 古い(ローカルが動いてへん)")
+          # ② 各収集の鮮度(許容日数は beacon 側に書いてある)
+          for k, v in st.get("tables", {}).items():
+              if v.get("stale"):
+                  fail.append(f"{k}: 最新 {v.get('latest')} / 遅れ {v.get('lag_days')}日 "
+                              f"(許容 {v.get('tol_days')}日)")
+          for k, v in st.get("logs", {}).items():
+              if v.get("stale"):
+                  fail.append(f"{k}: 最終書込 {v.get('mtime')}")
+          # ③ 再起動に失敗し続けとる = プロセス死より悪い
+          w = st.get("watchdog", {})
+          if w.get("recent_restart_failures", 0) >= 3:
+              fail.append(f"watchdog: 直近で RESTART FAILED {w['recent_restart_failures']}回")
+          if w.get("duplicate_loops", 0):
+              fail.append(f"watchdog: DUPLICATE LOOPS {w['duplicate_loops']}回")
+
+          for k, v in st.get("heartbeat_urls_set", {}).items():
+              if not v:
+                  print(f"[note] {k} は未設定(この経路が唯一の目撃者になっとる)")
+
+          if fail:
+              print("\n".join("DEADMAN: " + f for f in fail))
+              sys.exit(1)
+          print("all collectors alive")
+          PY
