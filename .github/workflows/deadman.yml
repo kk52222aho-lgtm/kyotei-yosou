@@ -34,14 +34,18 @@ jobs:
           except FileNotFoundError:
               sys.exit("DEADMAN: data/status.json が無い。ローカルの beacon が一度も押せてへん。")
 
+          # 灯台は JST の naive、ランナーは UTC。差は9時間や。
+          # **死活装置が時差で誤判定したら意味が無い**ので、時間で測って余裕を明示的に足す。
           gen = dt.datetime.fromisoformat(st["generated_at"])
-          age = (dt.datetime.now() - gen).days
-          print(f"beacon generated_at {st['generated_at']} ({age}日前)")
+          age_h = (dt.datetime.utcnow() - gen).total_seconds() / 3600
+          print(f"beacon generated_at {st['generated_at']} (JST) / "
+                f"経過 {age_h:.1f}h (UTC基準・時差9hを含む)")
 
           fail = []
           # ① 灯台そのものが古い = ローカルが動いてへん(PC停止・タスク死・push失敗)
-          if age > 2:
-              fail.append(f"beacon 自体が {age}日 古い(ローカルが動いてへん)")
+          #    許容 = 2日 + 時差9h + 実行時刻のズレ = 60h
+          if age_h > 60:
+              fail.append(f"beacon 自体が {age_h / 24:.1f}日 古い(ローカルが動いてへん)")
           # ② 各収集の鮮度(許容日数は beacon 側に書いてある)
           for k, v in st.get("tables", {}).items():
               if v.get("stale"):
