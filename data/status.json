@@ -1,0 +1,89 @@
+{
+ "generated_at": "2026-09-08T22:12:55",
+ "date": "20260908",
+ "tables": {
+  "entries": {
+   "latest": "20260907",
+   "rows": 1574064,
+   "lag_days": 1,
+   "tol_days": 3,
+   "stale": false
+  },
+  "payouts": {
+   "latest": "20260907",
+   "rows": 258066,
+   "lag_days": 1,
+   "tol_days": 3,
+   "stale": false
+  },
+  "results_st": {
+   "latest": "20260907",
+   "rows": 1547235,
+   "lag_days": 1,
+   "tol_days": 3,
+   "stale": false
+  },
+  "odds_timeseries": {
+   "latest": "20260905",
+   "rows": 146311,
+   "lag_days": 3,
+   "tol_days": 2,
+   "stale": true
+  },
+  "kachimake": {
+   "latest": "20260907",
+   "rows": 1277901,
+   "lag_days": 1,
+   "tol_days": 14,
+   "stale": false
+  },
+  "oriten": {
+   "latest": "20260717",
+   "rows": 80130,
+   "lag_days": 53,
+   "tol_days": 14,
+   "stale": true
+  }
+ },
+ "logs": {
+  "probe_loop.log": {
+   "mtime": "2026-09-08T22:02",
+   "age_hours": 0.2,
+   "tol_days": 1,
+   "stale": false
+  },
+  "watchdog.log": {
+   "mtime": "2026-09-08T22:10",
+   "age_hours": 0.0,
+   "tol_days": 1,
+   "stale": false
+  },
+  "pushout_record.log": {
+   "mtime": "2026-09-08T08:30",
+   "age_hours": 13.7,
+   "tol_days": 2,
+   "stale": false
+  },
+  "daily_collect.log": {
+   "mtime": "2026-09-08T07:31",
+   "age_hours": 14.7,
+   "tol_days": 2,
+   "stale": false
+  }
+ },
+ "watchdog": {
+  "recent_restart_failures": 29,
+  "last_line": "2026-09-08 22:10 alive pid=29660",
+  "duplicate_loops": 0
+ },
+ "heartbeat_urls_set": {
+  "HC_ODDS_LOOP": false,
+  "HC_ODDS_EXPORT": false
+ },
+ "stale": [
+  "odds_timeseries",
+  "oriten",
+  "watchdog:restart_failing"
+ ],
+ "ok": false
+}
