@@ -1,95 +1,94 @@
 {
- "generated_at": "2026-09-08T23:13:17",
- "date": "20260908",
+ "generated_at": "2026-09-09T01:56:16",
+ "date": "20260909",
  "tables": {
   "entries": {
    "latest": "20260907",
    "rows": 1574064,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 3,
    "stale": false
   },
   "payouts": {
    "latest": "20260907",
    "rows": 258066,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 3,
    "stale": false
   },
   "results_st": {
    "latest": "20260907",
    "rows": 1547235,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 3,
    "stale": false
   },
   "odds_timeseries": {
    "latest": "20260905",
    "rows": 146311,
-   "lag_days": 3,
+   "lag_days": 4,
    "tol_days": 2,
    "stale": true
   },
   "kachimake": {
    "latest": "20260907",
    "rows": 1277901,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 14,
    "stale": false
   },
   "oriten": {
-   "latest": "20260731",
-   "rows": 93300,
-   "lag_days": 39,
+   "latest": "20260908",
+   "rows": 127770,
+   "lag_days": 1,
    "tol_days": 14,
-   "stale": true
+   "stale": false
   }
  },
  "logs": {
   "probe_loop.log": {
    "mtime": "2026-09-08T22:52",
-   "age_hours": 0.3,
+   "age_hours": 3.1,
    "tol_days": 1,
    "stale": false
   },
   "watchdog.log": {
-   "mtime": "2026-09-08T23:10",
+   "mtime": "2026-09-09T01:50",
    "age_hours": 0.1,
    "tol_days": 1,
    "stale": false
   },
   "pushout_record.log": {
-   "mtime": "2026-09-08T08:30",
-   "age_hours": 14.7,
+   "mtime": "2026-09-08T23:13",
+   "age_hours": 2.7,
    "tol_days": 2,
    "stale": false
   },
   "daily_collect.log": {
    "mtime": "2026-09-08T23:12",
-   "age_hours": 0.0,
+   "age_hours": 2.7,
    "tol_days": 2,
    "stale": false
   },
   "shrink_record.log": {
    "mtime": "2026-09-08T23:13",
-   "age_hours": 0.0,
+   "age_hours": 2.7,
    "tol_days": 2,
    "stale": false
   }
  },
  "watchdog": {
   "recent_restart_failures": 0,
-  "last_line": "2026-09-08 23:10 off-hours",
+  "last_line": "2026-09-09 01:50 off-hours",
   "duplicate_loops": 0,
-  "since_last_ok": 2
+  "since_last_ok": 18
  },
  "heartbeat_urls_set": {
   "HC_ODDS_LOOP": false,
   "HC_ODDS_EXPORT": false
  },
  "stale": [
-  "odds_timeseries",
-  "oriten"
+  "odds_timeseries"
  ],
  "ok": false
 }
