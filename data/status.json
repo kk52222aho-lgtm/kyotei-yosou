@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-08T23:12:11",
+ "generated_at": "2026-09-08T23:13:17",
  "date": "20260908",
  "tables": {
   "entries": {
@@ -39,7 +39,7 @@
   },
   "oriten": {
    "latest": "20260731",
-   "rows": 93012,
+   "rows": 93300,
    "lag_days": 39,
    "tol_days": 14,
    "stale": true
@@ -54,7 +54,7 @@
   },
   "watchdog.log": {
    "mtime": "2026-09-08T23:10",
-   "age_hours": 0.0,
+   "age_hours": 0.1,
    "tol_days": 1,
    "stale": false
   },
@@ -71,14 +71,17 @@
    "stale": false
   },
   "shrink_record.log": {
-   "missing": true,
-   "stale": true
+   "mtime": "2026-09-08T23:13",
+   "age_hours": 0.0,
+   "tol_days": 2,
+   "stale": false
   }
  },
  "watchdog": {
-  "recent_restart_failures": 26,
+  "recent_restart_failures": 0,
   "last_line": "2026-09-08 23:10 off-hours",
-  "duplicate_loops": 0
+  "duplicate_loops": 0,
+  "since_last_ok": 2
  },
  "heartbeat_urls_set": {
   "HC_ODDS_LOOP": false,
@@ -86,9 +89,7 @@
  },
  "stale": [
   "odds_timeseries",
-  "oriten",
-  "shrink_record.log",
-  "watchdog:restart_failing"
+  "oriten"
  ],
  "ok": false
 }
