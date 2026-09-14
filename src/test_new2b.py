@@ -76,7 +76,7 @@ def main():
         print(f"  {label:18s}: {a:.2f}%   ({a-base:+.2f}pt)")
     allf = acc(df, NEW)
     print(f"  ＋3つ全部           : {allf:.2f}%   ({allf-base:+.2f}pt)")
-    print("\n読み: どれかthat+0.4ptを明確に超えれば#2の理由。全部~0なら第二の柱は存在せず=イン一本で最終確定。")
+    print("\n読み: どれかが+0.4ptを明確に超えれば#2の理由。全部~0なら第二の柱は存在せず=イン一本で最終確定。")
     print("※確定払戻・walk-forward・リークなし。")
 
 

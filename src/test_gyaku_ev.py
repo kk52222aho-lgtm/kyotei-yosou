@@ -4,7 +4,7 @@ ROI(勝敗×配当)はfat-tailで暴れCI[94,129]。だが的中率は64.5%で�
 ∴全艇オッズがあれば:
   ①EV=model_p×odズ で期待ROIを低分散推定(勝敗でなく確率×既知オッズ)→CIが締まる
   ②市場含意確率(1/odズ正規化) vs model_p を1レース対で比較→市場が外本命を過小評価か直接
-odds_cacheはサイトが妙味中心に貯めた=逆イン本命that濃い。walk-forwardでmodel_p付与し結合。
+odds_cacheはサイトが妙味中心に貯めた=逆イン本命が濃い。walk-forwardでmodel_p付与し結合。
 確定払戻・6艇クリーン。※オッズは締切前capture=実際に張れる価格。
 
 例: python -u -m src.test_gyaku_ev

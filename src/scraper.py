@@ -223,6 +223,73 @@ def fetch_beforeinfo(date: str, jcd: str, rno: int) -> tuple[dict[int, dict], di
     return per_lane, race_cond
 
 
+def fetch_beforeinfo_raw(date: str, jcd: str, rno: int) -> dict | None:
+    """直前情報ページの各セクションを【生テキストのまま】返す(前向き収集用・構造化は後段)。
+
+    返り値 dict (全て str | None):
+      lanes_raw   : 艇ごと1行×6 (体重/展示タイム/チルト/プロペラ/部品交換/前走成績/調整重量が全部入る)
+      parts_raw   : 部品交換の列挙 "2:キャブ | 5:ピストン2" (交換なしの艇は出さない。無交換レースは "")
+      chosei_raw  : 調整重量 "1:0.0 2:0.0 ..."
+      st_tenji_raw: スタート展示テーブル全文(進入隊形=行の並び順+ST が入る)
+      raw_text    : ページ本文全文(パース失敗しても情報を落とさない保険)
+    ページ自体が取れない場合のみ None。パース失敗はフィールドが None/"" になるだけでレコードは成立。
+
+    ※周回展示タイム(直線と別枠)・選手/記者コメントは boatrace.jp 本体には存在しない
+      (各場公式サイト側)。カラムだけ先に確保し、収集器は将来の場別スクレイパーで埋める。
+    """
+    soup = _get(_race_url("beforeinfo", date, jcd, rno))
+    if soup is None:
+        return None
+
+    out = {"lanes_raw": None, "parts_raw": None, "chosei_raw": None,
+           "st_tenji_raw": None,
+           "raw_text": re.sub(r"\s+", " ", soup.get_text(" ", strip=True))}
+
+    try:
+        body = None
+        for t in soup.find_all("table"):
+            if len(t.find_all("tbody")) >= 6 and "展示" in t.get_text():
+                body = t
+                break
+        if body is not None:
+            lanes, parts, chosei = [], [], []
+            for tb in body.find_all("tbody")[:6]:
+                rows = tb.find_all("tr")
+                if not rows:
+                    continue
+                line = re.sub(r"\s+", " ", tb.get_text(" ", strip=True))
+                lanes.append(line)
+                tds0 = [re.sub(r"\s+", " ", td.get_text(" ", strip=True))
+                        for td in rows[0].find_all("td")]
+                lane = tds0[0] if tds0 and tds0[0].isdigit() else str(len(lanes))
+                # row0 = [枠,写真,名前,体重,展示,チルト,プロペラ,部品交換,前走R,...]
+                if len(tds0) > 7 and tds0[7]:
+                    parts.append(f"{lane}:{tds0[7]}")
+                # row2 = [調整重量, 'ST', ST値]
+                if len(rows) > 2:
+                    tds2 = [re.sub(r"\s+", " ", td.get_text(" ", strip=True))
+                            for td in rows[2].find_all("td")]
+                    if tds2 and tds2[0]:
+                        chosei.append(f"{lane}:{tds2[0]}")
+            if lanes:
+                out["lanes_raw"] = "\n".join(lanes)
+                out["parts_raw"] = " | ".join(parts)          # 無交換なら ""
+                out["chosei_raw"] = " ".join(chosei)
+    except Exception:
+        pass                                                   # rawは残る=レコードは落とさない
+
+    try:
+        for t in soup.find_all("table"):
+            txt = t.get_text(" ", strip=True)
+            if "スタート展示" in txt or ("ST" in txt and "コース" in txt):
+                out["st_tenji_raw"] = re.sub(r"\s+", " ", txt)
+                break
+    except Exception:
+        pass
+
+    return out
+
+
 def fetch_result_full(date: str, jcd: str, rno: int) -> dict | None:
     """結果ページ1回で 勝ち艇・単勝払戻・2連単払戻 をまとめて返す（ライブ結果表示用）。
 

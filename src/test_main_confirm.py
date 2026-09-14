@@ -64,7 +64,7 @@ def main():
     d = collect_main(df)
     print(f"メイン10-12R 本命≠1号 総数 {len(d):,}  ROI {roi(d):.0f}%\n")
 
-    print("[機序: イン(1号艇)のクラス別] スター(A1)ほど過剰買い→妙味深い、that機序")
+    print("[機序: イン(1号艇)のクラス別] スター(A1)ほど過剰買い→妙味深い、が機序")
     for c in ["A1", "A2", "B1", "B2"]:
         sub = d[d["in_cls"] == c]
         if len(sub) >= 30:
@@ -79,7 +79,7 @@ def main():
     print(f"  全体ROI{roi(d):.0f}% → 最多場{top_v}を除くと {roi(d[d['jcd']!=top_v]):.0f}% (残れば場proxyでない)")
     per = [(v, len(d[d['jcd'] == v]), roi(d[d['jcd'] == v])) for v in vc.index if len(d[d['jcd'] == v]) >= 40]
     hi = sum(1 for _, _, r in per if r >= 171)
-    print(f"  件数40+の場 {len(per)}個中 {hi}個that基準171%超 (多数なら特定場でなく横断的)")
+    print(f"  件数40+の場 {len(per)}個中 {hi}個が基準171%超 (多数なら特定場でなく横断的)")
 
     print("\n判定: インA1で最大 かつ 最多場を抜いても>200% かつ 多くの場で基準超え なら")
     print("      メイン増幅=横断的な群衆バイアス(スター過剰買い)で確定→サイト実装候補。")

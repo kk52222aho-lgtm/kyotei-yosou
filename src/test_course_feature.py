@@ -85,7 +85,7 @@ def main():
     print(f"  +コース適性(個性): 1着{plus[0]:.1f}% / 妙味単勝{plus[1]:.0f}%")
     print(f"\n  -> 上乗せ: 1着 {plus[0]-base[0]:+.1f}pt / 妙味単勝 {plus[1]-base[1]:+.0f}pt")
     if plus[0] - base[0] >= 0.5 or plus[1] - base[1] >= 5:
-        print("  ** 上がった！ 個性that初の壁破り＝本物か個別検証へ。")
+        print("  ** 上がった！ 個性が初の壁破り＝本物か個別検証へ。")
     else:
         print("  個性もモデル特徴では上乗せ無し＝市場効率で天井、で確定（選抜での+4ptも控除に消える）。")
     print("\n※確定払戻・walk-forward・リークなし。")

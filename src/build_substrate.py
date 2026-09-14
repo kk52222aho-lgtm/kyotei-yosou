@@ -46,7 +46,7 @@ def main():
             win = int(g["tansho_lane"].iloc[0])
             conf = float(g["p"].iloc[0]) / s * 100        # レースの本命確信(混沌度)
             for rank, (_, b) in enumerate(g.iterrows(), 1):
-                row = {"yr": y, "jcd": str(jcd), "rno": rno, "lane": int(b["lane"]),
+                row = {"yr": y, "date": str(date), "jcd": str(jcd), "rno": rno, "lane": int(b["lane"]),
                        "p": float(b["p"]) / s * 100,       # レース内正規化勝率%
                        "rank": rank, "conf": conf, "is_lane1": int(b["lane"] == 1),
                        "won": int(int(b["lane"]) == win),

@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from . import predict
+
 DATA = Path(__file__).resolve().parent.parent / "data"
 
 
@@ -42,14 +44,11 @@ def select(rows):
     else:
         tier, hit = "○本命堅め", 63              # 高確信本命=63.3%
 
-    # 2連単 本命-流し 上位3(Harville)
-    p = {e["lane"]: e["win_prob"] for e in rows}
-    s = sum(p.values()) or 1
-    p = {k: v / s for k, v in p.items()}
+    # 2連単 本命-流し 上位3（段階別指数つき: predict.exacta_probs と同じ器）
     h = honmei["lane"]
-    dh = 1 - p[h]
-    ex = sorted(((f"{h}-{j}", p[h] * p[j] / dh if dh > 0 else 0)
-                 for j in p if j != h), key=lambda x: -x[1])
+    _ex = predict.exacta_probs({e["lane"]: e["win_prob"] for e in rows})
+    ex = sorted(((c, pr) for c, pr in _ex.items() if c.startswith(f"{h}-")),
+                key=lambda x: -x[1])
     return {
         "tansho": h, "name": honmei.get("name"), "tier": tier, "hit_pct": hit,
         "conf": round(conf, 1), "in_power_rank": in_rank,

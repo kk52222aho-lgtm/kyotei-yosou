@@ -75,9 +75,9 @@ def main():
         yrs = " ".join(f"{y[2:]}:{d[(d.conf>=lo)&(d.yr==y)]['won'].mean()*100:.0f}"
                        for y in sorted(d["yr"].unique()))
         print(f"  ≥{lo}%: {n:6d}  {hit:5.1f}  [{lo_ci:.0f},{hi_ci:.0f}]   {roi:5.1f}%   年{yrs}")
-    print("\n判定材料: 各帯の的中CIが締まってるか(N十分か)・年別that安定か・ROIが100%割れか。")
+    print("\n判定材料: 各帯の的中CIが締まってるか(N十分か)・年別が安定か・ROIが100%割れか。")
     print("旧ハード値(≥.80=84等)と実測が一致するか。※②(ライブ確信=展示前 と この物差しの分布照合)")
-    print("that通るまでページ非公開。的中を出すならROI(このEV現実)も必ず併記。")
+    print("が通るまでページ非公開。的中を出すならROI(このEV現実)も必ず併記。")
 
 
 if __name__ == "__main__":

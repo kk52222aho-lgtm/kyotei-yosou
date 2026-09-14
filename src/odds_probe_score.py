@@ -1,4 +1,4 @@
-"""前向きオッズprobeの採点台=「勝ちの一行」that出る唯一の場所。
+"""前向きオッズprobeの採点台=「勝ちの一行」が出る唯一の場所。
 
 収集器(odds_probe)が貯めた odds_timeseries に、事前登録R1/R2を当てて前向き成績を出す:
 各ルールの N・的中・単勝ROI・CI・事前登録の判定表(合格/kill/継続)。
@@ -39,7 +39,7 @@ def _decision_rows(conn, date):
 
 
 def fired(conn, date):
-    """事前登録R1/R2that発火した賭けを返す [{rule,jcd,rno,target,odds,ev,reg}]。"""
+    """事前登録R1/R2が発火した賭けを返す [{rule,jcd,rno,target,odds,ev,reg}]。"""
     bets = []
     for (jcd, rno), lanes in _decision_rows(conn, date).items():
         any_row = next(iter(lanes.values()))
@@ -57,7 +57,7 @@ def fired(conn, date):
                 bets.append({"rule": "R2", "date": date, "jcd": jcd, "rno": rno, "target": honmei,
                              "odds": od, "ev": ev, "reg": reg})
         # R3(純EVフィルタ=控除超える目を"つくる"): 艇を問わず late窓EVが最大&≥1.15 の1艇だけ買う。
-        # 順位でなく"価格that割に合う瞬間"だけ拾う=+EVを値から構築する唯一の手。
+        # 順位でなく"価格が割に合う瞬間"だけ拾う=+EVを値から構築する唯一の手。
         best = max(lanes, key=lambda ln: (lanes[ln][3] or 0))
         _, od, p, ev, _, _, reg = lanes[best][:7]
         if ev is not None and ev >= 1.15:
@@ -130,7 +130,7 @@ def main():
     conn.close()
     print(f"収集日 {dates}  発火した賭け(R1/R2) 計{len(all_bets)}件")
     settled = settle(all_bets)
-    print("\n=== 前向き成績(=勝ちの一行that出る場所) ===")
+    print("\n=== 前向き成績(=勝ちの一行が出る場所) ===")
     for rule in ["R1", "R2", "R3", "R4"]:
         rows = [s for s in settled if s["rule"] == rule]
         n = len(rows)

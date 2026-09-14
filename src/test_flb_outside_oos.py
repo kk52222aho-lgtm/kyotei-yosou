@@ -3,7 +3,7 @@
 test_flb_outside: 本命=外×p0≥.55で単勝110.9%・勾配滑らか・3年一貫だがN501でbootCI下限97・
 上位3配当抜きで99.4=確定に薄い。この仮説はSELECTION_YEARS(2016-22)から作ってない→そこで
 OOSテストすればN2-3倍の真の場外検証。各年その前年までで学習(walk-forward)。
-勾配/trim/bootCI/年別を全期間で。CI下限that100超えれば本物確定・跨げば「有望だが未確定」。
+勾配/trim/bootCI/年別を全期間で。CI下限が100超えれば本物確定・跨げば「有望だが未確定」。
 確定払戻・6艇クリーン。
 
 例: python -u -m src.test_flb_outside_oos

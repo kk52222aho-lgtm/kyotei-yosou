@@ -1,7 +1,7 @@
 """3連単は何点買えば過去分は平均で当たってたか＝top-N点の的中率(カバー率)を出す。
 
 既存test_trifecta_pointsは妙味(本命≠1号)限定=今日崩れたsurvivorship断面。∴クリーン
-(6艇そろい・全レース)で測り直す。モデルのHarville確率でtop-N点買った時、実3連単that
+(6艇そろい・全レース)で測り直す。モデルのHarville確率でtop-N点買った時、実3連単が
 その中に入る率(=的中率)とROIをNごとに。全体+堅い(本命=1号)+妙味(本命≠1号)で。
 「平均で当たる」=的中率50%を超えるN、を読む。確定払戻・walk-forward・6艇クリーン。
 
@@ -77,7 +77,7 @@ def main():
     df = load()
     d = collect(df)
     print(f"6艇そろい 総数 {len(d):,}（3連単・確定払戻・walk-forward）")
-    print("※top-N点=モデルHarville確率の上位N組を買う。的中率=実3連単that上位N点に入る率。")
+    print("※top-N点=モデルHarville確率の上位N組を買う。的中率=実3連単が上位N点に入る率。")
     table(d, "全体")
     table(d[d["honmei"] == 1], "堅い(本命=1号)")
     table(d[d["honmei"] != 1], "妙味(本命≠1号)")

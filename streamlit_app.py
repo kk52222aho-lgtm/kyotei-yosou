@@ -1254,14 +1254,80 @@ def _render_katai(date, raw_picks):
                "確定分の実績（上の指標）が想定に近いか＝前向きの答え合わせ。")
 
 
+
+def page_pushout():
+    """1号艇が危ないレース。押し出し検出器(2026-09-03 凍結)。
+
+    データは data/pushout_today.json。ローカルの常駐が毎朝 08:30 に判定して
+    Contents API でリポジトリへ押しとる(kyotei.db はクラウドに無いので、
+    クラウド側では前づけ癖を計算でけへん)。
+    """
+    import json as _json
+    import os as _os
+    st.header("⚠1号艇が危ない")
+    st.caption("**出走表だけ**で判定しとる。直前情報も展示も要らん。"
+               "根拠は「誰が内に差してくる癖があるか」")
+
+    path = _os.path.join(_os.path.dirname(__file__), "data", "pushout_today.json")
+    if not _os.path.exists(path):
+        st.info("本日ぶんの判定がまだ届いてへん(毎朝8:30に更新)。")
+        return
+    with open(path, encoding="utf-8") as f:
+        d = _json.load(f)
+
+    c = st.columns(4)
+    c[0].metric("判定日", d.get("date", "—"))
+    c[1].metric("該当レース", f'{len(d.get("fires", []))}本')
+    c[2].metric("走査したレース", f'{d.get("n_races", 0)}本')
+    c[3].metric("更新", (d.get("generated_at") or "")[-5:])
+
+    fires = d.get("fires", [])
+    if not fires:
+        st.success("**本日は該当なし。**危ないレースが無い日は「無い」と言う。")
+    else:
+        st.subheader("該当レース")
+        st.dataframe(pd.DataFrame([{
+            "場": r["venue"], "R": f'{r["rno"]}R',
+            "危険度": f'{r["p"]:.1%}',
+        } for r in fires]), use_container_width=True, hide_index=True)
+        st.warning(f"**この{len(fires)}本は1号艇の頭を疑う。**"
+                   "内に差される形が濃いレースや。")
+
+    with st.expander("なんでこれが分かるんか(実測)", expanded=False):
+        st.markdown("""
+**進入コースが枠番と違うレースが 10.2% ある**(前づけ)。25万レースの実測:
+
+| 進入 | レース数 | 1号艇の勝率 |
+|---|---|---|
+| 枠なり | 203,000 (79.9%) | **56.8%** |
+| 前づけあり | 50,995 (20.1%) | **46.8%** |
+| 1号艇が2コースへ | 2,137 (0.8%) | **11.8%** |
+
+**選手ごとに「その枠から内に入る癖」がある。**それは出走表の時点で分かる。
+そこから「1号艇が1コースを奪われるか」を当てる検出器を作った。
+
+- 判別 **AUC 0.852**
+- 上位0.1%のレースでは **3回に1回**押し出しが起きる(全体の 33.6倍)
+- そのレースの1号艇の勝率は **22.2%**(全体 54.7%)
+
+**モデルは 2026-09-03 に凍結しとる。**再学習も閾値変更もせん。
+判定は毎日全レースを記録して、事前登録どおり N=300 で下す
+(`docs/prereg_pushout.md`)。
+
+⚠ **これは的中を上げる話であって、儲かる話やない。**
+実測では、1号艇を切っても単勝の回収率は控除の壁を越えん。
+""")
+
 page = st.sidebar.radio("ページ",
-                        ["🔥渾身の一点", "🏆勝てる目（堅軸）", "⚑イン崩れ予想（本命≠1号）", "🎯動的買い目",
+                        ["🔥渾身の一点", "⚠1号艇が危ない", "🏆勝てる目（堅軸）", "⚑イン崩れ予想（本命≠1号）", "🎯動的買い目",
                          "🎰3連単", "🎙️エージェント実況", "💴買い方くらべ", "🌊荒れそうレース",
                          "成績（予想vs実際）", "プロの見方", "レース個別予想", "解説"])
 st.sidebar.markdown("---")
 st.sidebar.caption("愛知近郊: " + " / ".join(venue_name(j) for j in LOCAL_VENUES))
 if page == "🔥渾身の一点":
     page_ichiten()
+elif page == "⚠1号艇が危ない":
+    page_pushout()
 elif page == "⚑イン崩れ予想（本命≠1号）":
     page_today()
 elif page == "🏆勝てる目（堅軸）":

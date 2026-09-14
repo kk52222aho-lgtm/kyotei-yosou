@@ -84,7 +84,7 @@ def main():
         print(f"  model_p≥{lo:.2f}: 頭数{len(sub):6d}  実勝率{sub['won'].mean()*100:5.1f}%  ROI{roi:5.1f}%")
 
     print("\n読み: どの帯もROI~75-80%(=1-控除)で平ら → 純粋に控除だけ=歪み無し・効率的。")
-    print("      本命帯that大穴帯より明確に高い/どこかで>100% → Favorite-Longshot Bias=本物の歪み。")
+    print("      本命帯が大穴帯より明確に高い/どこかで>100% → Favorite-Longshot Bias=本物の歪み。")
 
 
 if __name__ == "__main__":

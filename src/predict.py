@@ -20,6 +20,61 @@ MARKS = ["◎", "○", "▲", "△", "×", " "]
 # 高確信妙味の閾値: 本命の正規化勝率(win_pct)がこれ以上なら🔥フラグ（強調表示のみ）
 HIGH_CONF_PCT = 50.0
 
+# ── 着順展開の段階別指数（Lo–Bacon-Shone型）────────────────────────────────
+# 素のHarvilleは「1着の確率ベクトルが2着・3着もそのまま支配する」と仮定するが、
+# 実測ではその仮定が成立せん。OOS 3,350レース(20260716-20260806/model.joblib=7/15学習)で
+# 最尤当てはめ＋ブートストラップ200回:
+#     γ (1着の鋭さ)   = 1.25  95%CI [1.20, 1.30]
+#     λ2(2着の減衰)   = 0.60  95%CI [0.60, 0.65]
+#     λ3(3着の減衰)   = 0.40  95%CI [0.40, 0.45]
+# 3つとも95%CIが1.00を外す＝素のHarville(全部1.00)は棄却される。
+# 症状: 台帳(本命≠1号艇の667件)で 3連複4点=予測72.2%/実際52.9%、3連単3点=予測21.8%/実際10.8%。
+#       2着以降ほど実際はバラけるのに、素のHarvilleは上位艇へ確率を寄せすぎとった。
+# 再当てはめ: python -m src.fit_stage_exponents
+STAGE_GAMMA = 1.25    # 1着: p ∝ p^γ (γ>1 = モデルは1着側で控えめすぎた分を鋭くする)
+STAGE_LAMBDA2 = 0.60  # 2着: ∝ p^λ2 (λ2<1 = 平たくする)
+STAGE_LAMBDA3 = 0.40  # 3着: ∝ p^λ3 (さらに平たい)
+
+
+def calibrated_win(win_prob: dict[int, float], gamma: float | None = None) -> dict[int, float]:
+    """レース内で正規化し、較正指数γで鋭くしたP(1着)を返す（合計1）。
+
+    gamma=None なら STAGE_GAMMA を都度読む（定数を差し替えた検証がそのまま効くように、
+    既定引数で定義時に固定せん）。
+    """
+    gamma = STAGE_GAMMA if gamma is None else gamma
+    s = sum(win_prob.values())
+    if s <= 0:
+        n = len(win_prob) or 1
+        return {k: 1 / n for k in win_prob}
+    w = {k: (v / s) ** gamma for k, v in win_prob.items()}
+    t = sum(w.values()) or 1
+    return {k: v / t for k, v in w.items()}
+
+
+def _stage(p: dict[int, float], taken: tuple[int, ...], lam: float) -> dict[int, float]:
+    """既に着順が決まった艇(taken)を除いた残りの、次の着の確率分布（合計1）。
+
+    素のHarvilleは lam=1.0（残りをそのままの比で配る）。lam<1 で平たくする。
+    """
+    w = {k: p[k] ** lam for k in p if k not in taken}
+    s = sum(w.values())
+    if s <= 0:
+        n = len(w) or 1
+        return {k: 1 / n for k in w}
+    return {k: v / s for k, v in w.items()}
+
+
+def exacta_probs(win_prob: dict[int, float]) -> dict[str, float]:
+    """各艇のP(1着)から2連単 i-j の確率を推定する（段階別指数つき）。"""
+    p = calibrated_win(win_prob)
+    out: dict[str, float] = {}
+    for i in p:
+        second = _stage(p, (i,), STAGE_LAMBDA2)
+        for j, pj in second.items():
+            out[f"{i}-{j}"] = p[i] * pj
+    return out
+
 
 def load_model():
     if not os.path.exists(MODEL_PATH):
@@ -45,13 +100,20 @@ def predict_entries(entries: list[dict], bundle=None) -> list[dict]:
     order = np.argsort(-win_pct)  # 確率降順
     rank_of = {idx: r for r, idx in enumerate(order)}
 
+    # 較正済みP(1着): レース内で合計1にした上で指数γで鋭くした値。EV・買い目の土台はこっち。
+    # win_pct(生の正規化)は katai/papertrade/sensor/streamlit の閾値が乗っとるので
+    # スケールを動かさず据え置き。ただし実測では控えめ側にズレる(台帳: 予測36.1%/実際42.1%)。
+    cal = calibrated_win({e["lane"]: float(raw[i]) for i, e in enumerate(entries)})
+
     out = []
     for i, e in enumerate(entries):
         r = rank_of[i]
         out.append({
             **e,
-            "win_prob": round(float(raw[i]), 4),   # 校正済みP(1着)。期待値計算用
-            "win_pct": round(float(win_pct[i]), 1),  # レース内正規化(表示用)
+            "win_prob": round(float(raw[i]), 4),   # 分類器の生出力(レース内合計は1にならん)
+            "win_pct": round(float(win_pct[i]), 1),  # レース内正規化(表示用・既存閾値の基準)
+            "win_p": round(cal[e["lane"]], 4),       # 較正済みP(1着)。合計1。EV用
+            "win_pct_cal": round(100 * cal[e["lane"]], 1),  # 同上を%表示にしたもの
             "rank": r + 1,
             "mark": MARKS[r] if r < len(MARKS) else " ",
         })
@@ -60,15 +122,23 @@ def predict_entries(entries: list[dict], bundle=None) -> list[dict]:
 
 
 def attach_odds(rows: list[dict], odds: dict[int, float] | None) -> list[dict]:
-    """各艇にオッズと期待値(EV = 校正済み勝率 × 単勝オッズ)を付与。
+    """各艇にオッズと期待値(EV = P(1着) × 単勝オッズ)を付与。
 
     EV > 1.0 が理論上プラス（割安）。odds が無ければ None のまま。
+
+    【EVに使う確率】win_prob は二値分類器の生出力で、レース内6艇の合計が1にならん
+    （実測 中央1.40・5-95%点1.13-1.68 / n=13,417スナップショット）。これを直接
+    オッズに掛けると EV が中央で4割ほど過大に出て、EV>1.0 の「割安」が実際には
+    真のEV 0.7台で発火してまう。よってレース内で正規化＋較正した P(1着) を使う。
     """
+    p = calibrated_win({e["lane"]: e["win_prob"] for e in rows})
     for e in rows:
         o = odds.get(e["lane"]) if odds else None
+        pe = e.get("win_p") or p.get(e["lane"], 0.0)   # predict_entries が付けとればそれを使う
+        e["win_p"] = round(pe, 4)              # レース内で合計1のP(1着)。EVの土台
         e["odds"] = o
-        e["ev"] = round(e["win_prob"] * o, 2) if o else None
-        e["value"] = bool(o and e["win_prob"] * o > 1.0)
+        e["ev"] = round(pe * o, 2) if o else None
+        e["value"] = bool(o and pe * o > 1.0)
     return rows
 
 
@@ -87,19 +157,9 @@ def recommend(rows: list[dict]) -> dict:
         return {"bet": False,
                 "reason": "モデル本命がイン(1号艇)＝公衆と同じ見立て。妙味薄のため見送り推奨。"}
 
-    # 2連単 上位3点（Harville: P(i-j)=p_i·p_j/(1-p_i)）
-    p = {e["lane"]: e["win_prob"] for e in rows}
-    s = sum(p.values()) or 1
-    p = {k: v / s for k, v in p.items()}
-    ex = []
-    for i in p:
-        di = 1 - p[i]
-        if di <= 0:
-            continue
-        for j in p:
-            if j != i:
-                ex.append((f"{i}-{j}", p[i] * p[j] / di))
-    ex.sort(key=lambda x: -x[1])
+    # 2連単 上位3点（段階別指数つき: exacta_probs）
+    ex = sorted(exacta_probs({e["lane"]: e["win_prob"] for e in rows}).items(),
+                key=lambda x: -x[1])
 
     # 3連複 上位4点（着順不問セット。順序スキル0を回避しセット選択だけ使う頑健な器。
     #  test_trio: 荒れ読みで4点258%/上位30本抜き222%とfat-tail頑健。ROI源はレース選択）
@@ -186,32 +246,24 @@ def exacta_ev(exacta3, exacta3_p, live_odds):
 
 
 def harville_trifecta(win_prob: dict[int, float]) -> dict[str, float]:
-    """各艇の1着確率(win_prob)から、Harville(Plackett-Luce)法で
-    3連単 i-j-k の確率を推定する。
+    """各艇の1着確率(win_prob)から3連単 i-j-k の確率を推定する。
 
-    P(i-j-k) = p_i · p_j/(1-p_i) · p_k/(1-p_i-p_j)
-    win_prob はレース内で合計1に正規化して使う。
+    素のHarvilleは P(i-j-k) = p_i · p_j/(1-p_i) · p_k/(1-p_i-p_j) やが、
+    実測で2着・3着ほど確率がバラける（STAGE_LAMBDA2/3 の由来コメント参照）ので
+    段階ごとに指数で平たくする:
+        P(i-j-k) = q_i · (q_j^λ2 / Σ) · (q_k^λ3 / Σ)     q = calibrated_win(p)
+    λ2=λ3=γ=1.0 に戻せば素のHarvilleと一致する。
     """
-    s = sum(win_prob.values())
-    if s <= 0:
+    if sum(win_prob.values()) <= 0:
         return {}
-    p = {k: v / s for k, v in win_prob.items()}
-    lanes = list(p.keys())
+    p = calibrated_win(win_prob)
     out: dict[str, float] = {}
-    for i in lanes:
-        di = 1 - p[i]
-        if di <= 0:
-            continue
-        for j in lanes:
-            if j == i:
-                continue
-            dij = 1 - p[i] - p[j]
-            if dij <= 0:
-                continue
-            for k in lanes:
-                if k in (i, j):
-                    continue
-                out[f"{i}-{j}-{k}"] = p[i] * (p[j] / di) * (p[k] / dij)
+    for i in p:
+        second = _stage(p, (i,), STAGE_LAMBDA2)
+        for j, pj in second.items():
+            third = _stage(p, (i, j), STAGE_LAMBDA3)
+            for k, pk in third.items():
+                out[f"{i}-{j}-{k}"] = p[i] * pj * pk
     return out
 
 
