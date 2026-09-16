@@ -1,92 +1,92 @@
 {
- "generated_at": "2026-09-16T18:10:56",
- "date": "20260916",
+ "generated_at": "2026-09-17T07:35:53",
+ "date": "20260917",
  "tables": {
   "entries": {
    "latest": "20260916",
    "rows": 1582272,
-   "lag_days": 0,
+   "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "payouts": {
    "latest": "20260916",
    "rows": 259385,
-   "lag_days": 0,
+   "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "results_st": {
    "latest": "20260916",
    "rows": 1555139,
-   "lag_days": 0,
+   "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "odds_timeseries": {
    "latest": "20260916",
-   "rows": 177757,
-   "lag_days": 0,
+   "rows": 178292,
+   "lag_days": 1,
    "tol_days": 2,
    "stale": false
   },
   "kachimake": {
    "latest": "20260907",
    "rows": 1277901,
-   "lag_days": 9,
+   "lag_days": 10,
    "tol_days": 14,
    "stale": false
   },
   "oriten": {
    "latest": "20260916",
    "rows": 129408,
-   "lag_days": 0,
+   "lag_days": 1,
    "tol_days": 14,
    "stale": false
   }
  },
  "logs": {
   "watchdog.log": {
-   "mtime": "2026-09-16T18:10",
-   "age_hours": 0.0,
+   "mtime": "2026-09-17T07:30",
+   "age_hours": 0.1,
    "tol_hours": 3,
    "stale": false,
    "note": "10分ごと。**稼働時間外も書く**ので一番鋭い生死signal"
   },
   "probe_loop.log": {
-   "mtime": "2026-09-16T18:09",
-   "age_hours": 0.0,
+   "mtime": "2026-09-16T22:57",
+   "age_hours": 8.6,
    "tol_hours": 14,
    "stale": false,
    "note": "稼働9-23時のみ毎分。夜間は書かんので長めに取る"
   },
   "daily_collect.log": {
-   "mtime": "2026-09-16T18:10",
+   "mtime": "2026-09-17T07:35",
    "age_hours": 0.0,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝07:30"
   },
   "pushout_record.log": {
-   "mtime": "2026-09-15T08:30",
-   "age_hours": 33.7,
+   "mtime": "2026-09-16T18:12",
+   "age_hours": 13.4,
    "tol_hours": 30,
-   "stale": true,
+   "stale": false,
    "note": "毎朝08:30"
   },
   "shrink_record.log": {
-   "mtime": "2026-09-15T08:31",
-   "age_hours": 33.7,
+   "mtime": "2026-09-16T18:12",
+   "age_hours": 13.4,
    "tol_hours": 30,
-   "stale": true,
+   "stale": false,
    "note": "毎朝08:30"
   }
  },
  "watchdog": {
   "recent_restart_failures": 0,
-  "last_line": "2026-09-16 18:10 alive pid=11812",
+  "last_line": "2026-09-17 07:30 off-hours",
   "duplicate_loops": 0,
-  "since_last_ok": 0
+  "since_last_ok": 52
  },
  "derived": {
   "model.joblib": {
@@ -120,9 +120,6 @@
   "HC_ODDS_LOOP": false,
   "HC_ODDS_EXPORT": false
  },
- "stale": [
-  "pushout_record.log",
-  "shrink_record.log"
- ],
- "ok": false
+ "stale": [],
+ "ok": true
 }
