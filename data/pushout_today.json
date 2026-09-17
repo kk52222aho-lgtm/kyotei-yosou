@@ -1,8 +1,8 @@
 {
- "date": "20260917",
- "generated_at": "2026-09-17T08:30",
+ "date": "20260918",
+ "generated_at": "2026-09-18T08:30",
  "threshold": 0.10674917816393809,
  "model_frozen_at": "2026-09-03T17:22:58",
- "n_races": 178,
+ "n_races": 177,
  "fires": []
 }
