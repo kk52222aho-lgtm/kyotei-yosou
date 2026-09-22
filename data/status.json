@@ -1,31 +1,31 @@
 {
- "generated_at": "2026-09-22T07:35:49",
- "date": "20260922",
+ "generated_at": "2026-09-23T07:35:14",
+ "date": "20260923",
  "tables": {
   "entries": {
    "latest": "20260922",
    "rows": 1588320,
-   "lag_days": 0,
+   "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "payouts": {
    "latest": "20260921",
    "rows": 260187,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 3,
    "stale": false
   },
   "results_st": {
    "latest": "20260921",
    "rows": 1559965,
-   "lag_days": 1,
+   "lag_days": 2,
    "tol_days": 3,
    "stale": false
   },
   "odds_timeseries": {
-   "latest": "20260921",
-   "rows": 203013,
+   "latest": "20260922",
+   "rows": 207911,
    "lag_days": 1,
    "tol_days": 2,
    "stale": false
@@ -33,49 +33,49 @@
   "kachimake": {
    "latest": "20260907",
    "rows": 1277901,
-   "lag_days": 15,
+   "lag_days": 16,
    "tol_days": 14,
    "stale": true
   },
   "oriten": {
    "latest": "20260916",
    "rows": 129408,
-   "lag_days": 6,
+   "lag_days": 7,
    "tol_days": 14,
    "stale": false
   }
  },
  "logs": {
   "watchdog.log": {
-   "mtime": "2026-09-22T07:30",
+   "mtime": "2026-09-23T07:30",
    "age_hours": 0.1,
    "tol_hours": 3,
    "stale": false,
    "note": "10分ごと。**稼働時間外も書く**ので一番鋭い生死signal"
   },
   "probe_loop.log": {
-   "mtime": "2026-09-21T22:57",
-   "age_hours": 8.6,
+   "mtime": "2026-09-22T22:52",
+   "age_hours": 8.7,
    "tol_hours": 14,
    "stale": false,
    "note": "稼働9-23時のみ毎分。夜間は書かんので長めに取る"
   },
   "daily_collect.log": {
-   "mtime": "2026-09-22T07:35",
+   "mtime": "2026-09-23T07:35",
    "age_hours": 0.0,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝07:30"
   },
   "pushout_record.log": {
-   "mtime": "2026-09-21T08:31",
+   "mtime": "2026-09-22T08:31",
    "age_hours": 23.1,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝08:30"
   },
   "shrink_record.log": {
-   "mtime": "2026-09-21T08:31",
+   "mtime": "2026-09-22T08:31",
    "age_hours": 23.1,
    "tol_hours": 30,
    "stale": false,
@@ -84,7 +84,7 @@
  },
  "watchdog": {
   "recent_restart_failures": 0,
-  "last_line": "2026-09-22 07:30 off-hours",
+  "last_line": "2026-09-23 07:30 off-hours",
   "duplicate_loops": 0,
   "since_last_ok": 52
  },
