@@ -207,7 +207,10 @@ def main() -> None:
     ap.add_argument("--redo", action="store_true", help="済みの日もやり直す")
     a = ap.parse_args()
 
-    con = sqlite3.connect(a.db)
+    con = sqlite3.connect(a.db, timeout=120)
+    # 常駐(KyoteiDailyCollect/KyoteiVenueSnap)が同じ db を触る。鍵待ちを入れんと
+    # 退避の途中で database is locked で死ぬ(2026-09-23 に実際に72日目で落ちた)
+    con.execute("PRAGMA busy_timeout=120000")
     con.executescript(DDL)
     con.commit()
 
