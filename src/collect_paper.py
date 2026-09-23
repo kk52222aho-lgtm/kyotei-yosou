@@ -59,11 +59,13 @@ EMPTY_MAX_CHARS = 3000
 
 X_REG = (70.0, 100.0)     # 「NN期\ndddd」の箱
 X_COMMENT = (675.0, 815.0)  # 選手コメントの箱
-Y_TOL = 4.0               # 上端どうしの差。実測は ±2 で足りる
+Y_OVERLAP_MIN = 4.0       # reg の箱とコメントの箱が縦にこれだけ重なったら同じ行
 
 REG_RE = re.compile(r"(\d{2,3})期\s*(\d{4})")
 # 締切時刻の箱が同じ x の帯に入っとるので弾く
 TIME_RE = re.compile(r"^\d{1,2}:\d{1,2}$")
+# 「期」と別の箱に割れた版組み用。4桁だけの箱
+BARE_REG_RE = re.compile(r"\s*\d{4}\s*")
 
 DDL = """
 CREATE TABLE IF NOT EXISTS paper_comment (
@@ -107,33 +109,44 @@ def parse_pdf(b: bytes) -> tuple[list[list[tuple[str, str]]], int]:
         items = [e for e in page if isinstance(e, LTTextContainer)]
         if pi == 0:
             first_page_chars = sum(len(e.get_text().strip()) for e in items)
-        regs: list[tuple[float, str]] = []
-        cmts: list[tuple[float, str]] = []
+        regs: list[tuple[float, float, str]] = []
+        cmts: list[tuple[float, float, str]] = []
         for e in items:
-            x0, y1 = e.bbox[0], e.bbox[3]  # y1 = 箱の上端
+            x0, y0, y1 = e.bbox[0], e.bbox[1], e.bbox[3]
             t = e.get_text().strip()
             if X_REG[0] <= x0 <= X_REG[1]:
                 m = REG_RE.search(t)
                 if m:
-                    regs.append((y1, m.group(2)))
+                    regs.append((y0, y1, m.group(2)))
+                elif BARE_REG_RE.fullmatch(t):
+                    # 版組みによっては「期」と登録番号が別の箱に割れる
+                    # (2022-12-20 / 2023-06-01 の2日。コメントは72箱あるのに
+                    #  「NN期 dddd」が0個で丸ごと落ちとった)。
+                    # 拾いすぎても **登録番号の集合が entries と一致せな書かん** ので安全側
+                    regs.append((y0, y1, t.strip()))
             elif X_COMMENT[0] <= x0 <= X_COMMENT[1] and len(t) > 4:
                 if TIME_RE.match(t):
                     continue
                 # 折り返しの改行は詰める(紙の都合であって本文やない)
-                cmts.append((y1, re.sub(r"\s+", "", t)))
-        regs.sort(key=lambda z: -z[0])
+                cmts.append((y0, y1, re.sub(r"\s+", "", t)))
+        regs.sort(key=lambda z: -z[1])
         # 6本ずつがレース塊。端数は捨てる(塊が崩れとる紙は書かん)
         for i in range(0, len(regs) - 5, 6):
             chunk = regs[i : i + 6]
             # 塊の中の y の間隔から外れたら別の塊。間隔の3倍を境にする
-            gaps = [chunk[k][0] - chunk[k + 1][0] for k in range(5)]
+            gaps = [chunk[k][1] - chunk[k + 1][1] for k in range(5)]
             if max(gaps) > 3 * (min(gaps) or 1):
                 continue
             rows: list[tuple[str, str]] = []
-            for y, reg in chunk:
-                hit = sorted((cy, c) for cy, c in cmts if abs(cy - y) <= Y_TOL)
+            for ry0, ry1, reg in chunk:
+                # 🚨 上端でも下端でも揃わん版組みがある(2022-12-20/2023-06-01 は
+                #    reg が1行・コメントが2行で、**下端だけ**揃う。普段は両方揃う)。
+                #    せやから **y の重なり** で合わせる。版組みに依らん
+                hit = [(cy0, cy1, c) for cy0, cy1, c in cmts
+                       if min(ry1, cy1) - max(ry0, cy0) >= Y_OVERLAP_MIN]
+                hit.sort(key=lambda z: -z[1])
                 # 実測では1艇1箱。割れとったら上から繋ぐ(黙って落とさん)
-                rows.append((reg, "".join(c for _, c in reversed(hit))))
+                rows.append((reg, "".join(c for _, _, c in hit)))
             races.append(rows)
     return races, first_page_chars
 
