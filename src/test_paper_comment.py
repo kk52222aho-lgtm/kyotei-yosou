@@ -84,7 +84,7 @@ def shuffle_races(vals: np.ndarray, nrace: int, rng) -> np.ndarray:
     return V[rng.permutation(nrace)].ravel()
 
 
-def run(db: str, cutoff: str = "2025") -> None:
+def run(db: str, cutoff: str = "2025", dry: bool = False) -> None:
     df = load()
     df = df[df["jcd"] == JCD].copy()
     oof = pd.read_csv("data/oof_base.csv",
@@ -106,6 +106,14 @@ def run(db: str, cutoff: str = "2025") -> None:
 
     q, resid, ro, keep, okz, r2 = orthogonalized_resid(df, nrace, rid_codes)
     print(f"既存特徴の順位が残差から説明した割合: {r2:.2%}")
+    if dry:
+        # 配管の点呼だけ。**t は出さん**(判定は holdout が揃ってから一発でやる)
+        yr = df["date"].str[:4].to_numpy()
+        for lab, m in (("訓練", yr < cutoff), ("holdout", yr >= cutoff)):
+            mm = m & okz & df["cmt_score"].notna().to_numpy()
+            print(f"  {lab}: 直交化でけてコメントも在る艇 {int(mm.sum()):,}")
+        print("(dry: t は出しとらん)")
+        return
 
     # ---- 測る列(本物2本 + 偽薬6本)。同じ配管に流す -----------------------
     cols: dict[str, np.ndarray] = {}
@@ -158,8 +166,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default="data/kyotei.db")
     ap.add_argument("--cutoff", default="2025")
+    ap.add_argument("--dry", action="store_true", help="配管の点呼だけ。t は出さん")
     a = ap.parse_args()
-    run(a.db, a.cutoff)
+    run(a.db, a.cutoff, a.dry)
 
 
 if __name__ == "__main__":
