@@ -84,6 +84,60 @@ def shuffle_races(vals: np.ndarray, nrace: int, rng) -> np.ndarray:
     return V[rng.permutation(nrace)].ravel()
 
 
+def race_level(df, nrace, rid_codes, q, okz, cutoff):
+    """従の読み: 本命的中がコメントで動くか。
+
+    設計書 §2 のとおり **holdout 4,092レースでは検出力が足りん**(2.8σ に
+    +0.62〜1.96pt 要る)。せやから「出た/出んかった」やのうて **CI ごと**出す。
+    訓練で logit(q) と cmt_score のレース内順位に重みを当てて、holdout で採点する。
+    """
+    yr = df["date"].str[:4].to_numpy()
+    z = race_z(df["cmt_score"].to_numpy(float), nrace)
+    win = df["win"].to_numpy(float)
+    ok = okz & ~np.isnan(z) & ~np.isnan(win)
+    ok = (np.bincount(rid_codes, weights=ok.astype(float),
+                      minlength=nrace)[rid_codes] == 6)
+    tr = ok & (yr < cutoff)
+    ho = ok & (yr >= cutoff)
+    if ho.sum() < 6 * 200 or tr.sum() < 6 * 200:
+        print("\n[レース単位] 本数が足らんので出さん "
+              f"(訓練 {int(tr.sum()//6)}R / holdout {int(ho.sum()//6)}R)")
+        return
+    qc = np.where(ok, np.clip(q, 1e-9, 1 - 1e-9), 0.5)   # ok の外は使わん
+    lq = np.log(qc) - np.log(1 - qc)
+    zc = np.where(ok, z, 0.0)
+    X = np.column_stack([lq, zc])
+    assert np.isfinite(X[ok]).all(), "ok の中に NaN が残っとる"
+    from sklearn.linear_model import LogisticRegression
+    m = LogisticRegression(max_iter=1000).fit(X[tr], win[tr])
+    s_new = m.decision_function(X)
+
+    def hits(scores, mask):
+        S = scores[mask].reshape(-1, 6)
+        W = win[mask].reshape(-1, 6)
+        return W[np.arange(len(S)), S.argmax(1)]
+
+    a = hits(lq, ho)          # モデルだけ
+    b = hits(s_new, ho)       # モデル + コメント
+    d = b - a
+    days = df["dnum"].to_numpy()[ho].reshape(-1, 6)[:, 0]
+    _, dc = np.unique(days, return_inverse=True)
+    nd = dc.max() + 1
+    sums = np.bincount(dc, weights=d, minlength=nd)
+    cnts = np.bincount(dc, minlength=nd)
+    rng = np.random.default_rng(20260923)
+    boot = np.empty(4000)
+    for i in range(4000):
+        w = rng.standard_normal(nd)
+        boot[i] = (sums * (1 + w)).sum() / cnts.sum()
+    lo, hi = np.percentile(boot, [2.5, 97.5])
+    print(f"\n=== レース単位(従) holdout {len(a):,}レース ===")
+    print(f"  モデルだけ        本命的中 {a.mean():.3%}")
+    print(f"  モデル+コメント   本命的中 {b.mean():.3%}")
+    print(f"  差 {d.mean()*100:+.3f}pt  CI95 [{lo*100:+.3f}, {hi*100:+.3f}] (日クラスタ)")
+    print(f"  本命が変わったレース(不一致率) {(np.sign(d)!=0).mean():.2%}")
+
+
 def run(db: str, cutoff: str = "2025", dry: bool = False) -> None:
     df = load()
     df = df[df["jcd"] == JCD].copy()
@@ -160,6 +214,8 @@ def run(db: str, cutoff: str = "2025", dry: bool = False) -> None:
         for nm, tv in sorted(zip(names, t), key=lambda z: -abs(z[1])):
             mark = "★通過" if abs(tv) > thr else "    "
             print(f"  {mark}  t={tv:+7.2f}  {nm}")
+
+    race_level(df, nrace, rid_codes, q, okz, cutoff)
 
 
 def main() -> None:
