@@ -131,14 +131,21 @@ def main() -> None:
     ap.add_argument("--db", default="data/kyotei.db")
     ap.add_argument("--cache", default="data/paper/17")
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--from", dest="dfrom", default=None)
+    ap.add_argument("--to", dest="dto", default=None)
     ap.add_argument("--redo", action="store_true")
     a = ap.parse_args()
     con = sqlite3.connect(a.db, timeout=120)
     con.execute("PRAGMA busy_timeout=120000")
     con.executescript(DDL)
     con.commit()
-    days = [r[0] for r in con.execute(
-        "SELECT date FROM paper_done WHERE jcd=? AND status='ok' ORDER BY date", (JCD,))]
+    q = "SELECT date FROM paper_done WHERE jcd=? AND status='ok'"
+    args = [JCD]
+    if a.dfrom:
+        q += " AND date>=?"; args.append(a.dfrom)
+    if a.dto:
+        q += " AND date<=?"; args.append(a.dto)
+    days = [r[0] for r in con.execute(q + " ORDER BY date", args)]
     if not a.redo:
         done = {r[0] for r in con.execute(
             "SELECT date FROM paper_mark_done WHERE jcd=? AND status='ok'", (JCD,))}
