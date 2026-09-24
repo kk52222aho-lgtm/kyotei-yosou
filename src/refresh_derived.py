@@ -33,7 +33,10 @@ JOBS = [
 # 派生物がファイルやのうて**DBの表**やから、年齢はファイルの mtime やのうて
 # 表の中の最新日で測る。
 TABLE_JOBS = [
-    ("kachimake", 3, "src.build_kachimake", "勝ち負け(status_beacon の許容は14日)"),
+    # 閾値は 3 やのうて 7。build_kachimake は差分やのうて **entries 全件(159万行)を
+    # 毎回作り直す**んで、3日にしたら実質毎朝フル再構築になる。
+    # beacon の許容 14日の内側に収まっとったらええ。
+    ("kachimake", 7, "src.build_kachimake", "勝ち負け(全件再構築。status_beacon の許容は14日)"),
 ]
 
 
