@@ -45,6 +45,9 @@ SLEEP_SEC = 3.0  # マナーとしての待機 (公式より一段丁寧に)
 BLOCK_WAIT_SEC = 15.0
 # 連続でこれだけ弾かれたら、その日は畳んで出直す(粘っても向こうの迷惑なだけ)
 MAX_CONSEC_BLOCKED = 3
+# 403 がこの回数続いたら「不在」とみなして打ち止め(毎晩叩き続けんため)。
+# **仮定やのうて規則**として書いとく: 5回叩いて5回とも403なら不在扱い
+MAX_ATTEMPTS = 5
 
 _session = requests.Session()
 _session.headers.update(HEADERS)
@@ -81,8 +84,14 @@ CREATE TABLE IF NOT EXISTS oriten_done (
     date   TEXT NOT NULL,
     jcd    TEXT NOT NULL,
     rno    INTEGER NOT NULL,
-    status TEXT,          -- 'ok' | 'empty' | 'error'
+    -- 'ok'    … 中身が取れた
+    -- 'empty' … 200 やのに中身が無い(ほんまに不在)
+    -- 'blocked' … 403。**不在か弾かれか、コードだけでは区別でけへん**(下)
+    -- 'gone'  … 403 が MAX_ATTEMPTS 回続いた。不在とみなして打ち止め
+    -- 'error' … それ以外
+    status TEXT,
     n_lane INTEGER,
+    attempts INTEGER DEFAULT 0,
     fetched_at TEXT,
     PRIMARY KEY (date, jcd, rno)
 );
@@ -98,6 +107,9 @@ def _init(conn) -> None:
     cols = {r[1] for r in conn.execute("PRAGMA table_info(oriten)")}
     if "halflap" not in cols:
         conn.execute("ALTER TABLE oriten ADD COLUMN halflap REAL")
+    dcols = {r[1] for r in conn.execute("PRAGMA table_info(oriten_done)")}
+    if "attempts" not in dcols:
+        conn.execute("ALTER TABLE oriten_done ADD COLUMN attempts INTEGER DEFAULT 0")
     conn.commit()
 
 
@@ -191,6 +203,24 @@ def parse_oriten(text: str) -> list[dict]:
     return rows
 
 
+def _control_ok(conn) -> bool:
+    """台帳で ok と分かっとるレースを1本叩いて、いま弾かれとるかを見る。
+
+    🚨 403 は「不在」と「弾かれ」の両方に使われとる(2026-09-24 実測)。
+    **中身を持っとると分かっとる玉**を対照にすれば、その場で分けられる。
+    これが無いと、ほんまに不在の場日で永久に畳み続ける。
+    """
+    row = conn.execute(
+        "SELECT date, jcd, rno FROM oriten_done WHERE status='ok' "
+        "ORDER BY date DESC LIMIT 1").fetchone()
+    if not row:
+        return False
+    d, j, r = row
+    time.sleep(SLEEP_SEC)
+    st, _ = _get_text(f"{HOST}/txt/{j}/bc_oriten_{d}_{j}_{str(r).zfill(2)}.txt")
+    return st == 200
+
+
 def fetch_race(conn, date: str, jcd: str, rno: int) -> str:
     """1レース分を取得してDBへ。status ('ok'|'empty'|'error') を返す。"""
     rr = str(rno).zfill(2)
@@ -221,10 +251,32 @@ def fetch_race(conn, date: str, jcd: str, rno: int) -> str:
 
 
 def _mark_done(conn, date, jcd, rno, status, n_lane, now) -> None:
+    """🚨 403 は「不在」と「弾かれ」の両方に使われとる。コードだけでは分けられん。
+
+    分ける唯一の方法は**日を変えて何回か叩くこと**や。実測(2026-09-24):
+
+      9月の empty … 叩き直したら 5/5 が 200(=弾かれとっただけ)
+      4月の empty … 3秒間隔でも 6/6 が 403 のまま。しかもその日その場は
+                    ok が1本も無い(=ほんまに不在)
+
+    せやから 403 は `blocked` で残して次回やり直すが、**MAX_ATTEMPTS 回続いたら
+    `gone`(不在とみなす)に落として打ち止めにする。**
+    こうせんと不在のレースを毎晩叩き続けることになる。
+    """
+    prev = conn.execute(
+        "SELECT attempts FROM oriten_done WHERE date=? AND jcd=? AND rno=?",
+        (date, jcd, rno)).fetchone()
+    att = (prev[0] or 0) if prev else 0
+    if status == "blocked":
+        att += 1
+        if att >= MAX_ATTEMPTS:
+            status = "gone"
+    else:
+        att = 0
     conn.execute(
         "INSERT OR REPLACE INTO oriten_done "
-        "(date,jcd,rno,status,n_lane,fetched_at) VALUES (?,?,?,?,?,?)",
-        (date, jcd, rno, status, n_lane, now),
+        "(date,jcd,rno,status,n_lane,attempts,fetched_at) VALUES (?,?,?,?,?,?,?)",
+        (date, jcd, rno, status, n_lane, att, now),
     )
 
 
@@ -236,7 +288,7 @@ def _already_done(conn, date, jcd, rno) -> bool:
     """
     r = conn.execute(
         "SELECT 1 FROM oriten_done WHERE date=? AND jcd=? AND rno=? "
-        "AND status IN ('ok','empty')",
+        "AND status IN ('ok','empty','gone')",
         (date, jcd, rno)).fetchone()
     return r is not None
 
@@ -249,8 +301,8 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
     #    済みだけの日を舐めるのに何時間もかかった。まず台帳で用事の有無を見る。
     have = conn.execute("SELECT COUNT(*) FROM oriten_done WHERE date=?", (date,)).fetchone()[0]
     todo = conn.execute(
-        "SELECT COUNT(*) FROM oriten_done WHERE date=? AND status NOT IN ('ok','empty')",
-        (date,)).fetchone()[0]
+        "SELECT COUNT(*) FROM oriten_done WHERE date=? "
+        "AND status NOT IN ('ok','empty','gone')", (date,)).fetchone()[0]
     if have and not todo:
         return {"ok": 0, "empty": 0, "error": 0, "skip": have, "blocked": 0}
     if have:
@@ -280,11 +332,23 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
             if st == "blocked":
                 consec += 1
                 if consec >= MAX_CONSEC_BLOCKED:
+                    # 🚨 403 が続いた。**弾かれとるんか、ほんまに不在なんか**を
+                    #    その場で対照実験して決める:
+                    #    台帳で ok と分かっとるレースを1本叩く。
+                    #      対照が 200 → 弾かれとらん。403 は**不在**やから、その日を
+                    #                   最後まで回して attempts を積む(いずれ gone)
+                    #      対照も 403 → **ほんまに弾かれとる**。畳んで出直す
                     conn.commit()
-                    if verbose:
-                        print(f"  {date}: {consec}連続で弾かれたんで畳む"
-                              f"(blocked は済み扱いにせんので次回やり直す)", flush=True)
-                    return counts
+                    if _control_ok(conn):
+                        if verbose:
+                            print(f"  {date}: {consec}連続403やが対照は200"
+                                  f"=不在とみなして続行", flush=True)
+                        consec = 0
+                    else:
+                        if verbose:
+                            print(f"  {date}: {consec}連続403で対照も403"
+                                  f"=弾かれとる。畳む(次回やり直す)", flush=True)
+                        return counts
             else:
                 consec = 0
             time.sleep(SLEEP_SEC)
@@ -311,20 +375,31 @@ def main() -> None:
     ap.add_argument("--end", help="終了日 YYYYMMDD (省略時は --start と同じ)")
     ap.add_argument("--jcd", nargs="*", help="場コード指定 (省略時は全場)")
     ap.add_argument("--quiet", action="store_true")
+    # 🚨 毎晩ちょっとずつ取り戻すための上限。
+    #    一気に流すと弾かれるし、弾かれた分を追いかけると何時間も張り付く。
+    #    **急がん**。blocked/requeue は済み扱いにせんので、毎晩 N 本ずつで必ず収束する。
+    ap.add_argument("--max-races", type=int, default=0, help="この本数だけ取ったら止める(0=無制限)")
     args = ap.parse_args()
     end = args.end or args.start
     jcds = [j.zfill(2) for j in args.jcd] if args.jcd else None
 
     conn = storage.connect()
     _init(conn)
-    total = {"ok": 0, "empty": 0, "error": 0, "skip": 0}
+    total = {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
     for date in daterange(args.start, end):
         c = collect_day(conn, date, jcds, verbose=not args.quiet)
         for k in total:
-            total[k] += c[k]
+            total[k] += c.get(k, 0)
+        if args.max_races and (total["ok"] + total["blocked"]) >= args.max_races:
+            print(f"  上限 {args.max_races} 本に達したんで止める"
+                  f"(残りは次回。blocked/requeue は済み扱いにせん)", flush=True)
+            break
+    left = conn.execute(
+        "SELECT COUNT(*) FROM oriten_done "
+        "WHERE status NOT IN ('ok','empty','gone')").fetchone()[0]
     conn.close()
-    print(f"\n完了: ok={total['ok']} empty={total['empty']} "
-          f"error={total['error']} skip={total['skip']}")
+    print(f"\n完了: ok={total['ok']} empty={total['empty']} blocked={total['blocked']} "
+          f"error={total['error']} skip={total['skip']} / 未回収 {left:,}")
 
 
 if __name__ == "__main__":

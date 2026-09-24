@@ -45,3 +45,9 @@ REM gets fixed before the beacon complains) and verifies the file actually got n
 "%PY%" -m src.refresh_derived                    >> data\daily_collect.log 2>&1
 
 "%PY%" -m src.status_beacon push                 >> data\daily_collect.log 2>&1
+
+REM 2026-09-24: recover oriten races that came back 403 earlier. A 403 means EITHER
+REM "absent" OR "rate limited" and the code alone cannot tell; the collector settles it
+REM with a control request against a race known to be ok. Bounded to 300 races a night
+REM so it never hammers - blocked/requeue are not treated as done, so it converges.
+"%PY%" -m src.collect_oriten --start 20260401 --end %TO% --max-races 300 --quiet >> data\daily_collect.log 2>&1
