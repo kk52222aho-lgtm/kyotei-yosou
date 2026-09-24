@@ -45,6 +45,8 @@ VENUE_MARK = re.compile(r"^(\d{2})(?:BBGN|KBGN)")
 # K(結果)がこれより小さかったらキャッシュを信用せんで取り直す。
 # 実測の正常値は3〜4万バイト。過去60日で15,000を割ったんは壊れとった2日だけ
 MIN_K_BYTES = 15_000
+# K はこの日数のあいだキャッシュを信用せず取り直す(結果が後から確定するため)
+K_RECHECK_DAYS = 3
 
 
 def _download(kind: str, date: str) -> bytes | None:
@@ -63,7 +65,22 @@ def _download(kind: str, date: str) -> bytes | None:
     #    (B は前もって出るんで、この扱いは K だけでええ)
     thin = (kind == "K" and os.path.exists(path)
             and os.path.getsize(path) < MIN_K_BYTES)
-    if not os.path.exists(path) or thin:
+    # 🚨 2026-09-25: サイズだけやと掴めん取りこぼしが在った。
+    #    K が正常サイズ(28〜38KB)やのに中身が欠けとる日が4日:
+    #      09-16 欠け23.9% / 09-21 23.2% / 09-22 8.3% / 09-24 15.6%(基準は1〜2%)
+    #    取り直したら 09-16 は 1.2%、09-24 は 0.5% まで埋まった
+    #    (09-21/09-22 はサーバ側も同じファイル = **中止**やった。
+    #     欠けが必ず連続した後半になる: 場09 は R1-4 実施 / R5-12 中止)。
+    #    = **結果は時間とともに確定していく**。サイズいう代理やのうて
+    #    「新しい日は取り直す」で直接効く。欠け率で判定したら中止日を永久に叩く。
+    fresh = False
+    if kind == "K":
+        try:
+            age = (dt.date.today() - dt.datetime.strptime(date, "%Y%m%d").date()).days
+            fresh = 0 <= age <= K_RECHECK_DAYS
+        except ValueError:
+            fresh = False
+    if not os.path.exists(path) or thin or fresh:
         url = f"https://www1.mbrace.or.jp/od2/{kind}/{date[:6]}/{fname}"
         try:
             r = requests.get(url, headers=HEADERS, timeout=30)
@@ -72,7 +89,7 @@ def _download(kind: str, date: str) -> bytes | None:
         if r.status_code != 200 or not r.content:
             return None if not os.path.exists(path) else _read_lzh(path)
         # 取り直しの時は**大きい方を残す**(その日がほんまに小さい可能性もある)
-        if not thin or len(r.content) > os.path.getsize(path):
+        if not (thin or fresh) or len(r.content) > os.path.getsize(path):
             with open(path, "wb") as f:
                 f.write(r.content)
         time.sleep(SLEEP_SEC)
@@ -197,11 +214,21 @@ def parse_k(data: bytes) -> dict:
 def collect_date(conn, date: str) -> int:
     bdata = _download("B", date)
     kdata = _download("K", date)
-    if not bdata or not kdata:
+    # 🚨 2026-09-25: ここは `if not bdata or not kdata: return 0` やった。
+    #    = **K(結果)が出るまで番組表ごと捨てる**ので、`entries` が常に1日遅れる。
+    #    前向きに締切前へ記帳する器(src/paper_daily.py)は `entries` で開催を
+    #    判定しとるから、**毎日「非開催」と言い続けて証人が1件も貯まらん**かった。
+    #    過去日を注入して通したのに気付かんかったんは、**過去の日には K が在るから
+    #    「今日」の経路が一度も通っとらんかった**から。
+    #    save_race は finish=None を素直に扱う(win も None)し INSERT OR REPLACE
+    #    やから、翌日 K が出たら同じ行が上書きで埋まる。has_race も元々
+    #    `finish IS NOT NULL` で見とる = 盤は結果待ちの行を想定しとった。
+    if not bdata:
         return 0
     programs = parse_b(bdata)
-    results = parse_k(kdata)
-    payouts = parse_payouts(kdata)
+    # K がまだ無い日(=今日/明日)は結果ぬきで番組表だけ入れる
+    results = parse_k(kdata) if kdata else {}
+    payouts = parse_payouts(kdata) if kdata else {}
     saved = 0
     for (jcd, rno), entries in programs.items():
         if len(entries) < 6:
