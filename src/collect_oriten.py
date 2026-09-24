@@ -37,6 +37,8 @@ from . import storage
 HOST = "https://race.boatcast.jp"
 HEADERS = {"User-Agent": "Mozilla/5.0 (kyotei-yosou research; personal use)"}
 SLEEP_SEC = 1.5  # マナーとしての待機 (公式より一段丁寧に)
+# 403(頻度制限)を食らった時の冷却。実測で約10秒で戻るんで余裕を持たせる
+BLOCK_WAIT_SEC = 15.0
 
 _session = requests.Session()
 _session.headers.update(HEADERS)
@@ -93,7 +95,7 @@ def _init(conn) -> None:
     conn.commit()
 
 
-def _get_text(url: str, retries: int = 3) -> tuple[int, str]:
+def _get_text(url: str, retries: int = 4) -> tuple[int, str]:
     """(status_code, text) を返す。最終試行の status を返す。"""
     status = 0
     for i in range(retries):
@@ -103,8 +105,15 @@ def _get_text(url: str, retries: int = 3) -> tuple[int, str]:
             if status == 200:
                 return 200, r.content.decode("utf-8", "replace")
             if status == 403:
-                # 403 = そのレース/日は不在。リトライ不要。
-                return 403, ""
+                # 🚨 2026-09-24: ここで「403 = 不在。リトライ不要」と決め打っとった。
+                #    実測では **403 は頻度制限**で、不在やない。
+                #    1.5秒間隔で叩くと **14発で引っかかって、約10秒で戻る**
+                #    (25発の実測: 200×18 / 403×7、15発目〜21発目が403)。
+                #    empty と記帳された 9/17 以降のレースを叩き直したら
+                #    **5/5 が 200 で中身を返した**。8日ぶん静かに落としとった。
+                #    冷却を待って同じレースをやり直す。それでも駄目なら blocked。
+                time.sleep(BLOCK_WAIT_SEC * (i + 1))
+                continue
         except requests.RequestException:
             pass
         time.sleep(SLEEP_SEC * (i + 1))
@@ -196,9 +205,13 @@ def fetch_race(conn, date: str, jcd: str, rno: int) -> str:
             return "ok"
         _mark_done(conn, date, jcd, rno, "empty", 0, now)
         return "empty"
-    # 403 やその他は「不在」として記録 (再取得しない)
-    _mark_done(conn, date, jcd, rno, "empty" if status == 403 else "error", 0, now)
-    return "empty" if status == 403 else "error"
+    if status == 200:
+        # 200 やのに中身が無い = ほんまに不在。ここだけが empty
+        _mark_done(conn, date, jcd, rno, "empty", 0, now)
+        return "empty"
+    # 🚨 403/その他は「不在」やない。**blocked として残して次回やり直す**
+    _mark_done(conn, date, jcd, rno, "blocked" if status == 403 else "error", 0, now)
+    return "blocked" if status == 403 else "error"
 
 
 def _mark_done(conn, date, jcd, rno, status, n_lane, now) -> None:
@@ -210,8 +223,14 @@ def _mark_done(conn, date, jcd, rno, status, n_lane, now) -> None:
 
 
 def _already_done(conn, date, jcd, rno) -> bool:
+    """済みは ok と empty(=200やのに中身が無い)だけ。
+
+    blocked/error は**済みやない**。弾かれただけのもんを「不在」に格上げしたら、
+    そのレースは永久に取れんくなる。→ [[insight_zero_is_a_measurement]]
+    """
     r = conn.execute(
-        "SELECT 1 FROM oriten_done WHERE date=? AND jcd=? AND rno=?",
+        "SELECT 1 FROM oriten_done WHERE date=? AND jcd=? AND rno=? "
+        "AND status IN ('ok','empty')",
         (date, jcd, rno)).fetchone()
     return r is not None
 
