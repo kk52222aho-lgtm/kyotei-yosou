@@ -38,6 +38,8 @@ import numpy as np
 from .collect_paper import JCD
 
 MODEL_PATH = "data/paper_ngram.joblib"
+# この器を建てた日。心拍の分母はこれ以降の開催日だけにする
+START_DATE = "20260925"
 
 DDL = """
 CREATE TABLE IF NOT EXISTS paper_forward (
@@ -79,6 +81,40 @@ def _deadlines(date: str) -> dict[int, str]:
     return out
 
 
+def _heartbeat(con: sqlite3.Connection) -> None:
+    """🚨 **証人が貯まっとるか**を毎回出す。
+
+    このログは**宮島が非開催の日も「何もせん」と書く**。せやから
+    `task_health` から見たら**1件も記帳されんまま永久に緑**になる。
+    2026-09-24 の oriten と一字一句おなじ形(ログは書いとる・成果物は
+    新しい・中身は空)で、実際この器は建てた翌朝まで**永久0件**やった。
+
+    見るんは「宮島が開催した日のうち、記帳が在る日の割合」や。
+    開催しとらん日は分母に入れん(入れたら薄まって気付かん)。
+    """
+    # 🚨 器を建てた日より前は分母に入れん。入れたら建てた直後に必ず 0/10 が出て、
+    #    **狼少年の門**になる(旗が出っぱなしの門は読まれんくなる)。
+    #    → [[insight_a_gate_that_cries_wolf]]
+    rows = con.execute(
+        "SELECT DISTINCT date FROM entries WHERE jcd=? AND date>=?"
+        " ORDER BY date DESC LIMIT 10", (JCD, START_DATE)).fetchall()
+    days = [r[0] for r in rows]
+    if not days:
+        print(f"  [心拍] 宮島の開催日が {START_DATE} 以降まだ無い"
+              "(器を建てた直後やからこれで正しい)")
+        return
+    got = {r[0] for r in con.execute(
+        "SELECT DISTINCT date FROM paper_forward WHERE jcd=?", (JCD,))}
+    hit = [d for d in days if d in got]
+    miss = [d for d in days if d not in got]
+    mark = "" if len(hit) == len(days) else "  🚨"
+    print(f"  [心拍] 宮島の直近{len(days)}開催日のうち記帳あり "
+          f"{len(hit)}/{len(days)}{mark}")
+    if miss:
+        print(f"         記帳が無い日: {','.join(miss[:6])}"
+              + (" …" if len(miss) > 6 else ""))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default="data/kyotei.db")
@@ -96,6 +132,7 @@ def main() -> None:
         "SELECT COUNT(*) FROM entries WHERE date=? AND jcd=?", (date, JCD)).fetchone()[0]
     if not n_ent:
         print(f"{date}: 宮島は開催なし(entries に行が無い)。何もせん")
+        _heartbeat(con)
         return
 
     # 1-2. コーパスを止めん。既にやってあったら中で飛ばされる
@@ -149,6 +186,7 @@ def main() -> None:
     print(f"  model_sha={sha[:16]}… recorded_at={now}")
     print(f"  ngram_score: 中央 {np.median(score):+.5f} / 幅 "
           f"[{score.min():+.5f}, {score.max():+.5f}]")
+    _heartbeat(con)
 
 
 if __name__ == "__main__":
