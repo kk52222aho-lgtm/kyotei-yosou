@@ -238,11 +238,20 @@ def _already_done(conn, date, jcd, rno) -> bool:
 def collect_day(conn, date: str, jcds: list[str] | None = None,
                 verbose: bool = True) -> dict[str, int]:
     """1日分を収集。{'ok','empty','error','skip'} の件数を返す。"""
+    # やることが無い日は**通信せず**飛ばす。
+    # 🚨 403 の退きを長くしたら、列挙の1発にも 15+30+45+60 秒かかるようになって、
+    #    済みだけの日を舐めるのに何時間もかかった。まず台帳で用事の有無を見る。
+    have = conn.execute("SELECT COUNT(*) FROM oriten_done WHERE date=?", (date,)).fetchone()[0]
+    todo = conn.execute(
+        "SELECT COUNT(*) FROM oriten_done WHERE date=? AND status NOT IN ('ok','empty')",
+        (date,)).fetchone()[0]
+    if have and not todo:
+        return {"ok": 0, "empty": 0, "error": 0, "skip": have, "blocked": 0}
     plan = enumerate_day(date)
     time.sleep(SLEEP_SEC)
     if jcds:
         plan = {k: v for k, v in plan.items() if k in jcds}
-    counts = {"ok": 0, "empty": 0, "error": 0, "skip": 0}
+    counts = {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
     if not plan:
         if verbose:
             print(f"{date}: 開催なし (or 列挙失敗)")
