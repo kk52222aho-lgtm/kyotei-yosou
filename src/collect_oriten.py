@@ -39,6 +39,8 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (kyotei-yosou research; personal use)"}
 SLEEP_SEC = 1.5  # マナーとしての待機 (公式より一段丁寧に)
 # 403(頻度制限)を食らった時の冷却。実測で約10秒で戻るんで余裕を持たせる
 BLOCK_WAIT_SEC = 15.0
+# 連続でこれだけ弾かれたら、その日は畳んで出直す(粘っても向こうの迷惑なだけ)
+MAX_CONSEC_BLOCKED = 3
 
 _session = requests.Session()
 _session.headers.update(HEADERS)
@@ -95,7 +97,7 @@ def _init(conn) -> None:
     conn.commit()
 
 
-def _get_text(url: str, retries: int = 4) -> tuple[int, str]:
+def _get_text(url: str, retries: int = 2) -> tuple[int, str]:
     """(status_code, text) を返す。最終試行の status を返す。"""
     status = 0
     for i in range(retries):
@@ -247,11 +249,18 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
         (date,)).fetchone()[0]
     if have and not todo:
         return {"ok": 0, "empty": 0, "error": 0, "skip": have, "blocked": 0}
-    plan = enumerate_day(date)
-    time.sleep(SLEEP_SEC)
+    if have:
+        # その日の (場, 最大レース番号) は台帳に残っとる。**組み直せるもんを
+        # 毎回ネットで列挙し直すな**(列挙の1発が403に当たると150秒待つ)。
+        plan = {j: n for j, n in conn.execute(
+            "SELECT jcd, MAX(rno) FROM oriten_done WHERE date=? GROUP BY jcd", (date,))}
+    else:
+        plan = enumerate_day(date)
+        time.sleep(SLEEP_SEC)
     if jcds:
         plan = {k: v for k, v in plan.items() if k in jcds}
     counts = {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
+    consec = 0
     if not plan:
         if verbose:
             print(f"{date}: 開催なし (or 列挙失敗)")
@@ -264,6 +273,16 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
                 continue
             st = fetch_race(conn, date, jcd, rno)
             counts[st] += 1
+            if st == "blocked":
+                consec += 1
+                if consec >= MAX_CONSEC_BLOCKED:
+                    conn.commit()
+                    if verbose:
+                        print(f"  {date}: {consec}連続で弾かれたんで畳む"
+                              f"(blocked は済み扱いにせんので次回やり直す)", flush=True)
+                    return counts
+            else:
+                consec = 0
             time.sleep(SLEEP_SEC)
         conn.commit()
         if verbose:
