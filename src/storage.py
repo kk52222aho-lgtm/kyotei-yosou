@@ -88,9 +88,18 @@ PAYOUT_COLS = ["trifecta_combo", "trifecta_yen", "trio_combo", "trio_yen",
                "tansho_lane", "tansho_yen"]
 
 
+# 🚨 2026-09-24: ここに待ちが無くて、**オッズの常駐ループが書いとる最中に
+# `src.official` が `database is locked` で落ちとった**。
+# しかも daily_collect.cmd は各モジュールの exit を見んので、
+# **タスクは成功(0)のまま entries だけが増えん**。今朝は24場中0場やった。
+# 待ちを入れて、書く側が終わるまで粘る。
+BUSY_TIMEOUT_MS = 120_000
+
+
 def connect() -> sqlite3.Connection:
     os.makedirs(DATA_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=BUSY_TIMEOUT_MS / 1000)
+    conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
     conn.execute(SCHEMA)
     conn.execute(PAYOUT_SCHEMA)
     _migrate(conn)

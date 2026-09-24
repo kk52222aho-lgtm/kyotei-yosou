@@ -42,6 +42,9 @@ K_HEADER = re.compile(
 K_RACER = re.compile(
     r"^\s*(\d{2})\s+([1-6])\s+(\d{4})\s+\S.+?\S\s+(\d+)\s+(\d+)\s+([\d.]+)\s+([1-6])\s+([F\d.]+)")
 VENUE_MARK = re.compile(r"^(\d{2})(?:BBGN|KBGN)")
+# K(結果)がこれより小さかったらキャッシュを信用せんで取り直す。
+# 実測の正常値は3〜4万バイト。過去60日で15,000を割ったんは壊れとった2日だけ
+MIN_K_BYTES = 15_000
 
 
 def _download(kind: str, date: str) -> bytes | None:
@@ -50,17 +53,33 @@ def _download(kind: str, date: str) -> bytes | None:
     fname = f"{kind.lower()}{yymmdd}.lzh"
     os.makedirs(RAW_DIR, exist_ok=True)
     path = os.path.join(RAW_DIR, fname)
-    if not os.path.exists(path):
+    # 🚨 2026-09-24: キャッシュを無条件に信用しとった。
+    #    K(結果)は**出揃う前に公表される**ことがあって、その薄い版を掴むと
+    #    二度と取り直さん。実例:
+    #      k260922.lzh  320バイト(正常は3〜4万)→ 20260922 の払戻が**全場ゼロ**
+    #      k260902.lzh 6,246バイト            → 払戻が2場だけ
+    #    消して取り直したら 320 → 37,598バイトになった。
+    #    薄いKはキャッシュを信用せんで取り直し、**大きい方を残す**。
+    #    (B は前もって出るんで、この扱いは K だけでええ)
+    thin = (kind == "K" and os.path.exists(path)
+            and os.path.getsize(path) < MIN_K_BYTES)
+    if not os.path.exists(path) or thin:
         url = f"https://www1.mbrace.or.jp/od2/{kind}/{date[:6]}/{fname}"
         try:
             r = requests.get(url, headers=HEADERS, timeout=30)
         except requests.RequestException:
-            return None
+            return None if not os.path.exists(path) else _read_lzh(path)
         if r.status_code != 200 or not r.content:
-            return None
-        with open(path, "wb") as f:
-            f.write(r.content)
+            return None if not os.path.exists(path) else _read_lzh(path)
+        # 取り直しの時は**大きい方を残す**(その日がほんまに小さい可能性もある)
+        if not thin or len(r.content) > os.path.getsize(path):
+            with open(path, "wb") as f:
+                f.write(r.content)
         time.sleep(SLEEP_SEC)
+    return _read_lzh(path)
+
+
+def _read_lzh(path: str) -> bytes | None:
     try:
         lf = lhafile.Lhafile(path)
         return lf.read(lf.namelist()[0])
