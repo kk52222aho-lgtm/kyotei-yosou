@@ -27,6 +27,29 @@ JOBS = [
     ("motor_boat.csv", 30, "src.backfill_motor_boat", "モーター/ボート番号(許容60日)"),
 ]
 
+# 🚨 2026-09-24: **同じ穴の4件目**。status_beacon は `=> STALE: kachimake` を
+# 17日鳴らし続けとったのに、`src/build_kachimake.py` を呼ぶもんがどこにも
+# 無かった(src.official 27日 / oriten 54日 / src.train 56日 と同じ形)。
+# 派生物がファイルやのうて**DBの表**やから、年齢はファイルの mtime やのうて
+# 表の中の最新日で測る。
+TABLE_JOBS = [
+    ("kachimake", 3, "src.build_kachimake", "勝ち負け(status_beacon の許容は14日)"),
+]
+
+
+def table_lag_days(table: str) -> float | None:
+    """表の中の最新日が何日前か。表が無い/空なら None。"""
+    try:
+        conn = storage.connect()
+        row = conn.execute(f"SELECT MAX(date) FROM {table}").fetchone()
+        conn.close()
+    except Exception:
+        return None
+    if not row or not row[0]:
+        return None
+    d = dt.datetime.strptime(str(row[0]), "%Y%m%d").date()
+    return (dt.date.today() - d).days
+
 
 def age_days(path: str) -> float | None:
     if not os.path.exists(path):
@@ -69,6 +92,36 @@ def main() -> int:
             print(f"[NG] {name}: 呼んだが新しなっとらん (前 {before} 日 / 後 {after} 日)", flush=True)
         else:
             print(f"[OK] {name}: {after*24:.1f} 時間前の版になった", flush=True)
+
+    for table, limit, mod, note in TABLE_JOBS:
+        lag = table_lag_days(table)
+        if lag is None:
+            why = "表が空か無い"
+        elif lag > limit:
+            why = f"最新が {lag:.0f}日前 > {limit}日"
+        elif a.force:
+            why = f"最新が {lag:.0f}日前 (--force)"
+        else:
+            print(f"[skip] {table}: 最新が {lag:.0f}日前 <= {limit}日  {note}", flush=True)
+            continue
+        print(f"[作り直す] {table}: {why}  -> {mod}   {note}", flush=True)
+        if a.dry_run:
+            continue
+        before = lag
+        try:
+            __import__(mod, fromlist=["main"]).main()
+        except Exception as ex:
+            rc = 1
+            print(f"[NG] {table}: {type(ex).__name__}: {ex}", flush=True)
+            continue
+        after = table_lag_days(table)
+        # 🚨 ファイルの時と同じで、「走った」と「新しなった」は別
+        if after is None or (before is not None and after >= before):
+            rc = 1
+            print(f"[NG] {table}: 呼んだが新しなっとらん "
+                  f"(前 {before}日前 / 後 {after}日前)", flush=True)
+        else:
+            print(f"[OK] {table}: 最新が {after}日前になった", flush=True)
     return rc
 
 

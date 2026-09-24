@@ -36,7 +36,9 @@ from . import storage
 
 HOST = "https://race.boatcast.jp"
 HEADERS = {"User-Agent": "Mozilla/5.0 (kyotei-yosou research; personal use)"}
-SLEEP_SEC = 1.5  # マナーとしての待機 (公式より一段丁寧に)
+# 🚨 2026-09-24: 1.5秒やと約14発で頻度制限に当たる(25発の実測で15〜21発目が403)。
+# 2.0秒なら 6/6 通ったんで上げた。速さやのうて**弾かれん**のが目的。
+SLEEP_SEC = 2.0  # マナーとしての待機 (公式より一段丁寧に)
 # 403(頻度制限)を食らった時の冷却。実測で約10秒で戻るんで余裕を持たせる
 BLOCK_WAIT_SEC = 15.0
 # 連続でこれだけ弾かれたら、その日は畳んで出直す(粘っても向こうの迷惑なだけ)
