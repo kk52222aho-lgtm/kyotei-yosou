@@ -40,6 +40,46 @@ TABLE_JOBS = [
 ]
 
 
+def _run(mod: str) -> None:
+    """呼ばれる側の argparse が **こっちの旗を食わんように** sys.argv を隔離する。
+
+    🚨 いま在る仕事(build_kachimake)は argparse を持っとらんので一度も出とらんが、
+    argparse を持つ仕事を足した瞬間に `refresh_derived --force` が
+    「unrecognized arguments: --force」で落ちる。足す前に塞ぐ。
+    """
+    import sys as _sys
+    argv = _sys.argv
+    _sys.argv = [mod]
+    try:
+        __import__(mod, fromlist=["main"]).main()
+    finally:
+        _sys.argv = argv
+
+
+def table_max_date(table: str) -> str | None:
+    try:
+        conn = storage.connect()
+        row = conn.execute(f"SELECT MAX(date) FROM {table}").fetchone()
+        conn.close()
+    except Exception:
+        return None
+    return row[0] if row else None
+
+
+# 派生表 → (入力表, モジュール, 説明)。
+# 🚨 こっちは「何日前か」やのうて **入力表の最新日に追いついとるか**で見る。
+#    beforeinfo_raw は odds_probe(締切15分前の探査)が書くんで、開催が無い日は
+#    伸びん。「N日より古い」で鳴らしたら上流の静けさを派生の故障として鳴らす
+#    =狼少年になる([[insight_a_gate_that_cries_wolf]])。
+#    派生物の鮮度は「入力より古いか」だけ([[feedback_silent_cron_death]])。
+DERIVED_FROM_TABLE = [
+    ("beforeinfo_weather", "beforeinfo_raw", "src.backfill_beforeinfo_cols",
+     "当日体重・チルトを entries へ / 気象は別表(刻印つき)"),
+    ("beforeinfo_parsed", "beforeinfo_raw", "src.parse_beforeinfo",
+     "部品交換・調整重量をほどく"),
+]
+
+
 def table_lag_days(table: str) -> float | None:
     """表の中の最新日が何日前か。表が無い/空なら None。"""
     try:
@@ -83,7 +123,7 @@ def main() -> int:
             continue
         before = age_days(path)
         try:
-            __import__(mod, fromlist=["main"]).main()
+            _run(mod)
         except Exception as ex:
             rc = 1
             print(f"[NG] {name}: {type(ex).__name__}: {ex}", flush=True)
@@ -125,6 +165,32 @@ def main() -> int:
                   f"(前 {before}日前 / 後 {after}日前)", flush=True)
         else:
             print(f"[OK] {table}: 最新が {after}日前になった", flush=True)
+    for out, src_tbl, mod, note in DERIVED_FROM_TABLE:
+        din, dout = table_max_date(src_tbl), table_max_date(out)
+        if din is None:
+            print(f"[skip] {out}: 入力 {src_tbl} が空か無い", flush=True)
+            continue
+        if dout == din and not a.force:
+            print(f"[skip] {out}: 入力 {src_tbl} の最新 {din} に追いついとる  {note}",
+                  flush=True)
+            continue
+        print(f"[作り直す] {out}: 入力 {din} / 派生 {dout}  -> {mod}   {note}", flush=True)
+        if a.dry_run:
+            continue
+        try:
+            _run(mod)
+        except Exception as ex:
+            rc = 1
+            print(f"[NG] {out}: {type(ex).__name__}: {ex}", flush=True)
+            continue
+        # 🚨 「走った」と「追いついた」は別
+        after = table_max_date(out)
+        if after != din:
+            rc = 1
+            print(f"[NG] {out}: 呼んだが入力に追いついとらん (入力 {din} / 派生 {after})",
+                  flush=True)
+        else:
+            print(f"[OK] {out}: 入力 {din} に追いついた", flush=True)
     return rc
 
 
