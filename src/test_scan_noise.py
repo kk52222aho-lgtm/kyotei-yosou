@@ -38,11 +38,20 @@ from sklearn.calibration import CalibratedClassifierCV
 from . import storage
 from .features import FEATURES, build_frame
 from .scan_all import KEYS, lagged, load as scan_load
+from .scan_pit import lagged_pit
 from .test_scan_confirm import NBOOT, N_MAX, cluster_ci, pick
 from .train import _make_estimator
 from .validate import SELECTION_YEARS
 
 RNG = np.random.default_rng(20260927)
+
+# 🚨 --pit を付けると窓を「**その日より前**」にする(scan_pit.lagged_pit)。
+#    締切時点で配れる形と学習時の形が一致する版や。ちがいは
+#    `test_serve_scan` で測った通りで、そのままやと値の一致が 73.78% しか無い。
+PIT = "--pit" in sys.argv
+if PIT:
+    sys.argv = [a for a in sys.argv if a != "--pit"]
+LAG = lagged_pit if PIT else lagged
 
 
 def make_placebos(F: pd.DataFrame, extra: list[str]) -> dict[str, list[str]]:
@@ -86,7 +95,8 @@ def make_placebos(F: pd.DataFrame, extra: list[str]) -> dict[str, list[str]]:
 def main() -> None:
     src = sys.argv[1] if len(sys.argv) > 1 else "data/scan_all.csv"
     only = sys.argv[2:] or None
-    print(f"選抜元: {src}" + (f"  / 採点年を {only} に限定" if only else ""))
+    print(("【pit版: 窓はその日より前】" if PIT else "【通常版】")
+          + f" 選抜元: {src}" + (f"  / 採点年を {only} に限定" if only else ""))
     res = pd.read_csv(src)
     if not res["survive_ort"].any():
         print("直交化残差の生き残りゼロ。載せるもんが無い。")
@@ -96,7 +106,7 @@ def main() -> None:
     df = scan_load()
     extra: list[str] = []
     for _, r in kept.iterrows():
-        for lname, vals in lagged(df, KEYS[r["key"]], r["qty"]):
+        for lname, vals in LAG(df, KEYS[r["key"]], r["qty"]):
             if lname == r["lag"]:
                 name = f"S_{r['key']}_{r['qty']}_{r['lag']}"
                 df[name] = vals
@@ -186,7 +196,9 @@ def main() -> None:
             r[sfx] = int(int(g.loc[g["p_" + sfx].idxmax(), "lane"]) == wl)
         rows.append(r)
     R = pd.DataFrame(rows)
-    R.to_csv("data/scan_noise_holdout.csv" if only else "data/scan_noise_races.csv",
+    tag = "_pit" if PIT else ""
+    R.to_csv(f"data/scan_noise_holdout{tag}.csv" if only
+             else f"data/scan_noise_races{tag}.csv",
              index=False)
 
     def rep(sub: pd.DataFrame, label: str) -> None:
