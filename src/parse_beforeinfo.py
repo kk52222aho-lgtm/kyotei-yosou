@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS beforeinfo_parsed (
 
 
 def parse_parts(s: str | None) -> dict[int, tuple[int, list[str]]]:
-    """'2:ピストン×2 電気 | 5:リング' → {2:(3,['piston','electric']), 5:(1,['ring'])}
+    r"""'2:ピストン×2 電気 | 5:リング' → {2:(3,['piston','electric']), 5:(1,['ring'])}
 
     🚨 個数は**全角数字**(×２)で来る。NFKC で寄せてから数える。
     最初の版は `[^\s×0-9|:]+` で ASCII 数字だけ除いとったんで、
