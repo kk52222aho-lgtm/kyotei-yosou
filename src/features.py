@@ -40,6 +40,17 @@ FEATURES = [
     "wave_height",   # 波高 cm
 ] + TENKAI          # 展開(相対) ※末尾に追加=venue_codeのCAT_INDEXは不変
 
+# --- 走査(pit版)24本 -------------------------------------------------------
+# 出どころは表 `scan_features` **だけ**(`src/build_scan_features.py` が書く)。
+# 学習も本番も同じ行を読むんで train-serving skew が構造的に起きん。
+# 素な名前にしとるんは、どの index が何の特徴かを `scan_spec` に持たせて
+# **選び直したら spec_sha が変わって読む側が止まる**ようにするため。
+#
+# holdout 2025/2026 n=88,338レースで 既存21列 57.007% → +走査 57.289%
+# (+0.28pt CI[+0.18,+0.39])。偽薬(日内シャッフル/ノイズ24列)は両方ゼロを跨ぐ。
+SCAN_COLS = [f"f{i:02d}" for i in range(24)]
+FEATURES_SCAN = FEATURES + SCAN_COLS
+
 # HistGradientBoosting に渡すカテゴリ列のインデックス
 CAT_INDEX = [FEATURES.index(c) for c in CATEGORICAL]
 NUMERIC = [c for c in FEATURES if c not in CATEGORICAL]

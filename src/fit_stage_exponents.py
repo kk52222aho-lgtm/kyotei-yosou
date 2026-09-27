@@ -50,7 +50,8 @@ def collect(start: str, end: str) -> list[tuple[dict, list[int]]]:
         if len(ents) != 6:
             continue
         for e in ents:
-            e["jcd"] = jcd
+            # 🚨 レースの鍵。predict が scan_features(走査24本)を引くのに要る
+            e["date"], e["jcd"], e["rno"] = date, str(jcd).zfill(2), int(rno)
             # 毎朝のスキャンと情報量を揃える（展示/風/波は朝は未公開）
             e["tenji_time"] = e["wind_speed"] = e["wave_height"] = None
         try:

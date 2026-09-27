@@ -11,7 +11,7 @@ import joblib
 import numpy as np
 
 from . import scraper, storage
-from .features import build_frame
+from .features import SCAN_COLS, build_frame
 
 MODEL_PATH = os.path.join(storage.DATA_DIR, "model.joblib")
 
@@ -82,6 +82,79 @@ def load_model():
     return joblib.load(MODEL_PATH)
 
 
+_SCAN_CSV = os.path.join(storage.DATA_DIR, "scan_recent.csv.gz")
+_scan_csv_cache: dict | None = None
+
+
+def _scan_from_csv(date: str, jcd: str, rno: int) -> dict[int, tuple]:
+    """DB が無い所(クラウド)用。`data/scan_recent.csv` から1レース分を返す。"""
+    global _scan_csv_cache
+    if _scan_csv_cache is None:
+        _scan_csv_cache = {}
+        try:
+            import csv
+            import gzip
+            with gzip.open(_SCAN_CSV, "rt", newline="", encoding="utf-8") as f:
+                for r in csv.DictReader(f):
+                    k = (r["date"], str(r["jcd"]).zfill(2), int(r["rno"]))
+                    _scan_csv_cache.setdefault(k, {})[int(r["lane"])] = tuple(
+                        (float(r[c]) if r[c] not in ("", "None") else None)
+                        for c in SCAN_COLS)
+        except OSError:
+            pass
+    return _scan_csv_cache.get((date, jcd, rno), {})
+
+
+def attach_scan(entries: list[dict], feats: list[str]) -> None:
+    """モデルが走査列を要るなら、表 `scan_features` から引いて entries に貼る。
+
+    🚨 **引けんかったら黙らず例外にする。**`build_frame` は知らん列を NaN で作るんで、
+    貼り忘れても動いてまう——それが一番あかん形や(学習は値を見て育っとるのに
+    本番だけ欠損=train-serving skew を静かに作る)。2026-09-27 に気象と展示で
+    同じ穴を2つ測ったばっかりや → [[insight_empty_column_blames_the_fetcher]]
+
+    行が在って中が NaN なんは**正しい**(履歴の浅い選手・新しいモーター)。
+    区別するんは値やのうて**行が在るか**。
+    """
+    need = [c for c in feats if c in SCAN_COLS]
+    if not need:
+        return
+    if entries and all(c in entries[0] for c in need):
+        return                      # 呼び出し側が既に貼っとる
+    keys = ("date", "jcd", "rno")
+    if not entries or not all(k in entries[0] for k in keys):
+        raise RuntimeError(
+            "走査列を要るモデルやのに出走表に date/jcd/rno が無い。"
+            "scraper.fetch_racelist が鍵を持たせとるか確かめること")
+    date, jcd = str(entries[0]["date"]), str(entries[0]["jcd"]).zfill(2)
+    rno = int(entries[0]["rno"])
+    cols = ", ".join(SCAN_COLS)
+    rows: dict[int, tuple] = {}
+    try:
+        conn = storage.connect()
+        try:
+            rows = {r[0]: r[1:] for r in conn.execute(
+                f"SELECT lane, {cols} FROM scan_features WHERE date=? AND jcd=? AND rno=?",
+                (date, jcd, rno))}
+        finally:
+            conn.close()
+    except Exception:                                    # noqa: BLE001
+        rows = {}
+    if not rows:
+        # 🚨 クラウド(streamlit.app)は kyotei.db を持っとらん。リポに置いた写しを見る。
+        #    写しは `build_scan_features` が表から書き出したもんで、計算はやり直さん
+        rows = _scan_from_csv(date, jcd, rno)
+    missing = [int(e["lane"]) for e in entries if int(e["lane"]) not in rows]
+    if missing:
+        raise RuntimeError(
+            f"scan_features に行が無い: {date} 場{jcd} R{rno} 艇{missing}。"
+            "`python -m src.build_scan_features` が走っとるか確かめること"
+            "(日次は refresh_derived が入力=entries の最新日で判定しとる)")
+    for e in entries:
+        for c, v in zip(SCAN_COLS, rows[int(e["lane"])]):
+            e[c] = v
+
+
 def predict_entries(entries: list[dict], bundle=None) -> list[dict]:
     """出走表 dict のリストに、各艇の勝率予測とランク・印を付与して返す。"""
     bundle = bundle or load_model()
@@ -89,6 +162,7 @@ def predict_entries(entries: list[dict], bundle=None) -> list[dict]:
         raise RuntimeError("モデル未学習です。先に python -m src.train を実行してください。")
 
     model, feats = bundle["model"], bundle["features"]
+    attach_scan(entries, feats)
     frame = build_frame(entries)
     X = frame[feats].to_numpy(dtype=float)
     raw = model.predict_proba(X)[:, 1]

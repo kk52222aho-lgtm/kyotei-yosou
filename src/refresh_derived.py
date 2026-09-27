@@ -24,7 +24,10 @@ from . import storage
 # (ファイル名, これより古かったら作り直す日数, 呼ぶモジュール, 説明)
 JOBS = [
     ("model.joblib", 7, "src.train", "本番モデル(status_beacon の許容は14日)"),
-    ("motor_boat.csv", 30, "src.backfill_motor_boat", "モーター/ボート番号(許容60日)"),
+    # 🚨 2026-09-27: `motor_boat.csv` をここから外した。**30日の年齢規則**やったんで
+    #    直近1ヶ月のモーター/ボート番号が無く、`scan_features` のモーター系キーが
+    #    静かに -1(=別の群)に化けとった。消費者が変わったのに規則が古いままやった。
+    #    → 下の DERIVED_FILE_FROM_TABLE(入力の最新日に追いついとるかで見る)へ移した
 ]
 
 # 🚨 2026-09-24: **同じ穴の4件目**。status_beacon は `=> STALE: kachimake` を
@@ -72,11 +75,39 @@ def table_max_date(table: str) -> str | None:
 #    伸びん。「N日より古い」で鳴らしたら上流の静けさを派生の故障として鳴らす
 #    =狼少年になる([[insight_a_gate_that_cries_wolf]])。
 #    派生物の鮮度は「入力より古いか」だけ([[feedback_silent_cron_death]])。
+# ファイルの派生物 → (中の最新日を読む関数, 入力表, モジュール, 説明)。
+# 年齢(mtime)やのうて**中身の最新日が入力表に追いついとるか**で見る。
+# mtime は「走った」しか言わん([[feedback_silent_cron_death]])。
+def _csv_max_date(path: str) -> str | None:
+    try:
+        import csv
+        with open(path, newline="", encoding="utf-8") as f:
+            r = csv.DictReader(f)
+            col = "date" if "date" in (r.fieldnames or []) else None
+            if not col:
+                return None
+            mx = None
+            for row in r:
+                v = row.get(col)
+                if v and (mx is None or v > mx):
+                    mx = v
+            return mx
+    except OSError:
+        return None
+
+
+DERIVED_FILE_FROM_TABLE = [
+    ("data/motor_boat.csv", _csv_max_date, "entries", "src.backfill_motor_boat",
+     "モーター/ボート番号(scan_features のモーター系キーが要る)"),
+]
+
 DERIVED_FROM_TABLE = [
     ("beforeinfo_weather", "beforeinfo_raw", "src.backfill_beforeinfo_cols",
      "当日体重・チルトを entries へ / 気象は別表(刻印つき)"),
     ("beforeinfo_parsed", "beforeinfo_raw", "src.parse_beforeinfo",
      "部品交換・調整重量をほどく"),
+    ("scan_features", "entries", "src.build_scan_features",
+     "走査24本(pit版)。学習と本番が同じ値を読む1か所"),
 ]
 
 
@@ -165,6 +196,32 @@ def main() -> int:
                   f"(前 {before}日前 / 後 {after}日前)", flush=True)
         else:
             print(f"[OK] {table}: 最新が {after}日前になった", flush=True)
+    for path, getter, src_tbl, mod, note in DERIVED_FILE_FROM_TABLE:
+        din, dout = table_max_date(src_tbl), getter(path)
+        if din is None:
+            print(f"[skip] {path}: 入力 {src_tbl} が空か無い", flush=True)
+            continue
+        if dout == din and not a.force:
+            print(f"[skip] {path}: 入力 {src_tbl} の最新 {din} に追いついとる  {note}",
+                  flush=True)
+            continue
+        print(f"[作り直す] {path}: 入力 {din} / 中身 {dout}  -> {mod}   {note}", flush=True)
+        if a.dry_run:
+            continue
+        try:
+            _run(mod)
+        except Exception as ex:
+            rc = 1
+            print(f"[NG] {path}: {type(ex).__name__}: {ex}", flush=True)
+            continue
+        after = getter(path)
+        if after != din:
+            rc = 1
+            print(f"[NG] {path}: 呼んだが入力に追いついとらん "
+                  f"(入力 {din} / 中身 {after})", flush=True)
+        else:
+            print(f"[OK] {path}: 入力 {din} に追いついた", flush=True)
+
     for out, src_tbl, mod, note in DERIVED_FROM_TABLE:
         din, dout = table_max_date(src_tbl), table_max_date(out)
         if din is None:

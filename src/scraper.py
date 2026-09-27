@@ -130,6 +130,12 @@ def fetch_racelist(date: str, jcd: str, rno: int) -> list[dict] | None:
             "boat_3rate": boa[2] if len(boa) >= 3 else None,
         })
 
+    # 🚨 レースの鍵を各艇に持たせる。予測の側が `scan_features`(走査24本)を
+    #    自分で引けるようにするため。呼び出し側を5箇所直すんは漏れる
+    #    ([[feedback_verify_before_claiming]] の「列挙は必ず漏れる」)。
+    #    build_frame は知らん列を無視するんで、足しても他は壊れん。
+    for e in entries:
+        e["date"], e["jcd"], e["rno"] = date, str(jcd).zfill(2), int(rno)
     return entries if len(entries) == 6 else (entries or None)
 
 

@@ -61,7 +61,10 @@ def main() -> None:
             skipped += 1
             continue
         for e in ents:
-            e["jcd"] = jcd
+            # 🚨 レースの鍵。predict が scan_features(走査24本)を引くのに要る。
+            #    下の呼びは except Exception で囲んどるんで、鍵が無いと
+            #    **全件が黙って飛ぶ**(0件を「賭けなし」と読んでまう)
+            e["date"], e["jcd"], e["rno"] = date, str(jcd).zfill(2), int(rno)
             if not a.with_tenji:
                 # 毎朝のスキャン(出走表のみ)と情報量を揃える。展示タイム・風・波は
                 # 朝の時点では未公開なので、これを使うとサイトが実際に出した予想と別物になる。

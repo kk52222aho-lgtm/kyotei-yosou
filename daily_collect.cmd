@@ -21,8 +21,23 @@ for /f %%d in ('powershell -NoProfile -Command "(Get-Date).AddDays(-10).ToString
 for /f %%d in ('powershell -NoProfile -Command "(Get-Date).ToString('yyyyMMdd')"') do set TO=%%d
 
 "%PY%" -m src.official --start %FROM% --end %TO% >> data\daily_collect.log 2>&1
+
+REM 2026-09-27: motor/boat numbers must be rebuilt EARLY, not by refresh_derived at
+REM the end of the chain. They used to be on a 30-day age rule, so the newest month
+REM had none and the motor/boat keys of scan_features silently became -1 (a bogus
+REM group). 20260926 and 20260927 had ZERO boats with all 24 columns until this ran.
+"%PY%" -m src.backfill_motor_boat                >> data\daily_collect.log 2>&1
 "%PY%" -m src.backfill_st                        >> data\daily_collect.log 2>&1
 "%PY%" -m src.backfill_tenji_st                  >> data\daily_collect.log 2>&1
+
+REM 2026-09-27: scan features (24 point-in-time columns, holdout +0.28pt over the
+REM 21-column model with both placebos flat) must exist BEFORE the cloud workflow
+REM daily-scan.yml fires at 22:47 UTC = 07:47 JST. The cloud has no kyotei.db, so a
+REM copy goes to the repo with the Contents API. Order matters: needs official,
+REM motor_boat and results_st above.
+"%PY%" -m src.build_scan_features --days 3       >> data\daily_collect.log 2>&1
+"%PY%" -m src.push_file data\scan_recent.csv.gz "scan features" >> data\daily_collect.log 2>&1
+
 "%PY%" -m src.heartbeat show                     >> data\daily_collect.log 2>&1
 
 REM 2026-09-08: push the status beacon so GitHub Actions (deadman.yml) can see from
