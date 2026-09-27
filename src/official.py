@@ -89,7 +89,18 @@ def _download(kind: str, date: str) -> bytes | None:
         if r.status_code != 200 or not r.content:
             return None if not os.path.exists(path) else _read_lzh(path)
         # 取り直しの時は**大きい方を残す**(その日がほんまに小さい可能性もある)
-        if not (thin or fresh) or len(r.content) > os.path.getsize(path):
+        #
+        # 🚨 2026-09-27: ここで **2日ぶん収集が止まっとった**。
+        #    ファイルが**無い**日は `fresh=True` で必ずこの枝に来るんで
+        #    `not (thin or fresh)` が False になって `os.path.getsize` が
+        #    存在せんファイルに当たり FileNotFoundError。20260925 で落ちて
+        #    26・27 に一度も到達せんかった(entries が2日遅れ、beacon は
+        #    許容3日やから「ok」のまま)。
+        #    前日に `fresh` を足した時、**過去日(ファイルが在る)でしか試しとらん**。
+        #    → [[insight_idle_daemon_never_tested]]
+        #    「新しい日」の経路は**ファイルが無い**いう点で過去日とちがう。
+        if (not os.path.exists(path) or not (thin or fresh)
+                or len(r.content) > os.path.getsize(path)):
             with open(path, "wb") as f:
                 f.write(r.content)
         time.sleep(SLEEP_SEC)
@@ -283,12 +294,36 @@ def main():
 
     conn = storage.connect()
     total = 0
+    # 🚨 2026-09-27: 1日で落ちたら窓の残り全部が死んどった(20260925 の例外で
+    #    26・27 に一度も到達せず、entries が2日遅れた)。日ごとに囲って
+    #    **他の日を人質に取らせん**。ただし黙って飲まん——数えて最後に鳴らす。
+    failed: list[tuple[str, str]] = []
+    empty: list[str] = []
     for date in daterange(args.start, args.end):
-        n = collect_date(conn, date)
+        try:
+            n = collect_date(conn, date)
+        except Exception as ex:                       # noqa: BLE001
+            failed.append((date, f"{type(ex).__name__}: {ex}"))
+            print(f"  {date}: 🚨 落ちた {type(ex).__name__}: {ex}")
+            continue
         total += n
+        if n == 0:
+            empty.append(date)
         print(f"  {date}: {n} レース")
     conn.close()
     print(f"\n完了: {total} レースを保存")
+    if failed:
+        print(f"🚨 落ちた日 {len(failed)}本:")
+        for d, m in failed:
+            print(f"    {d}  {m}")
+    # 🚨 日本のボートレースは毎日どこかで開催しとる。窓の**最後の日**が0レースなら
+    #    「その日は無い」やのうて「取れてへん」や(B は当日07:30に取れとる実績が
+    #    9/06〜9/25 で20日連続)。beacon の許容は3日やから、そこに頼っとったら
+    #    今日の断線に今日は気付けん。
+    last = list(daterange(args.start, args.end))[-1]
+    if last in empty:
+        print(f"🚨 窓の最後の日 {last} が0レース。**今日のBファイルが取れてへん**"
+              "(開催が無い日やない)。beacon が鳴るのを待たんと今日中に見る")
 
 
 if __name__ == "__main__":
