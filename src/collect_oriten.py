@@ -434,9 +434,22 @@ def main() -> None:
     left = conn.execute(
         "SELECT COUNT(*) FROM oriten_done "
         "WHERE status NOT IN ('ok','empty','gone')").fetchone()[0]
+    # 🚨 出しとらん場の分は**もう追わん**ので、素の「未回収」に混ぜたら
+    #    **永久に減らん数字を毎晩刷ることになる**。分けて出す。
+    #    追う気の無いもんを残件に数えたら、門が鳴っても誰も動かんくなる
+    #    → [[insight_a_gate_that_cries_wolf]] / [[insight_zero_is_a_measurement]]
+    dead = 0
+    if SKIP_JCD:
+        ph = ",".join("?" * len(SKIP_JCD))
+        dead = conn.execute(
+            f"SELECT COUNT(*) FROM oriten_done WHERE status NOT IN ('ok','empty','gone')"
+            f" AND jcd IN ({ph})", tuple(sorted(SKIP_JCD))).fetchone()[0]
     conn.close()
+    tail = (f" / 未回収 {left - dead:,}"
+            f"(+ 出しとらん場 {dead:,} は追わん: 場{'・'.join(sorted(SKIP_JCD))})"
+            if dead else f" / 未回収 {left:,}")
     print(f"\n完了: ok={total['ok']} empty={total['empty']} blocked={total['blocked']} "
-          f"error={total['error']} skip={total['skip']} / 未回収 {left:,}")
+          f"error={total['error']} skip={total['skip']}{tail}")
 
 
 if __name__ == "__main__":
