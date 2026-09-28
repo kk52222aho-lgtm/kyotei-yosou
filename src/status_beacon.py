@@ -74,8 +74,31 @@ LOGS = [
 #     誤報に慣れて死活装置ごと死ぬ。
 DERIVED = [                      # (パス, 入力より何日古かったらSTALEか, 説明)
     ("model.joblib", 14, "本番モデル。サイトの予想はこれで出る"),
-    ("motor_boat.csv", 60, "モーター/ボート番号。走査と今節特徴が使う"),
+    # 🚨 2026-09-27に60日から2日へ。走査のモーター系キーが要るんで**毎日**新しい必要が
+    #    在る。30日の年齢規則やった頃は直近1ヶ月の番号が無くて、キーが静かに
+    #    -1(別の群)に化けとった → [[insight_freshness_rule_outlives_its_consumer]]
+    ("motor_boat.csv", 2, "モーター/ボート番号。走査のモーター系キーが要る"),
 ]
+
+# 🚨 中身の最新日で見る派生物。**mtime は「走った」しか言わん**——実際
+#    `scan_recent.csv.gz` を git から戻しただけで mtime が今日になって
+#    「ok」と出た(中身は前日のまま)。クラウドが読む唯一の走査の値やから、
+#    ここが古いと daily-scan が「行が無い」で落ちて毎朝の予想が止まる。
+#    ローカルは表(scan_features)を読むんで**手元では気付けん**。
+#    → [[feedback_silent_cron_death]] / [[insight_freshness_rule_outlives_its_consumer]]
+DERIVED_CONTENT = [
+    ("scan_recent.csv.gz", 0, "走査24本の写し。クラウドの予想はこれで出る"),
+]
+
+
+def _gz_csv_max_date(path: str) -> str | None:
+    try:
+        import csv
+        import gzip
+        with gzip.open(path, "rt", newline="", encoding="utf-8") as f:
+            return max((r["date"] for r in csv.DictReader(f)), default=None)
+    except OSError:
+        return None
 FROZEN = [                       # 凍結が正しい = 古くて当たり前。数えるが旗は立てん
     ("pushout_model.joblib", "事前登録で凍結(docs/prereg_pushout.md)"),
     ("envelope_357.csv", "②の固定抽出。動かしたら証人が壊れる"),
@@ -140,6 +163,20 @@ def collect() -> dict:
             lag = (sd - m).days
             derived[fn] = {"built": m.strftime("%Y-%m-%d"), "lag_days": lag,
                            "tol_days": tol, "stale": lag > tol, "note": note}
+        # 中身の最新日で見る派生物(mtime では嘘になる)
+        for fn, tol, note in DERIVED_CONTENT:
+            fp = os.path.join(storage.DATA_DIR, fn)
+            if not os.path.exists(fp):
+                derived[fn] = {"missing": True, "stale": True, "note": note}
+                continue
+            d = _gz_csv_max_date(fp)
+            if not d:
+                derived[fn] = {"built": "読めん", "stale": True, "note": note}
+                continue
+            lag = (sd - dt.datetime.strptime(d, "%Y%m%d")).days
+            derived[fn] = {"built": f"{d[:4]}-{d[4:6]}-{d[6:]}", "lag_days": lag,
+                           "tol_days": tol, "stale": lag > tol,
+                           "note": note + "(中身の最新日で判定)"}
         for fn, note in FROZEN:
             fp = os.path.join(storage.DATA_DIR, fn)
             if os.path.exists(fp):
