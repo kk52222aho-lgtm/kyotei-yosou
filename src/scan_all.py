@@ -386,7 +386,9 @@ def scan(df, cutoff=None, out="data/scan_all.csv"):
     print("\n生は強いのに増分が閾値未満(=既存モデルが既に吸収しとる)上位10:")
     ab = res[~res["survive_inc"]].sort_values("t_raw", key=np.abs, ascending=False)
     print(ab.head(10).to_string(index=False))
-    print("\n保存: data/scan_all.csv")
+    # 🚨 決め打ちで "data/scan_all.csv" と刷っとった。`out` を無視するんで、
+    #    別の行き先へ書いた時に**証人を上書きした**と読んで肝を冷やす。
+    print(f"\n保存: {out}")
 
 
 def main():
