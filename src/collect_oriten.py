@@ -293,6 +293,29 @@ def _already_done(conn, date, jcd, rno) -> bool:
     return r is not None
 
 
+# 🚨 2026-09-29: **出しとらん場**。江戸川(場03)は 4月〜9月の83日・951レースで
+#    ok が**1本もゼロ**やった。同じ日・同じ秒に場02を叩いたら 200 で中身も在る
+#    (対照つきの実弾1発で確かめた)。**弾かれとるんやのうて出しとらん。**
+#    未回収 2,129 のうち 951(45%)がこの1場で、毎晩そこを叩き続けとった。
+#
+#    決め打ちの禁止リストにはせん。**台帳から数える**(試した数が十分で ok がゼロ)。
+#    ただし**完全に目を塞がん**——1回につき1本だけ様子見に行く。出し始めたら気付ける。
+#    → [[insight_zero_is_a_measurement]] / [[feedback_missing_param_looks_structural]]
+SILENT_MIN_TRIED = 60      # これだけ試して
+SILENT_PROBE = 1           # ok が0なら飛ばす。ただし毎回1本だけ様子見
+SKIP_JCD: set[str] = set()
+
+
+def silent_venues(conn, min_tried: int = SILENT_MIN_TRIED) -> dict[str, tuple[int, int]]:
+    """{場: (試した数, ok数)} で ok が1本も無い場を返す。"""
+    out = {}
+    for j, n, ok in conn.execute(
+            "SELECT jcd, COUNT(*), SUM(status='ok') FROM oriten_done GROUP BY jcd"):
+        if n >= min_tried and not (ok or 0):
+            out[j] = (n, ok or 0)
+    return out
+
+
 def collect_day(conn, date: str, jcds: list[str] | None = None,
                 verbose: bool = True) -> dict[str, int]:
     """1日分を収集。{'ok','empty','error','skip'} の件数を返す。"""
@@ -321,12 +344,19 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
         if verbose:
             print(f"{date}: 開催なし (or 列挙失敗)")
         return counts
+    probed: set[str] = set()
     for jcd in sorted(plan):
         nmax = plan[jcd]
         for rno in range(1, nmax + 1):
             if _already_done(conn, date, jcd, rno):
                 counts["skip"] += 1
                 continue
+            # 出しとらん場は飛ばす。**ただし1日1本だけ様子見**(目を塞がんため)
+            if jcd in SKIP_JCD:
+                if jcd in probed:
+                    counts["skip"] += 1
+                    continue
+                probed.add(jcd)
             st = fetch_race(conn, date, jcd, rno)
             counts[st] += 1
             if st == "blocked":
@@ -385,6 +415,13 @@ def main() -> None:
 
     conn = storage.connect()
     _init(conn)
+    global SKIP_JCD
+    sil = silent_venues(conn)
+    if sil and not args.jcd:
+        SKIP_JCD = set(sil)
+        for j, (n, _ok) in sorted(sil.items()):
+            print(f"  出しとらん場として飛ばす: 場{j}({n:,}本試して ok ゼロ)"
+                  f" ※1日1本だけ様子見はする", flush=True)
     total = {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
     for date in daterange(args.start, end):
         c = collect_day(conn, date, jcds, verbose=not args.quiet)
