@@ -1,12 +1,12 @@
 {
- "date": "20260928",
+ "date": "20260929",
  "races": [
   {
    "jcd": "14",
    "venue": "鳴門",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 65.7,
+   "win_pct": 60.0,
    "bet": false,
    "deadline": "08:32",
    "exacta3": null,
@@ -18,7 +18,7 @@
    "venue": "芦屋",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 56.5,
+   "win_pct": 52.8,
    "bet": false,
    "deadline": "08:44",
    "exacta3": null,
@@ -30,7 +30,7 @@
    "venue": "鳴門",
    "rno": 2,
    "honmei": 1,
-   "win_pct": 46.4,
+   "win_pct": 29.8,
    "bet": false,
    "deadline": "08:58",
    "exacta3": null,
@@ -42,7 +42,7 @@
    "venue": "芦屋",
    "rno": 2,
    "honmei": 1,
-   "win_pct": 53.2,
+   "win_pct": 57.9,
    "bet": false,
    "deadline": "09:10",
    "exacta3": null,
@@ -54,7 +54,7 @@
    "venue": "鳴門",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 49.6,
+   "win_pct": 53.6,
    "bet": false,
    "deadline": "09:24",
    "exacta3": null,
@@ -66,9 +66,9 @@
    "venue": "芦屋",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 51.4,
+   "win_pct": 49.1,
    "bet": false,
-   "deadline": "09:36",
+   "deadline": "09:38",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -78,7 +78,7 @@
    "venue": "鳴門",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 57.4,
+   "win_pct": 41.2,
    "bet": false,
    "deadline": "09:50",
    "exacta3": null,
@@ -90,9 +90,9 @@
    "venue": "芦屋",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 73.6,
+   "win_pct": 78.6,
    "bet": false,
-   "deadline": "10:02",
+   "deadline": "10:04",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -101,32 +101,33 @@
    "jcd": "14",
    "venue": "鳴門",
    "rno": 5,
-   "honmei": 1,
-   "win_pct": 42.5,
-   "bet": false,
-   "deadline": "10:18",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "honmei": 2,
+   "win_pct": 35.8,
+   "bet": true,
+   "deadline": "10:16",
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-3"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-6",
+    "1-2-4",
+    "1-2-5"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "2-1-6",
+    "1-2-3"
+   ]
   },
   {
    "jcd": "21",
    "venue": "芦屋",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 55.4,
-   "bet": false,
-   "deadline": "10:32",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 1,
-   "honmei": 1,
-   "win_pct": 59.4,
+   "win_pct": 53.7,
    "bet": false,
    "deadline": "10:33",
    "exacta3": null,
@@ -137,33 +138,20 @@
    "jcd": "13",
    "venue": "尼崎",
    "rno": 1,
-   "honmei": 3,
-   "win_pct": 36.1,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 43.5,
+   "bet": false,
    "deadline": "10:36",
-   "exacta3": [
-    "3-1",
-    "1-3",
-    "3-2"
-   ],
-   "trio4": [
-    "1-2-3",
-    "1-3-4",
-    "2-3-4",
-    "1-2-4"
-   ],
-   "trifecta3": [
-    "3-1-2",
-    "1-3-2",
-    "3-2-1"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "16",
    "venue": "児島",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 49.3,
+   "win_pct": 52.3,
    "bet": false,
    "deadline": "10:41",
    "exacta3": null,
@@ -174,32 +162,58 @@
    "jcd": "02",
    "venue": "戸田",
    "rno": 1,
-   "honmei": 1,
-   "win_pct": 34.9,
-   "bet": false,
+   "honmei": 3,
+   "win_pct": 40.0,
+   "bet": true,
    "deadline": "10:47",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "3-2",
+    "3-1",
+    "3-4"
+   ],
+   "trio4": [
+    "1-2-3",
+    "2-3-4",
+    "1-3-4",
+    "1-2-4"
+   ],
+   "trifecta3": [
+    "3-2-1",
+    "3-2-4",
+    "3-1-2"
+   ]
   },
   {
    "jcd": "14",
    "venue": "鳴門",
    "rno": 6,
-   "honmei": 1,
-   "win_pct": 32.5,
-   "bet": false,
+   "honmei": 3,
+   "win_pct": 32.6,
+   "bet": true,
    "deadline": "10:51",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "3-1",
+    "1-3",
+    "3-5"
+   ],
+   "trio4": [
+    "1-3-5",
+    "1-2-3",
+    "1-3-4",
+    "2-3-5"
+   ],
+   "trifecta3": [
+    "3-1-5",
+    "1-3-5",
+    "3-5-1"
+   ]
   },
   {
    "jcd": "04",
    "venue": "平和島",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 30.1,
+   "win_pct": 40.5,
    "bet": false,
    "deadline": "10:55",
    "exacta3": null,
@@ -210,33 +224,8 @@
    "jcd": "13",
    "venue": "尼崎",
    "rno": 2,
-   "honmei": 2,
-   "win_pct": 36.4,
-   "bet": true,
-   "deadline": "10:59",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-3"
-   ],
-   "trio4": [
-    "1-2-3",
-    "1-2-5",
-    "1-2-6",
-    "2-3-5"
-   ],
-   "trifecta3": [
-    "2-1-3",
-    "1-2-3",
-    "2-3-1"
-   ]
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 2,
    "honmei": 1,
-   "win_pct": 37.9,
+   "win_pct": 66.7,
    "bet": false,
    "deadline": "11:00",
    "exacta3": null,
@@ -247,20 +236,33 @@
    "jcd": "21",
    "venue": "芦屋",
    "rno": 6,
-   "honmei": 1,
-   "win_pct": 44.7,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 44.5,
+   "bet": true,
    "deadline": "11:03",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-3"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-5",
+    "1-2-6",
+    "1-2-4"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "2-1-5",
+    "2-1-6"
+   ]
   },
   {
    "jcd": "05",
    "venue": "多摩川",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 41.1,
+   "win_pct": 31.4,
    "bet": false,
    "deadline": "11:07",
    "exacta3": null,
@@ -272,9 +274,9 @@
    "venue": "児島",
    "rno": 2,
    "honmei": 1,
-   "win_pct": 56.5,
+   "win_pct": 51.8,
    "bet": false,
-   "deadline": "11:10",
+   "deadline": "11:09",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -284,7 +286,7 @@
    "venue": "江戸川",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 66.3,
+   "win_pct": 49.4,
    "bet": false,
    "deadline": "11:14",
    "exacta3": null,
@@ -296,24 +298,24 @@
    "venue": "戸田",
    "rno": 2,
    "honmei": 2,
-   "win_pct": 43.2,
+   "win_pct": 26.9,
    "bet": true,
    "deadline": "11:16",
    "exacta3": [
-    "2-1",
-    "1-2",
-    "2-3"
+    "2-3",
+    "3-2",
+    "2-1"
    ],
    "trio4": [
     "1-2-3",
+    "2-3-4",
     "1-2-4",
-    "1-2-6",
-    "1-2-5"
+    "1-3-4"
    ],
    "trifecta3": [
-    "2-1-3",
-    "1-2-3",
-    "2-1-4"
+    "2-3-1",
+    "3-2-1",
+    "2-1-3"
    ]
   },
   {
@@ -321,7 +323,7 @@
    "venue": "尼崎",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 65.1,
+   "win_pct": 56.5,
    "bet": false,
    "deadline": "11:23",
    "exacta3": null,
@@ -332,82 +334,70 @@
    "jcd": "04",
    "venue": "平和島",
    "rno": 2,
-   "honmei": 1,
-   "win_pct": 33.4,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 32.9,
+   "bet": true,
    "deadline": "11:26",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-3",
+    "2-1",
+    "3-2"
+   ],
+   "trio4": [
+    "1-2-3",
+    "2-3-4",
+    "1-2-4",
+    "1-3-4"
+   ],
+   "trifecta3": [
+    "2-3-1",
+    "2-1-3",
+    "3-2-1"
+   ]
   },
   {
    "jcd": "14",
    "venue": "鳴門",
    "rno": 7,
-   "honmei": 3,
-   "win_pct": 28.8,
+   "honmei": 2,
+   "win_pct": 33.5,
    "bet": true,
    "deadline": "11:29",
    "exacta3": [
-    "3-1",
-    "1-3",
-    "3-2"
+    "2-1",
+    "2-4",
+    "2-3"
    ],
    "trio4": [
+    "1-2-4",
     "1-2-3",
-    "1-3-4",
-    "1-3-5",
-    "2-3-4"
+    "2-3-4",
+    "1-3-4"
    ],
    "trifecta3": [
-    "3-1-2",
-    "3-1-4",
-    "1-3-2"
+    "2-1-4",
+    "2-4-1",
+    "2-1-3"
    ]
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 3,
-   "honmei": 1,
-   "win_pct": 47.4,
-   "bet": false,
-   "deadline": "11:30",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
   },
   {
    "jcd": "05",
    "venue": "多摩川",
    "rno": 2,
-   "honmei": 2,
-   "win_pct": 33.2,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 43.9,
+   "bet": false,
    "deadline": "11:33",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-3"
-   ],
-   "trio4": [
-    "1-2-3",
-    "1-2-4",
-    "2-3-4",
-    "1-3-4"
-   ],
-   "trifecta3": [
-    "2-1-3",
-    "1-2-3",
-    "2-1-4"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "21",
    "venue": "芦屋",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 33.9,
+   "win_pct": 54.8,
    "bet": false,
    "deadline": "11:35",
    "exacta3": null,
@@ -419,9 +409,9 @@
    "venue": "児島",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 54.4,
+   "win_pct": 43.0,
    "bet": false,
-   "deadline": "11:40",
+   "deadline": "11:39",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -431,7 +421,7 @@
    "venue": "江戸川",
    "rno": 2,
    "honmei": 1,
-   "win_pct": 36.1,
+   "win_pct": 35.3,
    "bet": false,
    "deadline": "11:41",
    "exacta3": null,
@@ -442,22 +432,35 @@
    "jcd": "02",
    "venue": "戸田",
    "rno": 3,
-   "honmei": 1,
-   "win_pct": 43.4,
-   "bet": false,
+   "honmei": 6,
+   "win_pct": 27.4,
+   "bet": true,
    "deadline": "11:45",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "6-2",
+    "6-3",
+    "6-1"
+   ],
+   "trio4": [
+    "2-3-6",
+    "1-2-6",
+    "1-3-6",
+    "1-2-3"
+   ],
+   "trifecta3": [
+    "6-2-3",
+    "6-3-2",
+    "6-2-1"
+   ]
   },
   {
    "jcd": "13",
    "venue": "尼崎",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 45.6,
+   "win_pct": 42.8,
    "bet": false,
-   "deadline": "11:52",
+   "deadline": "11:51",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -466,34 +469,35 @@
    "jcd": "04",
    "venue": "平和島",
    "rno": 3,
-   "honmei": 1,
-   "win_pct": 34.3,
-   "bet": false,
+   "honmei": 3,
+   "win_pct": 33.4,
+   "bet": true,
    "deadline": "11:54",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "3-1",
+    "1-3",
+    "3-5"
+   ],
+   "trio4": [
+    "1-3-5",
+    "1-3-6",
+    "1-2-3",
+    "1-3-4"
+   ],
+   "trifecta3": [
+    "3-1-5",
+    "3-1-6",
+    "3-1-2"
+   ]
   },
   {
    "jcd": "14",
    "venue": "鳴門",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 34.7,
+   "win_pct": 50.3,
    "bet": false,
    "deadline": "11:58",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 4,
-   "honmei": 1,
-   "win_pct": 46.8,
-   "bet": false,
-   "deadline": "11:59",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -503,7 +507,7 @@
    "venue": "多摩川",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 40.8,
+   "win_pct": 54.1,
    "bet": false,
    "deadline": "12:01",
    "exacta3": null,
@@ -515,7 +519,7 @@
    "venue": "芦屋",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 31.7,
+   "win_pct": 35.4,
    "bet": false,
    "deadline": "12:07",
    "exacta3": null,
@@ -526,20 +530,33 @@
    "jcd": "03",
    "venue": "江戸川",
    "rno": 3,
-   "honmei": 1,
-   "win_pct": 40.2,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 45.3,
+   "bet": true,
    "deadline": "12:08",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-5"
+   ],
+   "trio4": [
+    "1-2-5",
+    "1-2-4",
+    "1-2-3",
+    "1-2-6"
+   ],
+   "trifecta3": [
+    "2-1-5",
+    "2-1-4",
+    "2-1-3"
+   ]
   },
   {
    "jcd": "16",
    "venue": "児島",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 53.7,
+   "win_pct": 53.4,
    "bet": false,
    "deadline": "12:13",
    "exacta3": null,
@@ -551,7 +568,7 @@
    "venue": "戸田",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 32.5,
+   "win_pct": 28.6,
    "bet": false,
    "deadline": "12:14",
    "exacta3": null,
@@ -563,7 +580,7 @@
    "venue": "尼崎",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 58.3,
+   "win_pct": 62.7,
    "bet": false,
    "deadline": "12:21",
    "exacta3": null,
@@ -574,25 +591,25 @@
    "jcd": "04",
    "venue": "平和島",
    "rno": 4,
-   "honmei": 4,
-   "win_pct": 30.7,
+   "honmei": 3,
+   "win_pct": 40.8,
    "bet": true,
    "deadline": "12:24",
    "exacta3": [
-    "4-1",
-    "1-4",
-    "4-2"
+    "3-1",
+    "1-3",
+    "3-4"
    ],
    "trio4": [
-    "1-2-4",
     "1-3-4",
-    "1-4-6",
-    "1-4-5"
+    "1-2-3",
+    "1-3-6",
+    "2-3-4"
    ],
    "trifecta3": [
-    "4-1-2",
-    "1-4-2",
-    "4-1-3"
+    "3-1-4",
+    "3-1-2",
+    "1-3-4"
    ]
   },
   {
@@ -600,21 +617,9 @@
    "venue": "鳴門",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 20.7,
+   "win_pct": 42.3,
    "bet": false,
    "deadline": "12:27",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 5,
-   "honmei": 1,
-   "win_pct": 69.3,
-   "bet": false,
-   "deadline": "12:28",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -624,7 +629,7 @@
    "venue": "多摩川",
    "rno": 4,
    "honmei": 1,
-   "win_pct": 35.5,
+   "win_pct": 55.6,
    "bet": false,
    "deadline": "12:31",
    "exacta3": null,
@@ -635,32 +640,58 @@
    "jcd": "03",
    "venue": "江戸川",
    "rno": 4,
-   "honmei": 1,
-   "win_pct": 31.8,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 34.3,
+   "bet": true,
    "deadline": "12:35",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "2-3",
+    "1-2"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-5",
+    "2-3-5",
+    "1-2-6"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "2-3-1",
+    "1-2-3"
+   ]
   },
   {
    "jcd": "21",
    "venue": "芦屋",
    "rno": 9,
-   "honmei": 1,
-   "win_pct": 33.8,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 34.2,
+   "bet": true,
    "deadline": "12:41",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-4"
+   ],
+   "trio4": [
+    "1-2-4",
+    "1-2-5",
+    "1-2-3",
+    "2-4-5"
+   ],
+   "trifecta3": [
+    "2-1-4",
+    "1-2-4",
+    "2-1-5"
+   ]
   },
   {
    "jcd": "02",
    "venue": "戸田",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 42.4,
+   "win_pct": 65.2,
    "bet": false,
    "deadline": "12:44",
    "exacta3": null,
@@ -672,7 +703,7 @@
    "venue": "児島",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 50.2,
+   "win_pct": 45.0,
    "bet": false,
    "deadline": "12:50",
    "exacta3": null,
@@ -684,21 +715,9 @@
    "venue": "平和島",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 62.5,
+   "win_pct": 70.2,
    "bet": false,
    "deadline": "12:55",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 6,
-   "honmei": 1,
-   "win_pct": 60.7,
-   "bet": false,
-   "deadline": "12:56",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -708,7 +727,7 @@
    "venue": "尼崎",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 47.0,
+   "win_pct": 55.7,
    "bet": false,
    "deadline": "12:59",
    "exacta3": null,
@@ -719,20 +738,33 @@
    "jcd": "05",
    "venue": "多摩川",
    "rno": 5,
-   "honmei": 1,
-   "win_pct": 36.2,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 41.6,
+   "bet": true,
    "deadline": "13:01",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-3"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-5",
+    "1-2-4",
+    "2-3-5"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "1-2-3",
+    "2-3-1"
+   ]
   },
   {
    "jcd": "03",
    "venue": "江戸川",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 52.3,
+   "win_pct": 54.6,
    "bet": false,
    "deadline": "13:02",
    "exacta3": null,
@@ -744,7 +776,7 @@
    "venue": "鳴門",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 38.9,
+   "win_pct": 55.1,
    "bet": false,
    "deadline": "13:07",
    "exacta3": null,
@@ -755,33 +787,20 @@
    "jcd": "02",
    "venue": "戸田",
    "rno": 6,
-   "honmei": 4,
-   "win_pct": 32.5,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 48.0,
+   "bet": false,
    "deadline": "13:14",
-   "exacta3": [
-    "4-1",
-    "4-2",
-    "1-4"
-   ],
-   "trio4": [
-    "1-2-4",
-    "1-3-4",
-    "2-3-4",
-    "1-2-3"
-   ],
-   "trifecta3": [
-    "4-1-2",
-    "4-2-1",
-    "4-1-3"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "21",
    "venue": "芦屋",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 58.2,
+   "win_pct": 56.6,
    "bet": false,
    "deadline": "13:16",
    "exacta3": null,
@@ -793,21 +812,9 @@
    "venue": "平和島",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 37.7,
+   "win_pct": 39.4,
    "bet": false,
    "deadline": "13:22",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 7,
-   "honmei": 1,
-   "win_pct": 61.6,
-   "bet": false,
-   "deadline": "13:25",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -817,7 +824,7 @@
    "venue": "児島",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 46.3,
+   "win_pct": 46.9,
    "bet": false,
    "deadline": "13:28",
    "exacta3": null,
@@ -829,7 +836,7 @@
    "venue": "江戸川",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 30.5,
+   "win_pct": 45.6,
    "bet": false,
    "deadline": "13:29",
    "exacta3": null,
@@ -840,20 +847,33 @@
    "jcd": "05",
    "venue": "多摩川",
    "rno": 6,
-   "honmei": 1,
-   "win_pct": 36.9,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 39.9,
+   "bet": true,
    "deadline": "13:33",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-3"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-4",
+    "1-2-6",
+    "1-2-5"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "1-2-3",
+    "2-1-4"
+   ]
   },
   {
    "jcd": "13",
    "venue": "尼崎",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 58.0,
+   "win_pct": 72.3,
    "bet": false,
    "deadline": "13:38",
    "exacta3": null,
@@ -865,7 +885,7 @@
    "venue": "鳴門",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 49.0,
+   "win_pct": 42.7,
    "bet": false,
    "deadline": "13:40",
    "exacta3": null,
@@ -877,7 +897,7 @@
    "venue": "戸田",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 67.8,
+   "win_pct": 69.5,
    "bet": false,
    "deadline": "13:45",
    "exacta3": null,
@@ -889,7 +909,7 @@
    "venue": "芦屋",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 59.3,
+   "win_pct": 57.2,
    "bet": false,
    "deadline": "13:51",
    "exacta3": null,
@@ -900,35 +920,10 @@
    "jcd": "04",
    "venue": "平和島",
    "rno": 7,
-   "honmei": 3,
-   "win_pct": 41.9,
-   "bet": true,
-   "deadline": "13:54",
-   "exacta3": [
-    "3-1",
-    "3-2",
-    "3-4"
-   ],
-   "trio4": [
-    "1-2-3",
-    "1-3-4",
-    "2-3-4",
-    "1-3-5"
-   ],
-   "trifecta3": [
-    "3-1-2",
-    "3-1-4",
-    "3-2-1"
-   ]
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 8,
    "honmei": 1,
-   "win_pct": 53.2,
+   "win_pct": 30.3,
    "bet": false,
-   "deadline": "13:55",
+   "deadline": "13:54",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -938,7 +933,7 @@
    "venue": "江戸川",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 34.8,
+   "win_pct": 59.7,
    "bet": false,
    "deadline": "13:56",
    "exacta3": null,
@@ -950,7 +945,7 @@
    "venue": "多摩川",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 53.3,
+   "win_pct": 39.7,
    "bet": false,
    "deadline": "13:59",
    "exacta3": null,
@@ -962,7 +957,7 @@
    "venue": "児島",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 55.3,
+   "win_pct": 54.4,
    "bet": false,
    "deadline": "14:04",
    "exacta3": null,
@@ -974,7 +969,7 @@
    "venue": "鳴門",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 51.5,
+   "win_pct": 48.8,
    "bet": false,
    "deadline": "14:07",
    "exacta3": null,
@@ -986,7 +981,7 @@
    "venue": "尼崎",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 47.4,
+   "win_pct": 67.9,
    "bet": false,
    "deadline": "14:12",
    "exacta3": null,
@@ -998,7 +993,7 @@
    "venue": "戸田",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 40.3,
+   "win_pct": 53.3,
    "bet": false,
    "deadline": "14:16",
    "exacta3": null,
@@ -1010,7 +1005,7 @@
    "venue": "平和島",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 39.8,
+   "win_pct": 61.4,
    "bet": false,
    "deadline": "14:22",
    "exacta3": null,
@@ -1021,32 +1016,33 @@
    "jcd": "03",
    "venue": "江戸川",
    "rno": 8,
-   "honmei": 1,
-   "win_pct": 48.9,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 29.8,
+   "bet": true,
    "deadline": "14:24",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "2-3",
+    "1-2"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-4",
+    "2-3-4",
+    "1-3-4"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "2-3-1",
+    "1-2-3"
+   ]
   },
   {
    "jcd": "21",
    "venue": "芦屋",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 63.5,
-   "bet": false,
-   "deadline": "14:28",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 9,
-   "honmei": 1,
-   "win_pct": 63.7,
+   "win_pct": 51.8,
    "bet": false,
    "deadline": "14:29",
    "exacta3": null,
@@ -1058,7 +1054,7 @@
    "venue": "多摩川",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 48.4,
+   "win_pct": 52.8,
    "bet": false,
    "deadline": "14:32",
    "exacta3": null,
@@ -1070,9 +1066,9 @@
    "venue": "児島",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 60.1,
+   "win_pct": 48.6,
    "bet": false,
-   "deadline": "14:37",
+   "deadline": "14:38",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1082,9 +1078,9 @@
    "venue": "尼崎",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 48.9,
+   "win_pct": 57.5,
    "bet": false,
-   "deadline": "14:44",
+   "deadline": "14:45",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1094,7 +1090,7 @@
    "venue": "戸田",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 37.0,
+   "win_pct": 51.5,
    "bet": false,
    "deadline": "14:48",
    "exacta3": null,
@@ -1106,7 +1102,7 @@
    "venue": "江戸川",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 40.1,
+   "win_pct": 52.3,
    "bet": false,
    "deadline": "14:52",
    "exacta3": null,
@@ -1118,7 +1114,7 @@
    "venue": "平和島",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 46.7,
+   "win_pct": 32.0,
    "bet": false,
    "deadline": "14:56",
    "exacta3": null,
@@ -1130,21 +1126,9 @@
    "venue": "多摩川",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 63.9,
+   "win_pct": 46.5,
    "bet": false,
    "deadline": "15:03",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 10,
-   "honmei": 1,
-   "win_pct": 48.4,
-   "bet": false,
-   "deadline": "15:06",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1154,9 +1138,9 @@
    "venue": "児島",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 62.4,
+   "win_pct": 52.0,
    "bet": false,
-   "deadline": "15:09",
+   "deadline": "15:10",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1166,9 +1150,9 @@
    "venue": "尼崎",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 63.0,
+   "win_pct": 70.0,
    "bet": false,
-   "deadline": "15:15",
+   "deadline": "15:16",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1178,21 +1162,9 @@
    "venue": "丸亀",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 28.0,
+   "win_pct": 37.1,
    "bet": false,
    "deadline": "15:17",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "19",
-   "venue": "下関",
-   "rno": 1,
-   "honmei": 1,
-   "win_pct": 42.9,
-   "bet": false,
-   "deadline": "15:20",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1202,7 +1174,7 @@
    "venue": "戸田",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 39.8,
+   "win_pct": 60.8,
    "bet": false,
    "deadline": "15:21",
    "exacta3": null,
@@ -1214,9 +1186,33 @@
    "venue": "江戸川",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 56.1,
+   "win_pct": 69.9,
    "bet": false,
    "deadline": "15:22",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 1,
+   "honmei": 1,
+   "win_pct": 36.4,
+   "bet": false,
+   "deadline": "15:24",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "19",
+   "venue": "下関",
+   "rno": 1,
+   "honmei": 1,
+   "win_pct": 47.5,
+   "bet": false,
+   "deadline": "15:27",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1225,20 +1221,33 @@
    "jcd": "04",
    "venue": "平和島",
    "rno": 10,
-   "honmei": 1,
-   "win_pct": 53.7,
-   "bet": false,
-   "deadline": "15:29",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "honmei": 2,
+   "win_pct": 31.6,
+   "bet": true,
+   "deadline": "15:30",
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-4"
+   ],
+   "trio4": [
+    "1-2-4",
+    "1-2-3",
+    "2-3-4",
+    "1-2-5"
+   ],
+   "trifecta3": [
+    "2-1-4",
+    "1-2-4",
+    "2-4-1"
+   ]
   },
   {
    "jcd": "05",
    "venue": "多摩川",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 49.1,
+   "win_pct": 64.3,
    "bet": false,
    "deadline": "15:38",
    "exacta3": null,
@@ -1249,35 +1258,10 @@
    "jcd": "15",
    "venue": "丸亀",
    "rno": 2,
-   "honmei": 4,
-   "win_pct": 30.7,
-   "bet": true,
-   "deadline": "15:40",
-   "exacta3": [
-    "4-1",
-    "1-4",
-    "4-3"
-   ],
-   "trio4": [
-    "1-3-4",
-    "1-4-5",
-    "1-2-4",
-    "3-4-5"
-   ],
-   "trifecta3": [
-    "4-1-3",
-    "1-4-3",
-    "4-1-5"
-   ]
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 11,
    "honmei": 1,
-   "win_pct": 52.7,
+   "win_pct": 38.3,
    "bet": false,
-   "deadline": "15:41",
+   "deadline": "15:40",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1287,21 +1271,9 @@
    "venue": "児島",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 55.6,
+   "win_pct": 50.7,
    "bet": false,
    "deadline": "15:42",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "19",
-   "venue": "下関",
-   "rno": 2,
-   "honmei": 1,
-   "win_pct": 37.2,
-   "bet": false,
-   "deadline": "15:47",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1311,7 +1283,19 @@
    "venue": "尼崎",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 59.1,
+   "win_pct": 63.7,
+   "bet": false,
+   "deadline": "15:49",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 2,
+   "honmei": 1,
+   "win_pct": 39.2,
    "bet": false,
    "deadline": "15:51",
    "exacta3": null,
@@ -1323,7 +1307,7 @@
    "venue": "江戸川",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 45.0,
+   "win_pct": 54.3,
    "bet": false,
    "deadline": "15:53",
    "exacta3": null,
@@ -1335,9 +1319,21 @@
    "venue": "戸田",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 43.1,
+   "win_pct": 35.8,
    "bet": false,
    "deadline": "15:55",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "19",
+   "venue": "下関",
+   "rno": 2,
+   "honmei": 1,
+   "win_pct": 45.8,
+   "bet": false,
+   "deadline": "15:58",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1347,9 +1343,9 @@
    "venue": "平和島",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 45.6,
+   "win_pct": 49.1,
    "bet": false,
-   "deadline": "16:03",
+   "deadline": "16:04",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1359,7 +1355,7 @@
    "venue": "丸亀",
    "rno": 3,
    "honmei": 1,
-   "win_pct": 42.7,
+   "win_pct": 31.6,
    "bet": false,
    "deadline": "16:06",
    "exacta3": null,
@@ -1371,9 +1367,33 @@
    "venue": "多摩川",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 59.8,
+   "win_pct": 47.9,
    "bet": false,
    "deadline": "16:08",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "16",
+   "venue": "児島",
+   "rno": 11,
+   "honmei": 1,
+   "win_pct": 51.8,
+   "bet": false,
+   "deadline": "16:15",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 3,
+   "honmei": 1,
+   "win_pct": 54.5,
+   "bet": false,
+   "deadline": "16:17",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1382,47 +1402,10 @@
    "jcd": "19",
    "venue": "下関",
    "rno": 3,
-   "honmei": 2,
-   "win_pct": 37.6,
-   "bet": true,
-   "deadline": "16:11",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-4"
-   ],
-   "trio4": [
-    "1-2-4",
-    "1-2-6",
-    "1-2-3",
-    "1-2-5"
-   ],
-   "trifecta3": [
-    "2-1-4",
-    "2-1-6",
-    "1-2-4"
-   ]
-  },
-  {
-   "jcd": "16",
-   "venue": "児島",
-   "rno": 11,
    "honmei": 1,
-   "win_pct": 57.2,
+   "win_pct": 45.1,
    "bet": false,
-   "deadline": "16:16",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "09",
-   "venue": "津",
-   "rno": 12,
-   "honmei": 1,
-   "win_pct": 52.9,
-   "bet": false,
-   "deadline": "16:20",
+   "deadline": "16:23",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1432,9 +1415,9 @@
    "venue": "尼崎",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 68.1,
+   "win_pct": 57.7,
    "bet": false,
-   "deadline": "16:23",
+   "deadline": "16:25",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1444,7 +1427,7 @@
    "venue": "江戸川",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 65.5,
+   "win_pct": 62.7,
    "bet": false,
    "deadline": "16:25",
    "exacta3": null,
@@ -1456,7 +1439,7 @@
    "venue": "戸田",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 54.1,
+   "win_pct": 68.1,
    "bet": false,
    "deadline": "16:30",
    "exacta3": null,
@@ -1467,34 +1450,47 @@
    "jcd": "15",
    "venue": "丸亀",
    "rno": 4,
-   "honmei": 1,
-   "win_pct": 30.6,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 36.0,
+   "bet": true,
    "deadline": "16:34",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
-  },
-  {
-   "jcd": "19",
-   "venue": "下関",
-   "rno": 4,
-   "honmei": 1,
-   "win_pct": 38.3,
-   "bet": false,
-   "deadline": "16:36",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-3"
+   ],
+   "trio4": [
+    "1-2-3",
+    "1-2-5",
+    "1-2-4",
+    "1-2-6"
+   ],
+   "trifecta3": [
+    "2-1-3",
+    "1-2-3",
+    "2-1-5"
+   ]
   },
   {
    "jcd": "04",
    "venue": "平和島",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 47.8,
+   "win_pct": 59.3,
    "bet": false,
    "deadline": "16:38",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 4,
+   "honmei": 1,
+   "win_pct": 49.8,
+   "bet": false,
+   "deadline": "16:42",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1504,9 +1500,21 @@
    "venue": "多摩川",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 64.6,
+   "win_pct": 55.9,
    "bet": false,
    "deadline": "16:46",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "19",
+   "venue": "下関",
+   "rno": 4,
+   "honmei": 1,
+   "win_pct": 50.8,
+   "bet": false,
+   "deadline": "16:48",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1516,7 +1524,7 @@
    "venue": "児島",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 54.7,
+   "win_pct": 71.9,
    "bet": false,
    "deadline": "16:50",
    "exacta3": null,
@@ -1527,35 +1535,34 @@
    "jcd": "15",
    "venue": "丸亀",
    "rno": 5,
-   "honmei": 2,
-   "win_pct": 38.4,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 34.3,
+   "bet": false,
    "deadline": "17:01",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-4"
-   ],
-   "trio4": [
-    "1-2-4",
-    "1-2-3",
-    "1-2-6",
-    "2-3-4"
-   ],
-   "trifecta3": [
-    "2-1-4",
-    "1-2-4",
-    "2-1-3"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 5,
+   "honmei": 1,
+   "win_pct": 32.1,
+   "bet": false,
+   "deadline": "17:09",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "19",
    "venue": "下関",
    "rno": 5,
    "honmei": 1,
-   "win_pct": 52.4,
+   "win_pct": 64.0,
    "bet": false,
-   "deadline": "17:15",
+   "deadline": "17:17",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1565,9 +1572,21 @@
    "venue": "丸亀",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 47.0,
+   "win_pct": 54.5,
    "bet": false,
-   "deadline": "17:29",
+   "deadline": "17:27",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 6,
+   "honmei": 1,
+   "win_pct": 60.8,
+   "bet": false,
+   "deadline": "17:34",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1577,7 +1596,7 @@
    "venue": "大村",
    "rno": 1,
    "honmei": 1,
-   "win_pct": 51.2,
+   "win_pct": 48.5,
    "bet": false,
    "deadline": "17:41",
    "exacta3": null,
@@ -1589,9 +1608,9 @@
    "venue": "下関",
    "rno": 6,
    "honmei": 1,
-   "win_pct": 46.0,
+   "win_pct": 52.4,
    "bet": false,
-   "deadline": "17:50",
+   "deadline": "17:48",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1601,9 +1620,21 @@
    "venue": "丸亀",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 38.6,
+   "win_pct": 72.5,
    "bet": false,
-   "deadline": "17:59",
+   "deadline": "17:55",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 7,
+   "honmei": 1,
+   "win_pct": 56.4,
+   "bet": false,
+   "deadline": "18:02",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1612,20 +1643,33 @@
    "jcd": "24",
    "venue": "大村",
    "rno": 2,
-   "honmei": 1,
-   "win_pct": 46.9,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 48.7,
+   "bet": true,
    "deadline": "18:08",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-4"
+   ],
+   "trio4": [
+    "1-2-4",
+    "1-2-5",
+    "1-2-6",
+    "1-2-3"
+   ],
+   "trifecta3": [
+    "2-1-4",
+    "2-1-5",
+    "2-1-6"
+   ]
   },
   {
    "jcd": "19",
    "venue": "下関",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 53.5,
+   "win_pct": 52.4,
    "bet": false,
    "deadline": "18:17",
    "exacta3": null,
@@ -1637,9 +1681,9 @@
    "venue": "丸亀",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 59.0,
+   "win_pct": 51.9,
    "bet": false,
-   "deadline": "18:26",
+   "deadline": "18:25",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1648,10 +1692,35 @@
    "jcd": "24",
    "venue": "大村",
    "rno": 3,
-   "honmei": 1,
-   "win_pct": 41.9,
-   "bet": false,
+   "honmei": 3,
+   "win_pct": 44.5,
+   "bet": true,
    "deadline": "18:34",
+   "exacta3": [
+    "3-1",
+    "1-3",
+    "3-4"
+   ],
+   "trio4": [
+    "1-3-4",
+    "1-2-3",
+    "1-3-6",
+    "2-3-4"
+   ],
+   "trifecta3": [
+    "3-1-4",
+    "1-3-4",
+    "3-1-2"
+   ]
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 8,
+   "honmei": 1,
+   "win_pct": 53.5,
+   "bet": false,
+   "deadline": "18:41",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1661,9 +1730,9 @@
    "venue": "下関",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 56.4,
+   "win_pct": 46.6,
    "bet": false,
-   "deadline": "18:45",
+   "deadline": "18:48",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1673,7 +1742,7 @@
    "venue": "丸亀",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 45.9,
+   "win_pct": 53.7,
    "bet": false,
    "deadline": "18:55",
    "exacta3": null,
@@ -1684,35 +1753,46 @@
    "jcd": "24",
    "venue": "大村",
    "rno": 4,
-   "honmei": 2,
-   "win_pct": 38.3,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 40.4,
+   "bet": false,
    "deadline": "19:03",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-4"
-   ],
-   "trio4": [
-    "1-2-4",
-    "1-2-3",
-    "2-3-4",
-    "1-2-6"
-   ],
-   "trifecta3": [
-    "2-1-4",
-    "1-2-4",
-    "2-1-3"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 9,
+   "honmei": 1,
+   "win_pct": 51.2,
+   "bet": false,
+   "deadline": "19:10",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "19",
    "venue": "下関",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 55.8,
+   "win_pct": 50.1,
    "bet": false,
-   "deadline": "19:17",
+   "deadline": "19:16",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 10,
+   "honmei": 1,
+   "win_pct": 67.9,
+   "bet": false,
+   "deadline": "19:23",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1721,22 +1801,35 @@
    "jcd": "24",
    "venue": "大村",
    "rno": 5,
-   "honmei": 1,
-   "win_pct": 58.9,
-   "bet": false,
+   "honmei": 2,
+   "win_pct": 38.0,
+   "bet": true,
    "deadline": "19:30",
-   "exacta3": null,
-   "trio4": null,
-   "trifecta3": null
+   "exacta3": [
+    "2-1",
+    "1-2",
+    "2-5"
+   ],
+   "trio4": [
+    "1-2-5",
+    "1-2-3",
+    "1-2-4",
+    "1-2-6"
+   ],
+   "trifecta3": [
+    "2-1-5",
+    "2-1-3",
+    "2-1-4"
+   ]
   },
   {
-   "jcd": "15",
-   "venue": "丸亀",
+   "jcd": "07",
+   "venue": "蒲郡",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 44.1,
+   "win_pct": 55.6,
    "bet": false,
-   "deadline": "19:38",
+   "deadline": "19:39",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1746,9 +1839,9 @@
    "venue": "下関",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 49.1,
+   "win_pct": 48.6,
    "bet": false,
-   "deadline": "19:47",
+   "deadline": "19:48",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1757,35 +1850,34 @@
    "jcd": "24",
    "venue": "大村",
    "rno": 6,
-   "honmei": 2,
-   "win_pct": 42.1,
-   "bet": true,
+   "honmei": 1,
+   "win_pct": 41.8,
+   "bet": false,
    "deadline": "19:56",
-   "exacta3": [
-    "2-1",
-    "1-2",
-    "2-4"
-   ],
-   "trio4": [
-    "1-2-4",
-    "1-2-3",
-    "1-2-6",
-    "2-3-4"
-   ],
-   "trifecta3": [
-    "2-1-4",
-    "2-1-3",
-    "1-2-4"
-   ]
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
   },
   {
    "jcd": "15",
    "venue": "丸亀",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 53.6,
+   "win_pct": 46.5,
    "bet": false,
-   "deadline": "20:06",
+   "deadline": "20:03",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 11,
+   "honmei": 1,
+   "win_pct": 53.4,
+   "bet": false,
+   "deadline": "20:08",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1795,9 +1887,9 @@
    "venue": "下関",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 62.1,
+   "win_pct": 47.5,
    "bet": false,
-   "deadline": "20:15",
+   "deadline": "20:17",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1807,7 +1899,7 @@
    "venue": "大村",
    "rno": 7,
    "honmei": 1,
-   "win_pct": 77.3,
+   "win_pct": 64.7,
    "bet": false,
    "deadline": "20:25",
    "exacta3": null,
@@ -1819,9 +1911,21 @@
    "venue": "丸亀",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 46.3,
+   "win_pct": 73.0,
    "bet": false,
-   "deadline": "20:36",
+   "deadline": "20:31",
+   "exacta3": null,
+   "trio4": null,
+   "trifecta3": null
+  },
+  {
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 12,
+   "honmei": 1,
+   "win_pct": 57.1,
+   "bet": false,
+   "deadline": "20:38",
    "exacta3": null,
    "trio4": null,
    "trifecta3": null
@@ -1831,7 +1935,7 @@
    "venue": "下関",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 46.9,
+   "win_pct": 50.0,
    "bet": false,
    "deadline": "20:45",
    "exacta3": null,
@@ -1843,7 +1947,7 @@
    "venue": "大村",
    "rno": 8,
    "honmei": 1,
-   "win_pct": 72.7,
+   "win_pct": 48.7,
    "bet": false,
    "deadline": "20:59",
    "exacta3": null,
@@ -1855,7 +1959,7 @@
    "venue": "大村",
    "rno": 9,
    "honmei": 1,
-   "win_pct": 56.7,
+   "win_pct": 61.7,
    "bet": false,
    "deadline": "21:25",
    "exacta3": null,
@@ -1867,7 +1971,7 @@
    "venue": "大村",
    "rno": 10,
    "honmei": 1,
-   "win_pct": 53.3,
+   "win_pct": 59.9,
    "bet": false,
    "deadline": "21:51",
    "exacta3": null,
@@ -1879,7 +1983,7 @@
    "venue": "大村",
    "rno": 11,
    "honmei": 1,
-   "win_pct": 45.9,
+   "win_pct": 57.4,
    "bet": false,
    "deadline": "22:16",
    "exacta3": null,
@@ -1891,7 +1995,7 @@
    "venue": "大村",
    "rno": 12,
    "honmei": 1,
-   "win_pct": 58.2,
+   "win_pct": 46.7,
    "bet": false,
    "deadline": "22:41",
    "exacta3": null,
