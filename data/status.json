@@ -1,31 +1,31 @@
 {
- "generated_at": "2026-09-28T11:14:52",
- "date": "20260928",
+ "generated_at": "2026-09-29T09:54:03",
+ "date": "20260929",
  "tables": {
   "entries": {
-   "latest": "20260928",
-   "rows": 1593792,
+   "latest": "20260929",
+   "rows": 1594656,
    "lag_days": 0,
    "tol_days": 3,
    "stale": false
   },
   "payouts": {
-   "latest": "20260927",
-   "rows": 261278,
+   "latest": "20260928",
+   "rows": 261422,
    "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "results_st": {
-   "latest": "20260927",
-   "rows": 1566509,
+   "latest": "20260928",
+   "rows": 1567371,
    "lag_days": 1,
    "tol_days": 3,
    "stale": false
   },
   "odds_timeseries": {
-   "latest": "20260928",
-   "rows": 229218,
+   "latest": "20260929",
+   "rows": 232815,
    "lag_days": 0,
    "tol_days": 2,
    "stale": false
@@ -33,13 +33,13 @@
   "kachimake": {
    "latest": "20260925",
    "rows": 1291898,
-   "lag_days": 3,
+   "lag_days": 4,
    "tol_days": 14,
    "stale": false
   },
   "oriten": {
-   "latest": "20260928",
-   "rows": 151974,
+   "latest": "20260929",
+   "rows": 152724,
    "lag_days": 0,
    "tol_days": 3,
    "stale": false
@@ -47,36 +47,36 @@
  },
  "logs": {
   "watchdog.log": {
-   "mtime": "2026-09-28T11:10",
+   "mtime": "2026-09-29T09:50",
    "age_hours": 0.1,
    "tol_hours": 3,
    "stale": false,
    "note": "10分ごと。**稼働時間外も書く**ので一番鋭い生死signal"
   },
   "probe_loop.log": {
-   "mtime": "2026-09-28T11:14",
+   "mtime": "2026-09-29T09:53",
    "age_hours": 0.0,
    "tol_hours": 14,
    "stale": false,
    "note": "稼働9-23時のみ毎分。夜間は書かんので長めに取る"
   },
   "daily_collect.log": {
-   "mtime": "2026-09-28T11:14",
+   "mtime": "2026-09-29T09:54",
    "age_hours": 0.0,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝07:30"
   },
   "pushout_record.log": {
-   "mtime": "2026-09-28T08:30",
-   "age_hours": 2.7,
+   "mtime": "2026-09-29T08:31",
+   "age_hours": 1.4,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝08:30"
   },
   "shrink_record.log": {
-   "mtime": "2026-09-28T08:30",
-   "age_hours": 2.7,
+   "mtime": "2026-09-29T08:31",
+   "age_hours": 1.4,
    "tol_hours": 30,
    "stale": false,
    "note": "毎朝08:30"
@@ -84,35 +84,42 @@
  },
  "watchdog": {
   "recent_restart_failures": 0,
-  "last_line": "2026-09-28 11:10 alive pid=11812",
+  "last_line": "2026-09-29 09:50 alive pid=11812",
   "duplicate_loops": 0,
   "since_last_ok": 0
  },
  "derived": {
   "model.joblib": {
-   "built": "2026-09-27",
-   "lag_days": 0,
+   "built": "2026-09-29",
+   "lag_days": -1,
    "tol_days": 14,
    "stale": false,
    "note": "本番モデル。サイトの予想はこれで出る"
   },
   "motor_boat.csv": {
-   "built": "2026-09-28",
+   "built": "2026-09-29",
    "lag_days": -1,
-   "tol_days": 60,
+   "tol_days": 2,
    "stale": false,
-   "note": "モーター/ボート番号。走査と今節特徴が使う"
+   "note": "モーター/ボート番号。走査のモーター系キーが要る"
+  },
+  "scan_recent.csv.gz": {
+   "built": "2026-09-29",
+   "lag_days": 0,
+   "tol_days": 0,
+   "stale": false,
+   "note": "走査24本の写し。クラウドの予想はこれで出る(中身の最新日で判定)"
   }
  },
  "frozen": {
   "pushout_model.joblib": {
    "built": "2026-09-03",
-   "lag_days": 24,
+   "lag_days": 25,
    "note": "事前登録で凍結(docs/prereg_pushout.md)"
   },
   "envelope_357.csv": {
    "built": "2026-09-02",
-   "lag_days": 25,
+   "lag_days": 26,
    "note": "②の固定抽出。動かしたら証人が壊れる"
   }
  },
