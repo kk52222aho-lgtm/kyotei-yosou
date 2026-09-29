@@ -301,6 +301,7 @@ def _already_done(conn, date, jcd, rno) -> bool:
 #    決め打ちの禁止リストにはせん。**台帳から数える**(試した数が十分で ok がゼロ)。
 #    ただし**完全に目を塞がん**——1回につき1本だけ様子見に行く。出し始めたら気付ける。
 #    → [[insight_zero_is_a_measurement]] / [[feedback_missing_param_looks_structural]]
+FIRST_DATA_HOUR = 11     # これより前に今日の分を聞いても在り得ん
 SILENT_MIN_TRIED = 60      # これだけ試して
 SILENT_PROBE = 1           # ok が0なら飛ばす。ただし毎回1本だけ様子見
 SKIP_JCD: set[str] = set()
@@ -322,6 +323,23 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
     # やることが無い日は**通信せず**飛ばす。
     # 🚨 403 の退きを長くしたら、列挙の1発にも 15+30+45+60 秒かかるようになって、
     #    済みだけの日を舐めるのに何時間もかかった。まず台帳で用事の有無を見る。
+    # 🚨 2026-09-30: **まだ走っとらんレースの展示データは在るわけない。**
+    #    毎朝07:30の run が今日の約150本に403を連打して attempts を無駄に積んどった。
+    #    実測(9/18〜9/29): 同日中に取れるんは 144本中 **5〜21本**(0本の日も多い)で、
+    #    同日の初取得は **08:58〜10:32**。残り約130本は**翌朝に取れとる**。
+    #    → 午前は今日を聞かん。午後に回した時は同日分も取りに行く余地を残す。
+    #    (未来日は常に飛ばす。存在し得んもんを叩いて attempts を積むと
+    #     MAX_ATTEMPTS で gone に落ちる筋も作ってまう)
+    _today = datetime.now()
+    if date > _today.strftime("%Y%m%d"):
+        if verbose:
+            print(f"{date}: 未来の日付。飛ばす")
+        return {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
+    if date == _today.strftime("%Y%m%d") and _today.hour < FIRST_DATA_HOUR:
+        if verbose:
+            print(f"{date}: まだ {FIRST_DATA_HOUR}時前。今日の分は在り得んので飛ばす"
+                  f"(実測の同日初取得は08:58〜10:32、翌朝に約130本取れる)")
+        return {"ok": 0, "empty": 0, "error": 0, "skip": 0, "blocked": 0}
     have = conn.execute("SELECT COUNT(*) FROM oriten_done WHERE date=?", (date,)).fetchone()[0]
     todo = conn.execute(
         "SELECT COUNT(*) FROM oriten_done WHERE date=? "
