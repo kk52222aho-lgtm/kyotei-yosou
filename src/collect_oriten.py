@@ -48,6 +48,9 @@ MAX_CONSEC_BLOCKED = 3
 # 403 がこの回数続いたら「不在」とみなして打ち止め(毎晩叩き続けんため)。
 # **仮定やのうて規則**として書いとく: 5回叩いて5回とも403なら不在扱い
 MAX_ATTEMPTS = 5
+# 古い日付は2回で打ち止め(根拠は _mark のコメント: 1,553回叩いて0本)
+MAX_ATTEMPTS_OLD = 2
+OLD_DAYS = 30
 
 _session = requests.Session()
 _session.headers.update(HEADERS)
@@ -88,6 +91,8 @@ CREATE TABLE IF NOT EXISTS oriten_done (
     -- 'empty' … 200 やのに中身が無い(ほんまに不在)
     -- 'blocked' … 403。**不在か弾かれか、コードだけでは区別でけへん**(下)
     -- 'gone'  … 403 が MAX_ATTEMPTS 回続いた。不在とみなして打ち止め
+    -- 'cancelled' … **公式Kが「走っとらん」と言うとる**。通信ゼロで打ち止め。
+    --            gone(諦めた)と分けとくんは、後から見分けられるようにするため
     -- 'error' … それ以外
     status TEXT,
     n_lane INTEGER,
@@ -269,7 +274,19 @@ def _mark_done(conn, date, jcd, rno, status, n_lane, now) -> None:
     att = (prev[0] or 0) if prev else 0
     if status == "blocked":
         att += 1
-        if att >= MAX_ATTEMPTS:
+        # 🚨 2026-09-30: **古い日付は2回で打ち止め。**5回いう規則は「403が頻度制限
+        #    かもしれん」から来とったが、いまは対照(_control_ok)が同じ秒に200を
+        #    返して判別しとる。そして実測が在る——夜の回収の run 5回ぶんで
+        #    **叩いた 1,553 / 取れた 0**(同じ期間の窓の run は 1,170叩いて 1,587本取れとる
+        #    ので、器やのうて古い分が向こうに無いだけ)。
+        #    残り約915本を5回ずつやと約4,500リクエストで期待収穫は0。
+        #    直近は据え置く(公開が遅れる筋と頻度制限が実際に在る)。
+        try:
+            age = (_date.today() - datetime.strptime(date, "%Y%m%d").date()).days
+        except ValueError:
+            age = 0
+        limit = MAX_ATTEMPTS_OLD if age > OLD_DAYS else MAX_ATTEMPTS
+        if att >= limit:
             status = "gone"
     else:
         att = 0
@@ -288,7 +305,7 @@ def _already_done(conn, date, jcd, rno) -> bool:
     """
     r = conn.execute(
         "SELECT 1 FROM oriten_done WHERE date=? AND jcd=? AND rno=? "
-        "AND status IN ('ok','empty','gone')",
+        "AND status IN ('ok','empty','gone','cancelled')",
         (date, jcd, rno)).fetchone()
     return r is not None
 
@@ -317,6 +334,59 @@ def silent_venues(conn, min_tried: int = SILENT_MIN_TRIED) -> dict[str, tuple[in
     return out
 
 
+def mark_cancelled_gone(conn, verbose: bool = True) -> int:
+    """**中止レースを通信ゼロで打ち止めにする。**
+
+    🚨 2026-09-30: 滞留939本を公式Kと突き合わせたら **84本は中止**やった。
+       中止のレースに展示データが在るわけないのに、**5回叩いてから諦めとった**
+       (84×5 = 420リクエストの無駄)。**手元に在る権威ある出どころで分かるもんを
+       他人に聞くな。**
+
+    見分け方(記憶にある印そのまま): 中止は**その日の後半に連続して出る**。
+    実例 場03 20260428 → R1-R7 は着順6/6、**R8-R12 は着順0/6**。
+
+    条件:
+      ① **その日のどこかの場に着順が在る**(= K ファイルが入っとる証拠)
+      ② そのレース自身の着順が **1本も無い**
+      ③ 日付が2日以上前(当日の途中を「中止」と読まんため)
+
+    🚨 ①を「同じ場日」やのうて「その日」に広げる時、**手元のKが欠けとるだけの日**を
+       中止と読む危険が在った(記憶: 正常サイズやのに中身が欠けとる日が4日、
+       09-16 は欠け23.9%)。**一番怪しい例で実際に確かめた**:
+       20260603 は場03・07・09・10 の**4場まとめてゼロ**で、天候にも取りこぼしにも見える。
+       K を退避して取り直したら **同じ結果**で、しかも **バイト単位で同一**やった
+       = サーバ側も同じ中身 → 取りこぼしやのうて**ほんまに中止**。
+       → [[insight_estimator_needs_ground_truth]]
+
+    `gone`(5回叩いて諦めた)と `cancelled`(公式が走っとらんと言うとる)は
+    **別の状態に分けとる**。打ち止めは取り消せんので、後から理由が見分けられるように。
+    """
+    rows = conn.execute("""
+        SELECT d.date, d.jcd, d.rno FROM oriten_done d
+        JOIN (SELECT date, jcd, rno, SUM(finish IS NOT NULL) fin
+              FROM entries GROUP BY date, jcd, rno) e
+          ON e.date = d.date AND e.jcd = d.jcd AND e.rno = d.rno
+        JOIN (SELECT date, SUM(finish IS NOT NULL) datefin
+              FROM entries GROUP BY date) v
+          ON v.date = d.date
+        WHERE d.status NOT IN ('ok', 'empty', 'gone', 'cancelled')
+          AND e.fin = 0 AND v.datefin > 0
+          AND d.date < ?
+    """, ((_date.today() - timedelta(days=2)).strftime("%Y%m%d"),)).fetchall()
+    if not rows:
+        return 0
+    now = datetime.now().isoformat(timespec="seconds")
+    conn.executemany(
+        "UPDATE oriten_done SET status='cancelled', fetched_at=? "
+        "WHERE date=? AND jcd=? AND rno=?",
+        [(now, d, j, r) for d, j, r in rows])
+    conn.commit()
+    if verbose:
+        print(f"  中止レースを通信ゼロで打ち止め: {len(rows):,}本"
+              f"(公式Kで着順が1本も無い=展示が在るわけない)", flush=True)
+    return len(rows)
+
+
 def collect_day(conn, date: str, jcds: list[str] | None = None,
                 verbose: bool = True) -> dict[str, int]:
     """1日分を収集。{'ok','empty','error','skip'} の件数を返す。"""
@@ -343,7 +413,7 @@ def collect_day(conn, date: str, jcds: list[str] | None = None,
     have = conn.execute("SELECT COUNT(*) FROM oriten_done WHERE date=?", (date,)).fetchone()[0]
     todo = conn.execute(
         "SELECT COUNT(*) FROM oriten_done WHERE date=? "
-        "AND status NOT IN ('ok','empty','gone')", (date,)).fetchone()[0]
+        "AND status NOT IN ('ok','empty','gone','cancelled')", (date,)).fetchone()[0]
     if have and not todo:
         return {"ok": 0, "empty": 0, "error": 0, "skip": have, "blocked": 0}
     if have:
@@ -433,6 +503,7 @@ def main() -> None:
 
     conn = storage.connect()
     _init(conn)
+    mark_cancelled_gone(conn, verbose=not args.quiet)
     global SKIP_JCD
     sil = silent_venues(conn)
     if sil and not args.jcd:
@@ -451,7 +522,7 @@ def main() -> None:
             break
     left = conn.execute(
         "SELECT COUNT(*) FROM oriten_done "
-        "WHERE status NOT IN ('ok','empty','gone')").fetchone()[0]
+        "WHERE status NOT IN ('ok','empty','gone','cancelled')").fetchone()[0]
     # 🚨 出しとらん場の分は**もう追わん**ので、素の「未回収」に混ぜたら
     #    **永久に減らん数字を毎晩刷ることになる**。分けて出す。
     #    追う気の無いもんを残件に数えたら、門が鳴っても誰も動かんくなる
@@ -460,7 +531,7 @@ def main() -> None:
     if SKIP_JCD:
         ph = ",".join("?" * len(SKIP_JCD))
         dead = conn.execute(
-            f"SELECT COUNT(*) FROM oriten_done WHERE status NOT IN ('ok','empty','gone')"
+            f"SELECT COUNT(*) FROM oriten_done WHERE status NOT IN ('ok','empty','gone','cancelled')"
             f" AND jcd IN ({ph})", tuple(sorted(SKIP_JCD))).fetchone()[0]
     conn.close()
     tail = (f" / 未回収 {left - dead:,}"
