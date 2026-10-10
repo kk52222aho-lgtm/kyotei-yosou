@@ -1,68 +1,85 @@
 {
- "date": "20261009",
+ "date": "20261010",
  "picks": [
   {
    "tansho": 1,
-   "name": "入海 馨",
+   "name": "塚越 海斗",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 78.5,
+   "conf": 76.9,
    "in_power_rank": 1,
    "exacta3": [
+    "1-3",
     "1-2",
-    "1-4",
-    "1-5"
+    "1-4"
    ],
    "jcd": "01",
    "venue": "桐生",
    "rno": 6,
-   "deadline": "17:48"
+   "deadline": "17:51"
   },
   {
    "tansho": 1,
-   "name": "平野 和明",
+   "name": "稗田 聖也",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 47.9,
+   "conf": 61.8,
    "in_power_rank": 1,
    "exacta3": [
     "1-3",
-    "1-4",
-    "1-2"
+    "1-2",
+    "1-4"
    ],
    "jcd": "01",
    "venue": "桐生",
    "rno": 7,
-   "deadline": "18:17"
+   "deadline": "18:18"
   },
   {
    "tansho": 1,
-   "name": "牧 宏次",
+   "name": "中田 友也",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 53.0,
+   "conf": 45.8,
    "in_power_rank": 2,
    "exacta3": [
     "1-5",
-    "1-4",
-    "1-3"
+    "1-3",
+    "1-4"
    ],
    "jcd": "01",
    "venue": "桐生",
    "rno": 8,
-   "deadline": "18:48"
+   "deadline": "18:46"
   },
   {
    "tansho": 1,
-   "name": "都築 正治",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 50.2,
-   "in_power_rank": 3,
+   "name": "黒井 達矢",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 61.7,
+   "in_power_rank": 1,
    "exacta3": [
-    "1-2",
+    "1-4",
     "1-3",
-    "1-5"
+    "1-2"
+   ],
+   "jcd": "01",
+   "venue": "桐生",
+   "rno": 9,
+   "deadline": "19:16"
+  },
+  {
+   "tansho": 1,
+   "name": "馬袋 義則",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 67.3,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-3",
+    "1-5",
+    "1-6"
    ],
    "jcd": "01",
    "venue": "桐生",
@@ -71,49 +88,32 @@
   },
   {
    "tansho": 1,
-   "name": "清水 敦揮",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 59.4,
-   "in_power_rank": 2,
+   "name": "吉村 誠",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 50.4,
+   "in_power_rank": 1,
    "exacta3": [
-    "1-4",
-    "1-5",
-    "1-2"
+    "1-2",
+    "1-3",
+    "1-4"
    ],
    "jcd": "01",
    "venue": "桐生",
    "rno": 11,
-   "deadline": "20:17"
+   "deadline": "20:16"
   },
   {
    "tansho": 1,
-   "name": "吉村 誠",
+   "name": "山田 丈",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 52.2,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "01",
-   "venue": "桐生",
-   "rno": 12,
-   "deadline": "20:45"
-  },
-  {
-   "tansho": 1,
-   "name": "藤井 公人",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 50.8,
+   "conf": 59.2,
    "in_power_rank": 2,
    "exacta3": [
     "1-4",
-    "1-3",
-    "1-5"
+    "1-2",
+    "1-3"
    ],
    "jcd": "02",
    "venue": "戸田",
@@ -122,15 +122,15 @@
   },
   {
    "tansho": 1,
-   "name": "吉田 凌太朗",
+   "name": "村上 遼",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 69.4,
+   "conf": 67.3,
    "in_power_rank": 1,
    "exacta3": [
-    "1-3",
     "1-4",
-    "1-2"
+    "1-5",
+    "1-3"
    ],
    "jcd": "02",
    "venue": "戸田",
@@ -139,15 +139,15 @@
   },
   {
    "tansho": 1,
-   "name": "櫻井 優",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 46.6,
-   "in_power_rank": 1,
+   "name": "伊久間 陽優",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 50.1,
+   "in_power_rank": 4,
    "exacta3": [
     "1-2",
-    "1-4",
-    "1-5"
+    "1-3",
+    "1-6"
    ],
    "jcd": "02",
    "venue": "戸田",
@@ -156,15 +156,15 @@
   },
   {
    "tansho": 1,
-   "name": "石川 諒",
+   "name": "柳内 敬太",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 49.8,
+   "conf": 51.3,
    "in_power_rank": 2,
    "exacta3": [
-    "1-2",
     "1-4",
-    "1-5"
+    "1-2",
+    "1-3"
    ],
    "jcd": "02",
    "venue": "戸田",
@@ -173,10 +173,27 @@
   },
   {
    "tansho": 1,
-   "name": "高石 梨菜",
+   "name": "白神 優",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 51.8,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-4",
+    "1-5",
+    "1-2"
+   ],
+   "jcd": "02",
+   "venue": "戸田",
+   "rno": 12,
+   "deadline": "16:30"
+  },
+  {
+   "tansho": 1,
+   "name": "藤原 菜希",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 70.9,
+   "conf": 68.7,
    "in_power_rank": 1,
    "exacta3": [
     "1-3",
@@ -185,37 +202,37 @@
    ],
    "jcd": "03",
    "venue": "江戸川",
-   "rno": 1,
-   "deadline": "11:14"
-  },
-  {
-   "tansho": 2,
-   "name": "岩崎 芳美",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 50.2,
-   "in_power_rank": 4,
-   "exacta3": [
-    "2-1",
-    "2-3",
-    "2-4"
-   ],
-   "jcd": "03",
-   "venue": "江戸川",
-   "rno": 4,
-   "deadline": "12:35"
+   "rno": 7,
+   "deadline": "13:56"
   },
   {
    "tansho": 1,
-   "name": "後藤 美翼",
+   "name": "平高 奈菜",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 60.6,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-3",
+    "1-4",
+    "1-2"
+   ],
+   "jcd": "03",
+   "venue": "江戸川",
+   "rno": 8,
+   "deadline": "14:24"
+  },
+  {
+   "tansho": 1,
+   "name": "櫻本 あゆみ",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 54.0,
+   "conf": 61.4,
    "in_power_rank": 2,
    "exacta3": [
-    "1-5",
     "1-4",
-    "1-3"
+    "1-3",
+    "1-2"
    ],
    "jcd": "03",
    "venue": "江戸川",
@@ -224,15 +241,15 @@
   },
   {
    "tansho": 1,
-   "name": "平高 奈菜",
+   "name": "海野 ゆかり",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 68.2,
+   "conf": 57.1,
    "in_power_rank": 1,
    "exacta3": [
-    "1-5",
-    "1-2",
-    "1-3"
+    "1-4",
+    "1-3",
+    "1-2"
    ],
    "jcd": "03",
    "venue": "江戸川",
@@ -241,13 +258,13 @@
   },
   {
    "tansho": 1,
-   "name": "藤原 菜希",
+   "name": "田口 節子",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 66.5,
+   "conf": 69.9,
    "in_power_rank": 1,
    "exacta3": [
-    "1-5",
+    "1-3",
     "1-4",
     "1-2"
    ],
@@ -258,15 +275,15 @@
   },
   {
    "tansho": 1,
-   "name": "海野 ゆかり",
+   "name": "三浦 永理",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 53.2,
+   "conf": 66.8,
    "in_power_rank": 1,
    "exacta3": [
     "1-4",
-    "1-5",
-    "1-2"
+    "1-2",
+    "1-3"
    ],
    "jcd": "03",
    "venue": "江戸川",
@@ -275,168 +292,168 @@
   },
   {
    "tansho": 1,
-   "name": "樫葉 新心",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 44.0,
-   "in_power_rank": 2,
+   "name": "吉村 正明",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 64.3,
+   "in_power_rank": 1,
    "exacta3": [
     "1-2",
-    "1-3",
-    "1-4"
+    "1-4",
+    "1-3"
    ],
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 3,
-   "deadline": "11:43"
+   "jcd": "06",
+   "venue": "浜名湖",
+   "rno": 5,
+   "deadline": "13:06"
+  },
+  {
+   "tansho": 2,
+   "name": "平田 忠則",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 55.6,
+   "in_power_rank": 6,
+   "exacta3": [
+    "2-1",
+    "2-4",
+    "2-3"
+   ],
+   "jcd": "06",
+   "venue": "浜名湖",
+   "rno": 7,
+   "deadline": "14:11"
   },
   {
    "tansho": 1,
-   "name": "和田 拓也",
+   "name": "久富 政弘",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 48.2,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-4",
+    "1-3",
+    "1-5"
+   ],
+   "jcd": "06",
+   "venue": "浜名湖",
+   "rno": 9,
+   "deadline": "15:11"
+  },
+  {
+   "tansho": 1,
+   "name": "鳥居塚 孝博",
    "tier": "◎堅い",
    "hit_pct": 69,
    "conf": 62.6,
    "in_power_rank": 2,
    "exacta3": [
-    "1-5",
-    "1-3",
-    "1-2"
-   ],
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 5,
-   "deadline": "12:42"
-  },
-  {
-   "tansho": 1,
-   "name": "桑原 将光",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 65.0,
-   "in_power_rank": 1,
-   "exacta3": [
     "1-2",
     "1-4",
-    "1-3"
-   ],
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 7,
-   "deadline": "13:46"
-  },
-  {
-   "tansho": 1,
-   "name": "樋口 亮",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 58.5,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-2",
-    "1-3",
     "1-5"
    ],
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 8,
-   "deadline": "14:17"
-  },
-  {
-   "tansho": 1,
-   "name": "清水 攻二",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 50.7,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "05",
-   "venue": "多摩川",
+   "jcd": "06",
+   "venue": "浜名湖",
    "rno": 10,
-   "deadline": "15:18"
+   "deadline": "15:38"
   },
   {
    "tansho": 1,
-   "name": "中 亮太",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 53.4,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-4",
-    "1-2",
-    "1-3"
-   ],
-   "jcd": "05",
-   "venue": "多摩川",
-   "rno": 12,
-   "deadline": "16:31"
-  },
-  {
-   "tansho": 1,
-   "name": "武重 雄介",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 40.4,
-   "in_power_rank": 2,
+   "name": "山本 寛久",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 66.0,
+   "in_power_rank": 1,
    "exacta3": [
     "1-5",
     "1-2",
     "1-3"
    ],
-   "jcd": "07",
-   "venue": "蒲郡",
-   "rno": 6,
-   "deadline": "17:27"
+   "jcd": "06",
+   "venue": "浜名湖",
+   "rno": 11,
+   "deadline": "16:05"
   },
   {
    "tansho": 1,
-   "name": "原田 幸哉",
+   "name": "平田 忠則",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 67.7,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-3",
+    "1-4",
+    "1-5"
+   ],
+   "jcd": "06",
+   "venue": "浜名湖",
+   "rno": 12,
+   "deadline": "16:36"
+  },
+  {
+   "tansho": 1,
+   "name": "上野 秀和",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 57.3,
+   "conf": 47.0,
    "in_power_rank": 2,
    "exacta3": [
     "1-3",
     "1-4",
-    "1-2"
+    "1-5"
    ],
    "jcd": "07",
    "venue": "蒲郡",
-   "rno": 10,
-   "deadline": "19:23"
+   "rno": 9,
+   "deadline": "19:09"
+  },
+  {
+   "tansho": 1,
+   "name": "福田 宗平",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 52.6,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-4",
+    "1-2",
+    "1-3"
+   ],
+   "jcd": "07",
+   "venue": "蒲郡",
+   "rno": 11,
+   "deadline": "20:08"
   },
   {
    "tansho": 1,
    "name": "池田 浩二",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 68.8,
+   "conf": 64.6,
    "in_power_rank": 1,
    "exacta3": [
-    "1-3",
+    "1-2",
     "1-4",
-    "1-2"
+    "1-3"
    ],
    "jcd": "07",
    "venue": "蒲郡",
-   "rno": 11,
-   "deadline": "20:03"
+   "rno": 12,
+   "deadline": "20:40"
   },
   {
    "tansho": 1,
-   "name": "高田 明",
+   "name": "後藤 翔之",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 57.9,
+   "conf": 74.7,
    "in_power_rank": 1,
    "exacta3": [
-    "1-4",
     "1-2",
-    "1-3"
+    "1-3",
+    "1-4"
    ],
    "jcd": "08",
    "venue": "常滑",
@@ -445,14 +462,82 @@
   },
   {
    "tansho": 1,
-   "name": "小坂 尚哉",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 83.5,
-   "in_power_rank": 1,
+   "name": "山下 夏鈴",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 55.6,
+   "in_power_rank": 4,
+   "exacta3": [
+    "1-2",
+    "1-5",
+    "1-6"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 2,
+   "deadline": "10:44"
+  },
+  {
+   "tansho": 1,
+   "name": "渡邉 英児",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 53.1,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-5",
+    "1-4",
+    "1-3"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 3,
+   "deadline": "11:11"
+  },
+  {
+   "tansho": 1,
+   "name": "上野 俊樹",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 52.9,
+   "in_power_rank": 4,
    "exacta3": [
     "1-2",
     "1-3",
+    "1-4"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 4,
+   "deadline": "11:39"
+  },
+  {
+   "tansho": 1,
+   "name": "丹下 将",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 54.8,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-2",
+    "1-5",
+    "1-3"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 5,
+   "deadline": "12:12"
+  },
+  {
+   "tansho": 1,
+   "name": "藤生 雄人",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 51.6,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-2",
+    "1-6",
     "1-4"
    ],
    "jcd": "08",
@@ -462,15 +547,49 @@
   },
   {
    "tansho": 1,
-   "name": "三浦 洋次朗",
+   "name": "柏野 幸二",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 50.7,
+   "conf": 47.6,
    "in_power_rank": 2,
    "exacta3": [
+    "1-6",
+    "1-4",
+    "1-2"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 7,
+   "deadline": "13:18"
+  },
+  {
+   "tansho": 1,
+   "name": "松下 一也",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 50.7,
+   "in_power_rank": 3,
+   "exacta3": [
     "1-3",
+    "1-4",
+    "1-2"
+   ],
+   "jcd": "08",
+   "venue": "常滑",
+   "rno": 9,
+   "deadline": "14:20"
+  },
+  {
+   "tansho": 1,
+   "name": "岡崎 恭裕",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 52.6,
+   "in_power_rank": 2,
+   "exacta3": [
     "1-2",
-    "1-4"
+    "1-3",
+    "1-6"
    ],
    "jcd": "08",
    "venue": "常滑",
@@ -479,333 +598,367 @@
   },
   {
    "tansho": 1,
-   "name": "永田 啓二",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 60.9,
-   "in_power_rank": 2,
+   "name": "小坂 尚哉",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 67.4,
+   "in_power_rank": 1,
    "exacta3": [
-    "1-5",
+    "1-2",
     "1-4",
     "1-3"
    ],
    "jcd": "08",
    "venue": "常滑",
    "rno": 11,
-   "deadline": "15:30"
+   "deadline": "15:32"
   },
   {
    "tansho": 1,
    "name": "松村 敏",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 64.3,
+   "conf": 68.5,
    "in_power_rank": 1,
    "exacta3": [
-    "1-3",
     "1-4",
-    "1-2"
+    "1-3",
+    "1-5"
    ],
    "jcd": "08",
    "venue": "常滑",
    "rno": 12,
-   "deadline": "16:05"
+   "deadline": "16:01"
   },
   {
    "tansho": 1,
-   "name": "松田 祐季",
+   "name": "西丸 敦基",
    "tier": "○本命堅め",
    "hit_pct": 63,
-   "conf": 57.5,
+   "conf": 53.2,
    "in_power_rank": 3,
    "exacta3": [
-    "1-4",
     "1-2",
+    "1-3",
+    "1-5"
+   ],
+   "jcd": "09",
+   "venue": "津",
+   "rno": 2,
+   "deadline": "10:57"
+  },
+  {
+   "tansho": 1,
+   "name": "下條 雄太郎",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 62.3,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-4",
     "1-3"
    ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 1,
-   "deadline": "10:36"
-  },
-  {
-   "tansho": 1,
-   "name": "塩田 北斗",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 52.6,
-   "in_power_rank": 5,
-   "exacta3": [
-    "1-4",
-    "1-3",
-    "1-2"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 2,
-   "deadline": "11:04"
-  },
-  {
-   "tansho": 1,
-   "name": "笠原 亮",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 57.3,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "10",
-   "venue": "三国",
+   "jcd": "09",
+   "venue": "津",
    "rno": 3,
-   "deadline": "11:32"
+   "deadline": "11:25"
   },
   {
    "tansho": 1,
-   "name": "権藤 俊光",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 59.1,
-   "in_power_rank": 5,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 5,
-   "deadline": "12:30"
-  },
-  {
-   "tansho": 1,
-   "name": "仲谷 颯仁",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 63.9,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 6,
-   "deadline": "12:59"
-  },
-  {
-   "tansho": 1,
-   "name": "湯川 浩司",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 53.0,
-   "in_power_rank": 5,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 7,
-   "deadline": "13:29"
-  },
-  {
-   "tansho": 1,
-   "name": "永井 彪也",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 54.0,
-   "in_power_rank": 4,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 8,
-   "deadline": "13:59"
-  },
-  {
-   "tansho": 1,
-   "name": "平本 真之",
+   "name": "島村 隆幸",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 56.5,
+   "conf": 55.2,
    "in_power_rank": 2,
    "exacta3": [
     "1-4",
-    "1-2",
-    "1-5"
+    "1-6",
+    "1-3"
    ],
-   "jcd": "10",
-   "venue": "三国",
+   "jcd": "09",
+   "venue": "津",
+   "rno": 4,
+   "deadline": "11:54"
+  },
+  {
+   "tansho": 1,
+   "name": "小芦 るり華",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 55.9,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-2",
+    "1-4",
+    "1-3"
+   ],
+   "jcd": "09",
+   "venue": "津",
+   "rno": 6,
+   "deadline": "12:56"
+  },
+  {
+   "tansho": 1,
+   "name": "野中 一平",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 55.7,
+   "in_power_rank": 4,
+   "exacta3": [
+    "1-2",
+    "1-4",
+    "1-3"
+   ],
+   "jcd": "09",
+   "venue": "津",
    "rno": 9,
    "deadline": "14:32"
   },
   {
    "tansho": 1,
-   "name": "山田 康二",
+   "name": "椎名 豊",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 61.9,
+   "conf": 68.6,
    "in_power_rank": 1,
    "exacta3": [
-    "1-4",
-    "1-3",
-    "1-2"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 10,
-   "deadline": "15:06"
-  },
-  {
-   "tansho": 1,
-   "name": "白井 英治",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 56.5,
-   "in_power_rank": 2,
-   "exacta3": [
     "1-2",
-    "1-3",
-    "1-4"
+    "1-4",
+    "1-3"
    ],
-   "jcd": "10",
-   "venue": "三国",
+   "jcd": "09",
+   "venue": "津",
    "rno": 11,
-   "deadline": "15:41"
+   "deadline": "15:42"
   },
   {
    "tansho": 1,
-   "name": "毒島 誠",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 60.5,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-2",
-    "1-4"
-   ],
-   "jcd": "10",
-   "venue": "三国",
-   "rno": 12,
-   "deadline": "16:20"
-  },
-  {
-   "tansho": 1,
-   "name": "馬場 剛",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 71.5,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 1,
-   "deadline": "08:35"
-  },
-  {
-   "tansho": 1,
-   "name": "森口 和紀",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 54.1,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-2",
-    "1-4"
-   ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 2,
-   "deadline": "09:01"
-  },
-  {
-   "tansho": 1,
-   "name": "河野 真也",
+   "name": "重野 哲之",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 57.8,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 3,
-   "deadline": "09:27"
-  },
-  {
-   "tansho": 1,
-   "name": "山田 佑樹",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 67.0,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-5"
-   ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 7,
-   "deadline": "11:23"
-  },
-  {
-   "tansho": 1,
-   "name": "井内 将太郎",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 56.6,
+   "conf": 63.8,
    "in_power_rank": 2,
    "exacta3": [
     "1-2",
     "1-4",
     "1-3"
    ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 10,
-   "deadline": "13:07"
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 1,
+   "deadline": "15:17"
   },
   {
    "tansho": 1,
-   "name": "田中 駿兵",
+   "name": "籾山 佳岳",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 54.1,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-3",
+    "1-5",
+    "1-4"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 2,
+   "deadline": "15:40"
+  },
+  {
+   "tansho": 1,
+   "name": "中島 昂章",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 58.7,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-6",
+    "1-2",
+    "1-4"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 5,
+   "deadline": "17:01"
+  },
+  {
+   "tansho": 1,
+   "name": "船岡 洋一郎",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 57.1,
+   "conf": 58.3,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-4",
+    "1-3",
+    "1-2"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 6,
+   "deadline": "17:29"
+  },
+  {
+   "tansho": 1,
+   "name": "松井 賢治",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 53.0,
+   "in_power_rank": 4,
+   "exacta3": [
+    "1-2",
+    "1-6",
+    "1-3"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 9,
+   "deadline": "18:54"
+  },
+  {
+   "tansho": 1,
+   "name": "佐藤 大佑",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 55.0,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-5"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 10,
+   "deadline": "19:24"
+  },
+  {
+   "tansho": 1,
+   "name": "渋谷 明憲",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 50.9,
+   "in_power_rank": 4,
+   "exacta3": [
+    "1-2",
+    "1-4",
+    "1-5"
+   ],
+   "jcd": "12",
+   "venue": "住之江",
+   "rno": 11,
+   "deadline": "19:57"
+  },
+  {
+   "tansho": 1,
+   "name": "上田 隆章",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 41.6,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 1,
+   "deadline": "15:20"
+  },
+  {
+   "tansho": 1,
+   "name": "古川 誠之",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 56.7,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-6",
+    "1-2",
+    "1-5"
+   ],
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 6,
+   "deadline": "17:37"
+  },
+  {
+   "tansho": 1,
+   "name": "中澤 和志",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 59.3,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-4",
+    "1-3"
+   ],
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 8,
+   "deadline": "18:32"
+  },
+  {
+   "tansho": 1,
+   "name": "和田 操拓",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 53.3,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 9,
+   "deadline": "19:02"
+  },
+  {
+   "tansho": 1,
+   "name": "秋山 広一",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 59.5,
    "in_power_rank": 1,
    "exacta3": [
     "1-3",
     "1-4",
     "1-2"
    ],
-   "jcd": "14",
-   "venue": "鳴門",
-   "rno": 12,
-   "deadline": "14:11"
+   "jcd": "15",
+   "venue": "丸亀",
+   "rno": 10,
+   "deadline": "19:32"
   },
   {
    "tansho": 1,
-   "name": "小原 聡将",
+   "name": "坪口 竜也",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 57.3,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "16",
+   "venue": "児島",
+   "rno": 1,
+   "deadline": "10:50"
+  },
+  {
+   "tansho": 1,
+   "name": "西野 翔太",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 63.3,
+   "conf": 64.3,
    "in_power_rank": 1,
    "exacta3": [
     "1-3",
@@ -814,71 +967,54 @@
    ],
    "jcd": "16",
    "venue": "児島",
-   "rno": 1,
-   "deadline": "10:53"
-  },
-  {
-   "tansho": 1,
-   "name": "溝口 海義也",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 65.9,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "16",
-   "venue": "児島",
-   "rno": 9,
-   "deadline": "15:12"
-  },
-  {
-   "tansho": 1,
-   "name": "宮崎 奨",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 57.8,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-4",
-    "1-3",
-    "1-6"
-   ],
-   "jcd": "16",
-   "venue": "児島",
-   "rno": 10,
-   "deadline": "15:39"
-  },
-  {
-   "tansho": 1,
-   "name": "山田 亮太",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 54.0,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-2",
-    "1-4",
-    "1-5"
-   ],
-   "jcd": "16",
-   "venue": "児島",
-   "rno": 11,
-   "deadline": "16:15"
+   "rno": 5,
+   "deadline": "13:00"
   },
   {
    "tansho": 1,
    "name": "福来 剛",
    "tier": "◎鉄板",
    "hit_pct": 74,
-   "conf": 62.0,
+   "conf": 67.1,
    "in_power_rank": 1,
    "exacta3": [
-    "1-4",
     "1-3",
+    "1-4",
     "1-2"
+   ],
+   "jcd": "16",
+   "venue": "児島",
+   "rno": 6,
+   "deadline": "13:40"
+  },
+  {
+   "tansho": 1,
+   "name": "山田 亮太",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 64.4,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-4"
+   ],
+   "jcd": "16",
+   "venue": "児島",
+   "rno": 9,
+   "deadline": "15:05"
+  },
+  {
+   "tansho": 1,
+   "name": "田頭 実",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 61.2,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-4"
    ],
    "jcd": "16",
    "venue": "児島",
@@ -887,411 +1023,326 @@
   },
   {
    "tansho": 1,
-   "name": "天野 友和",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 61.8,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-2",
-    "1-4",
-    "1-3"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 5,
-   "deadline": "19:56"
-  },
-  {
-   "tansho": 1,
-   "name": "岡 祐臣",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 61.5,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-4",
-    "1-2",
-    "1-3"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 6,
-   "deadline": "20:25"
-  },
-  {
-   "tansho": 1,
-   "name": "片橋 幸貴",
+   "name": "広次 修",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 62.4,
+   "conf": 51.7,
    "in_power_rank": 2,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 7,
-   "deadline": "20:53"
-  },
-  {
-   "tansho": 1,
-   "name": "山下 昂大",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 59.9,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-5"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 8,
-   "deadline": "21:17"
-  },
-  {
-   "tansho": 1,
-   "name": "内堀 学",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 70.1,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-2",
-    "1-3",
-    "1-4"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 9,
-   "deadline": "21:41"
-  },
-  {
-   "tansho": 1,
-   "name": "山本 隆幸",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 50.7,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 10,
-   "deadline": "22:05"
-  },
-  {
-   "tansho": 1,
-   "name": "守田 俊介",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 56.4,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-2",
-    "1-4",
-    "1-3"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 11,
-   "deadline": "22:30"
-  },
-  {
-   "tansho": 1,
-   "name": "松崎 祐太郎",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 59.4,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-2",
-    "1-4"
-   ],
-   "jcd": "20",
-   "venue": "若松",
-   "rno": 12,
-   "deadline": "22:54"
-  },
-  {
-   "tansho": 1,
-   "name": "山下 友貴",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 62.2,
-   "in_power_rank": 1,
    "exacta3": [
     "1-4",
     "1-2",
     "1-3"
    ],
-   "jcd": "23",
-   "venue": "唐津",
+   "jcd": "18",
+   "venue": "徳山",
    "rno": 1,
    "deadline": "08:47"
   },
   {
    "tansho": 1,
-   "name": "立間 充宏",
+   "name": "大橋 純一郎",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 71.4,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-5"
+   ],
+   "jcd": "18",
+   "venue": "徳山",
+   "rno": 3,
+   "deadline": "09:39"
+  },
+  {
+   "tansho": 1,
+   "name": "山田 竜一",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 56.1,
+   "in_power_rank": 3,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "18",
+   "venue": "徳山",
+   "rno": 4,
+   "deadline": "10:05"
+  },
+  {
+   "tansho": 1,
+   "name": "室田 泰史",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 59.4,
+   "conf": 51.4,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-4",
+    "1-3",
+    "1-5"
+   ],
+   "jcd": "18",
+   "venue": "徳山",
+   "rno": 9,
+   "deadline": "12:42"
+  },
+  {
+   "tansho": 1,
+   "name": "吉田 拡郎",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 65.9,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-4",
+    "1-3",
+    "1-2"
+   ],
+   "jcd": "18",
+   "venue": "徳山",
+   "rno": 12,
+   "deadline": "14:28"
+  },
+  {
+   "tansho": 1,
+   "name": "福島 勇樹",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 70.1,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-4",
+    "1-3",
+    "1-5"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 1,
+   "deadline": "11:07"
+  },
+  {
+   "tansho": 1,
+   "name": "堤 昇",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 49.6,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-4",
+    "1-2",
+    "1-3"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 4,
+   "deadline": "12:30"
+  },
+  {
+   "tansho": 1,
+   "name": "平山 智加",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 67.2,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 8,
+   "deadline": "14:30"
+  },
+  {
+   "tansho": 1,
+   "name": "齊藤 仁",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 64.1,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-4",
+    "1-2",
+    "1-5"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 9,
+   "deadline": "15:02"
+  },
+  {
+   "tansho": 1,
+   "name": "山下 和彦",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 53.6,
    "in_power_rank": 2,
    "exacta3": [
     "1-3",
-    "1-4",
+    "1-6",
     "1-2"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 10,
+   "deadline": "15:29"
+  },
+  {
+   "tansho": 1,
+   "name": "島川 光男",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 58.7,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-2",
+    "1-3",
+    "1-4"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 11,
+   "deadline": "15:58"
+  },
+  {
+   "tansho": 1,
+   "name": "河合 佑樹",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 50.4,
+   "in_power_rank": 5,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-4"
+   ],
+   "jcd": "22",
+   "venue": "福岡",
+   "rno": 12,
+   "deadline": "16:40"
+  },
+  {
+   "tansho": 1,
+   "name": "山口 裕二",
+   "tier": "◎鉄板",
+   "hit_pct": 74,
+   "conf": 75.9,
+   "in_power_rank": 1,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-4"
+   ],
+   "jcd": "23",
+   "venue": "唐津",
+   "rno": 1,
+   "deadline": "08:35"
+  },
+  {
+   "tansho": 1,
+   "name": "後藤 隼之",
+   "tier": "◎堅い",
+   "hit_pct": 69,
+   "conf": 42.2,
+   "in_power_rank": 2,
+   "exacta3": [
+    "1-3",
+    "1-2",
+    "1-4"
    ],
    "jcd": "23",
    "venue": "唐津",
    "rno": 2,
-   "deadline": "09:13"
+   "deadline": "09:01"
   },
   {
    "tansho": 1,
-   "name": "國崎 良春",
+   "name": "前野 竜一",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 55.3,
+   "conf": 58.7,
    "in_power_rank": 2,
    "exacta3": [
-    "1-4",
     "1-3",
-    "1-2"
+    "1-2",
+    "1-4"
    ],
    "jcd": "23",
    "venue": "唐津",
    "rno": 3,
-   "deadline": "09:48"
+   "deadline": "09:27"
   },
   {
    "tansho": 1,
-   "name": "香川 素子",
+   "name": "田中 辰彦",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 54.1,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-3",
-    "1-4",
-    "1-2"
-   ],
-   "jcd": "23",
-   "venue": "唐津",
-   "rno": 5,
-   "deadline": "10:40"
-  },
-  {
-   "tansho": 1,
-   "name": "吉田 光",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 39.1,
+   "conf": 61.5,
    "in_power_rank": 2,
    "exacta3": [
     "1-4",
-    "1-3",
-    "1-2"
-   ],
-   "jcd": "23",
-   "venue": "唐津",
-   "rno": 8,
-   "deadline": "12:06"
-  },
-  {
-   "tansho": 1,
-   "name": "谷野 錬志",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 63.1,
-   "in_power_rank": 1,
-   "exacta3": [
     "1-2",
-    "1-4",
     "1-3"
    ],
    "jcd": "23",
    "venue": "唐津",
-   "rno": 11,
-   "deadline": "13:50"
-  },
-  {
-   "tansho": 1,
-   "name": "山ノ内 雅人",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 68.3,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-2",
-    "1-4"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 2,
-   "deadline": "15:48"
-  },
-  {
-   "tansho": 1,
-   "name": "中村 有裕",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 72.4,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-3",
-    "1-2",
-    "1-4"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 4,
-   "deadline": "16:42"
-  },
-  {
-   "tansho": 1,
-   "name": "谷口 丞",
-   "tier": "◎堅い",
-   "hit_pct": 69,
-   "conf": 49.4,
-   "in_power_rank": 2,
-   "exacta3": [
-    "1-6",
-    "1-2",
-    "1-3"
-   ],
-   "jcd": "24",
-   "venue": "大村",
    "rno": 5,
-   "deadline": "17:09"
+   "deadline": "10:23"
   },
   {
-   "tansho": 1,
-   "name": "原田 篤志",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 70.2,
-   "in_power_rank": 1,
+   "tansho": 2,
+   "name": "村岡 賢人",
+   "tier": "○本命堅め",
+   "hit_pct": 63,
+   "conf": 53.0,
+   "in_power_rank": 5,
    "exacta3": [
-    "1-2",
-    "1-3",
-    "1-5"
+    "2-1",
+    "2-3",
+    "2-4"
    ],
-   "jcd": "24",
-   "venue": "大村",
+   "jcd": "23",
+   "venue": "唐津",
    "rno": 6,
-   "deadline": "17:34"
+   "deadline": "10:52"
   },
   {
    "tansho": 1,
-   "name": "山崎 郡",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 81.9,
-   "in_power_rank": 1,
-   "exacta3": [
-    "1-4",
-    "1-2",
-    "1-5"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 7,
-   "deadline": "18:02"
-  },
-  {
-   "tansho": 1,
-   "name": "長尾 京志郎",
+   "name": "井上 茂",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 48.8,
+   "conf": 36.4,
    "in_power_rank": 2,
    "exacta3": [
+    "1-4",
     "1-3",
-    "1-5",
     "1-2"
    ],
-   "jcd": "24",
-   "venue": "大村",
+   "jcd": "23",
+   "venue": "唐津",
    "rno": 8,
-   "deadline": "18:41"
+   "deadline": "11:51"
   },
   {
    "tansho": 1,
-   "name": "榮田 将彦",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 52.8,
-   "in_power_rank": 4,
-   "exacta3": [
-    "1-4",
-    "1-2",
-    "1-3"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 9,
-   "deadline": "19:10"
-  },
-  {
-   "tansho": 1,
-   "name": "坂元 浩仁",
+   "name": "長尾 章平",
    "tier": "◎堅い",
    "hit_pct": 69,
-   "conf": 61.0,
+   "conf": 53.4,
    "in_power_rank": 2,
    "exacta3": [
-    "1-2",
-    "1-4",
-    "1-3"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 10,
-   "deadline": "19:39"
-  },
-  {
-   "tansho": 1,
-   "name": "桐本 康臣",
-   "tier": "○本命堅め",
-   "hit_pct": 63,
-   "conf": 55.0,
-   "in_power_rank": 4,
-   "exacta3": [
-    "1-2",
     "1-3",
-    "1-4"
-   ],
-   "jcd": "24",
-   "venue": "大村",
-   "rno": 11,
-   "deadline": "20:10"
-  },
-  {
-   "tansho": 1,
-   "name": "海野 康志郎",
-   "tier": "◎鉄板",
-   "hit_pct": 74,
-   "conf": 55.5,
-   "in_power_rank": 1,
-   "exacta3": [
     "1-2",
-    "1-4",
     "1-5"
    ],
-   "jcd": "24",
-   "venue": "大村",
+   "jcd": "23",
+   "venue": "唐津",
    "rno": 12,
-   "deadline": "20:38"
+   "deadline": "14:14"
   }
  ]
 }

@@ -1042,15 +1042,27 @@
 {"date": "20261008", "jcd": "03", "rno": 3, "venue": "江戸川", "score": 77.0, "honmei": 1, "settled": true, "winner": 4, "broke": true, "trifecta_yen": 3210, "manshu": false, "tan_win": false, "tan_return": 0}
 {"date": "20261008", "jcd": "24", "rno": 3, "venue": "大村", "score": 77.0, "honmei": 1, "settled": true, "winner": 6, "broke": true, "trifecta_yen": 9800, "manshu": false, "tan_win": false, "tan_return": 0}
 {"date": "20261008", "jcd": "16", "rno": 8, "venue": "児島", "score": 76.8, "honmei": 1, "settled": true, "winner": 6, "broke": true, "trifecta_yen": 20090, "manshu": true, "tan_win": false, "tan_return": 0}
-{"date": "20261009", "jcd": "16", "rno": 4, "venue": "児島", "score": 82.1, "honmei": 1, "settled": false}
-{"date": "20261009", "jcd": "01", "rno": 4, "venue": "桐生", "score": 81.8, "honmei": 2, "settled": false}
-{"date": "20261009", "jcd": "16", "rno": 2, "venue": "児島", "score": 81.0, "honmei": 2, "settled": false}
-{"date": "20261009", "jcd": "01", "rno": 5, "venue": "桐生", "score": 80.8, "honmei": 3, "settled": false}
-{"date": "20261009", "jcd": "05", "rno": 4, "venue": "多摩川", "score": 80.8, "honmei": 4, "settled": false}
-{"date": "20261009", "jcd": "08", "rno": 4, "venue": "常滑", "score": 80.5, "honmei": 2, "settled": false}
-{"date": "20261009", "jcd": "01", "rno": 9, "venue": "桐生", "score": 79.7, "honmei": 1, "settled": false}
-{"date": "20261009", "jcd": "01", "rno": 2, "venue": "桐生", "score": 78.8, "honmei": 2, "settled": false}
-{"date": "20261009", "jcd": "02", "rno": 6, "venue": "戸田", "score": 78.6, "honmei": 3, "settled": false}
-{"date": "20261009", "jcd": "02", "rno": 4, "venue": "戸田", "score": 78.3, "honmei": 1, "settled": false}
-{"date": "20261009", "jcd": "03", "rno": 2, "venue": "江戸川", "score": 77.7, "honmei": 1, "settled": false}
-{"date": "20261009", "jcd": "08", "rno": 3, "venue": "常滑", "score": 77.6, "honmei": 5, "settled": false}
+{"date": "20261009", "jcd": "16", "rno": 4, "venue": "児島", "score": 82.1, "honmei": 1, "settled": true, "winner": 4, "broke": true, "trifecta_yen": 15990, "manshu": true, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "01", "rno": 4, "venue": "桐生", "score": 81.8, "honmei": 2, "settled": true, "winner": 2, "broke": true, "trifecta_yen": 1760, "manshu": false, "tan_win": true, "tan_return": 180}
+{"date": "20261009", "jcd": "16", "rno": 2, "venue": "児島", "score": 81.0, "honmei": 2, "settled": true, "winner": 2, "broke": true, "trifecta_yen": 28310, "manshu": true, "tan_win": true, "tan_return": 490}
+{"date": "20261009", "jcd": "01", "rno": 5, "venue": "桐生", "score": 80.8, "honmei": 3, "settled": true, "winner": 6, "broke": true, "trifecta_yen": 124950, "manshu": true, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "05", "rno": 4, "venue": "多摩川", "score": 80.8, "honmei": 4, "settled": true, "winner": 2, "broke": true, "trifecta_yen": 9300, "manshu": false, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "08", "rno": 4, "venue": "常滑", "score": 80.5, "honmei": 2, "settled": true, "winner": 5, "broke": true, "trifecta_yen": 17730, "manshu": true, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "01", "rno": 9, "venue": "桐生", "score": 79.7, "honmei": 1, "settled": true, "winner": 4, "broke": true, "trifecta_yen": 6940, "manshu": false, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "01", "rno": 2, "venue": "桐生", "score": 78.8, "honmei": 2, "settled": true, "winner": 4, "broke": true, "trifecta_yen": 2830, "manshu": false, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "02", "rno": 6, "venue": "戸田", "score": 78.6, "honmei": 3, "settled": true, "winner": 5, "broke": true, "trifecta_yen": 58900, "manshu": true, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "02", "rno": 4, "venue": "戸田", "score": 78.3, "honmei": 1, "settled": true, "winner": 4, "broke": true, "trifecta_yen": 3020, "manshu": false, "tan_win": false, "tan_return": 0}
+{"date": "20261009", "jcd": "03", "rno": 2, "venue": "江戸川", "score": 77.7, "honmei": 1, "settled": true, "winner": 1, "broke": false, "trifecta_yen": 3200, "manshu": false, "tan_win": true, "tan_return": 340}
+{"date": "20261009", "jcd": "08", "rno": 3, "venue": "常滑", "score": 77.6, "honmei": 5, "settled": true, "winner": 3, "broke": true, "trifecta_yen": 6150, "manshu": false, "tan_win": false, "tan_return": 0}
+{"date": "20261010", "jcd": "07", "rno": 8, "venue": "蒲郡", "score": 84.4, "honmei": 4, "settled": false}
+{"date": "20261010", "jcd": "12", "rno": 8, "venue": "住之江", "score": 77.8, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "15", "rno": 4, "venue": "丸亀", "score": 77.6, "honmei": 3, "settled": false}
+{"date": "20261010", "jcd": "15", "rno": 5, "venue": "丸亀", "score": 77.0, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "01", "rno": 3, "venue": "桐生", "score": 76.9, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "06", "rno": 4, "venue": "浜名湖", "score": 76.8, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "06", "rno": 7, "venue": "浜名湖", "score": 76.3, "honmei": 2, "settled": false}
+{"date": "20261010", "jcd": "15", "rno": 2, "venue": "丸亀", "score": 76.2, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "02", "rno": 8, "venue": "戸田", "score": 76.0, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "16", "rno": 4, "venue": "児島", "score": 76.0, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "08", "rno": 8, "venue": "常滑", "score": 75.9, "honmei": 1, "settled": false}
+{"date": "20261010", "jcd": "15", "rno": 3, "venue": "丸亀", "score": 75.7, "honmei": 1, "settled": false}
